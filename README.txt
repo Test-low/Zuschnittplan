@@ -14,3 +14,5 @@ Cache-Verhalten ab V31:
 Hinweis beim einmaligen Wechsel von V30 auf V31:
 Ein bereits aktiver alter V30-Service-Worker kann die erste normale Aktualisierung noch abfangen.
 Nach dem Hochladen V31 einmal Strg+F5 verwenden oder den alten Service Worker abmelden. Danach greift die neue Update-Strategie.
+
+V32: E-Mail-Anfrage nun auch fuer Laengenzuschnitt inkl. PDF und CSV.

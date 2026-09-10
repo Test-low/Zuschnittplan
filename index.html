@@ -1548,6 +1548,36 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
             <h3>Stückliste</h3>
             <div id="lengthPieceSummary"></div>
           </div>
+
+          <div class="request-card">
+            <h3>Unverbindliche Anfrage</h3>
+            <p>Es wird eine fertige E-Mail-Datei (.eml) erzeugt. Nachricht, Längenzuschnitt-PDF und CSV-Stückliste sind bereits enthalten. Die Datei anschließend im Mailprogramm öffnen, Empfänger eintragen und senden.</p>
+            <form id="lengthRequestForm">
+              <div class="form-grid">
+                <div>
+                  <label>Name *</label>
+                  <input name="name" required>
+                </div>
+                <div>
+                  <label>Firma</label>
+                  <input name="company">
+                </div>
+                <div>
+                  <label>E-Mail *</label>
+                  <input name="email" type="email" required>
+                </div>
+                <div>
+                  <label>Telefon</label>
+                  <input name="phone">
+                </div>
+                <div class="full">
+                  <label>Bemerkung</label>
+                  <textarea name="remarks"></textarea>
+                </div>
+              </div>
+              <button class="btn btn-primary full-btn" id="lengthSendRequestBtn" type="submit">E-Mail-Anfrage erstellen</button>
+            </form>
+          </div>
         </div>
       </div>
     </section>
@@ -3680,7 +3710,7 @@ function sendRequest(ev){
 
 
 /* =========================================================
-   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V26
+   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V32
    ========================================================= */
 window.activePlannerMode="plate";
 let activeLengthMode="single";
@@ -3948,6 +3978,137 @@ function lengthCsvText(){
   return rows.map(row=>row.map(csvCell).join(";")).join("\r\n");
 }
 function downloadLengthCsv(){if(!currentLengthResult)return;const blob=new Blob(["\ufeff"+lengthCsvText()],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=currentLengthResult.mode==="project"?"stueckliste-projekt-laengenzuschnitt.csv":"stueckliste-laengenzuschnitt.csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+
+function buildSimplePdfBase64(pages){
+  const objects=[null];
+  const add=o=>{objects.push(o);return objects.length-1;};
+  const f1=add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const f2=add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+  const contentIds=pages.map(pg=>add(`<< /Length ${pg.length} >>\nstream\n${pg}endstream`));
+  const pagesId=add("");
+  const pageIds=contentIds.map(cid=>add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${cid} 0 R >>`));
+  objects[pagesId]=`<< /Type /Pages /Kids [${pageIds.map(id=>`${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
+  const catalog=add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+  let pdf="%PDF-1.4\n",offsets=[0];
+  for(let i=1;i<objects.length;i++){offsets[i]=pdf.length;pdf+=`${i} 0 obj\n${objects[i]}\nendobj\n`;}
+  const xref=pdf.length;
+  pdf+=`xref\n0 ${objects.length}\n0000000000 65535 f \n`;
+  for(let i=1;i<objects.length;i++)pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";
+  pdf+=`trailer\n<< /Size ${objects.length} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return btoa(unescape(encodeURIComponent(pdf)));
+}
+
+function makeLengthPlanPdfBase64(result,customer){
+  const pages=[];
+  const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
+  const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
+  const rc=(x,y,w,h,fill=false)=>`${x} ${y} ${w} ${h} re ${fill?"B":"S"}\n`;
+  const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
+  const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars).customerRest,0);
+  const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars).warehouseRest,0);
+
+  let c="0 G 0 g 0.7 w\n";
+  c+=t(45,800,18,result.mode==="project"?"Projekt-Laengenzuschnitt":"Laengen-Zuschnittplan",true);
+  if(result.mode==="project"&&result.projectName)c+=t(45,778,11,`Projekt: ${result.projectName}`,true);
+  c+=t(45,result.mode==="project"&&result.projectName?758:778,9,`Saegefuge: 0,5 cm / 5 mm | Rohstuecke: ${totalBars} | Fertigteile: ${result.items.length}`);
+  c+=t(45,result.mode==="project"&&result.projectName?742:762,9,`Kundenrest: ${lengthFmt(totalCustomer)} cm | Lagerrest: ${lengthFmt(totalWarehouse)} cm`);
+  let y=result.mode==="project"&&result.projectName?712:730;
+  c+=t(45,y,11,"Kunde",true);y-=16;
+  c+=t(55,y,9,`${customer.name}${customer.company?" | "+customer.company:""}`);y-=14;
+  c+=t(55,y,9,`${customer.email}${customer.phone?" | "+customer.phone:""}`);y-=24;
+  c+=t(45,y,11,"Stueckliste",true);y-=16;
+  for(const p of result.pos){
+    const line=result.mode==="project"
+      ? `Pos. ${p.pos}: ${p.q} x ${p.material} ${p.dimension} cm | ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`
+      : `Pos. ${p.pos}: ${p.q} x ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`;
+    if(y<90){pages.push(c);c="0 G 0 g 0.7 w\n";c+=t(45,800,14,"Stueckliste - Fortsetzung",true);y=775;}
+    c+=t(55,y,8,line);y-=13;
+  }
+  if(customer.remarks){
+    y-=5;if(y<130){pages.push(c);c="0 G 0 g 0.7 w\n";y=795;}
+    c+=t(45,y,10,"Bemerkung:",true);y-=14;
+    const chunks=pdfAscii(customer.remarks).match(/.{1,82}/g)||[];
+    chunks.slice(0,10).forEach(line=>{if(y<70)return;c+=t(55,y,8,line);y-=12;});
+  }
+  pages.push(c);
+
+  result.groups.forEach(group=>{
+    const patterns=groupLengthBars(group.bars,group.material);
+    let p="0 G 0 g 0.7 w\n",py=800;
+    const startPage=()=>{
+      p="0 G 0 g 0.7 w\n";py=800;
+      p+=t(45,py,15,`${group.material} ${group.dimension} cm`,true);py-=18;
+      const sum=summarizeBars(group.material,group.bars);
+      p+=t(45,py,8,`Rohlaengen: ${group.raws.map(lengthFmt).join(" / ")} cm | Fertigteile: ${group.items.length} | Rohstuecke: ${group.bars.length} | Kundenrest: ${lengthFmt(sum.customerRest)} cm | Lagerrest: ${lengthFmt(sum.warehouseRest)} cm`);py-=20;
+    };
+    startPage();
+    patterns.forEach((pat,idx)=>{
+      if(py<115){pages.push(p);startPage();}
+      const bar=pat.bar,raw=bar.raw,rest=Math.max(0,Math.round((raw-bar.used)*10)/10),cls=classifyLengthRest(group.material,raw,rest);
+      p+=t(45,py,9,pat.count>1?`${pat.count}x identisch schneiden`:`Rohstueck ${idx+1}`,true);
+      p+=t(385,py,7,`Rohlaenge ${lengthFmt(raw)} cm | ${cls.label}`);py-=12;
+      const bx=45,bw=505,bh=16,by=py-4;
+      p+="1 g\n"+rc(bx,by,bw,bh,true)+"0 g\n"+rc(bx,by,bw,bh,false);
+      let off=0;
+      bar.pieces.forEach(piece=>{
+        const x=bx+bw*(off/raw),w=Math.max(.8,bw*(piece.len/raw));
+        p+=rc(x,by,w,bh,false);
+        if(w>28)p+=t(x+3,by+5,6,`${lengthFmt(piece.len)} cm`,true);
+        off+=piece.len+LENGTH_KERF_CM;
+      });
+      const restW=bw*(rest/raw);
+      if(restW>0){const rx=bx+bw*((raw-rest)/raw);p+="0.93 g\n"+rc(rx,by,restW,bh,true)+"0 g\n"+rc(rx,by,restW,bh,false);}
+      py-=14;
+      const seq=bar.pieces.map(x=>`${lengthFmt(x.len)}${x.name?" "+x.name:""}`).join(" + ");
+      const seqLines=pdfAscii(`Schnittfolge: ${seq}${rest?" | "+cls.label:""}`).match(/.{1,105}/g)||[];
+      seqLines.slice(0,2).forEach(line=>{p+=t(50,py,6.5,line);py-=10;});
+      py-=5;
+    });
+    pages.push(p);
+  });
+  return buildSimplePdfBase64(pages);
+}
+
+function makeLengthEml(result,customer){
+  const boundary="----=_Lowis_Laengenzuschnitt_"+Date.now();
+  const ref="TEST-L-"+new Date().toISOString().replace(/[-:TZ.]/g,"").slice(0,14);
+  const subject=`TEST Laengen-Zuschnittanfrage ${ref}${result.mode==="project"&&result.projectName?" - "+result.projectName:""}`;
+  const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
+  const text=[
+    "Neue unverbindliche Laengen-Zuschnittanfrage","",`Referenz: ${ref}`,
+    result.mode==="project"&&result.projectName?`Projekt: ${result.projectName}`:null,
+    `Kunde: ${customer.name}`,customer.company?`Firma: ${customer.company}`:null,`E-Mail: ${customer.email}`,customer.phone?`Telefon: ${customer.phone}`:null,"",
+    `Modus: ${result.mode==="project"?"Projekt / mehrere Dimensionen":"Einzelmaterial"}`,
+    "Saegefuge: 0,5 cm / 5 mm fest",`Berechnete Rohstuecke: ${totalBars}`,`Fertigteile gesamt: ${result.items.length}`,"",
+    "Materialgruppen:",...result.groups.map(g=>{const s=summarizeBars(g.material,g.bars);return `${g.material} ${g.dimension} cm | Rohlaengen ${g.raws.map(lengthFmt).join(" / ")} cm | ${g.bars.length} Rohstueck(e) | Kundenrest ${lengthFmt(s.customerRest)} cm | Lagerrest ${lengthFmt(s.warehouseRest)} cm`;}),"",
+    "Stueckliste:",...result.pos.map(p=>result.mode==="project"?`Pos. ${p.pos}: ${p.q} x ${p.material} ${p.dimension} cm | ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`:`Pos. ${p.pos}: ${p.q} x ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`),
+    customer.remarks?"":null,customer.remarks?"Bemerkung:":null,customer.remarks||null,"","Laengenzuschnitt-PDF und CSV-Stueckliste sind angehaengt."
+  ].filter(v=>v!==null).join("\r\n");
+  const pdfB64=makeLengthPlanPdfBase64(result,customer);
+  const csvB64=utf8Base64("\ufeff"+lengthCsvText());
+  const headers=["To: ",`Reply-To: ${emlSafeHeader(customer.email)}`,`Subject: =?UTF-8?B?${utf8Base64(subject)}?=`,`Date: ${new Date().toUTCString()}`,"MIME-Version: 1.0",`Content-Type: multipart/mixed; boundary="${boundary}"`,""];
+  const parts=[
+    `--${boundary}`,'Content-Type: text/plain; charset="UTF-8"',"Content-Transfer-Encoding: base64","",utf8Base64(text),
+    `--${boundary}`,`Content-Type: application/pdf; name="laengenzuschnitt-${ref}.pdf"`,`Content-Disposition: attachment; filename="laengenzuschnitt-${ref}.pdf"`,"Content-Transfer-Encoding: base64","",pdfB64.match(/.{1,76}/g).join("\r\n"),
+    `--${boundary}`,`Content-Type: text/csv; charset="UTF-8"; name="stueckliste-${ref}.csv"`,`Content-Disposition: attachment; filename="stueckliste-${ref}.csv"`,"Content-Transfer-Encoding: base64","",csvB64.match(/.{1,76}/g).join("\r\n"),`--${boundary}--`,""
+  ];
+  return {ref,content:headers.concat(parts).join("\r\n")};
+}
+
+function sendLengthRequest(ev){
+  ev.preventDefault();
+  if(!currentLengthResult){setLengthNotice("error","Bitte zuerst einen Laengenzuschnitt berechnen.");return;}
+  const fd=new FormData(ev.currentTarget),customer={name:String(fd.get("name")||"").trim(),company:String(fd.get("company")||"").trim(),email:String(fd.get("email")||"").trim(),phone:String(fd.get("phone")||"").trim(),remarks:String(fd.get("remarks")||"").trim()};
+  if(!customer.name||!customer.email){setLengthNotice("error","Bitte Name und E-Mail ausfuellen.");return;}
+  const btn=$("lengthSendRequestBtn");btn.disabled=true;btn.textContent="E-Mail wird erstellt …";
+  try{
+    const eml=makeLengthEml(currentLengthResult,customer);
+    downloadEml(eml.content,`Lowis-Laengenzuschnittanfrage-${eml.ref}.eml`);
+    openModal("Die fertige .eml-Datei wurde heruntergeladen. Oeffne sie in Outlook, Thunderbird oder Windows Mail. Laengenzuschnitt-PDF und CSV-Stueckliste sind angehaengt. Den Empfaenger bitte im Mailprogramm eintragen. Danach nur noch auf Senden klicken.");
+  }catch(err){setLengthNotice("error","Die E-Mail-Datei konnte nicht erstellt werden: "+err.message);}
+  finally{btn.disabled=false;btn.textContent="E-Mail-Anfrage erstellen";}
+}
+
 function serializeSelections(store){const out={};Object.entries(store).forEach(([k,v])=>out[k]=[...v]);return out;}
 function restoreSelections(store,data){if(!data||typeof data!=="object")return;Object.entries(data).forEach(([k,v])=>{if(Array.isArray(v))store[k]=new Set(v.map(Number));});}
 function saveLengthDraft(){
@@ -4099,10 +4260,11 @@ try{setPlannerMode(localStorage.getItem("lowis-active-planner")||"plate");}catch
 
 
 $("requestForm").addEventListener("submit",sendRequest);
+$("lengthRequestForm").addEventListener("submit",sendLengthRequest);
 
 $("modalClose").addEventListener("click",closeModal);
 $("modalPrint").addEventListener("click",()=>window.print());
-$("modalCsv").addEventListener("click",downloadCsv);
+$("modalCsv").addEventListener("click",()=>window.activePlannerMode==="length"?downloadLengthCsv():downloadCsv());
 $("modalBackdrop").addEventListener("click",ev=>{if(ev.target===$("modalBackdrop")) closeModal();});
 
 initGroups();
