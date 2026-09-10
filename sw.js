@@ -1,5 +1,5 @@
-const CACHE="lowis-zuschnittplaner-v16";
-const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg"];
+const CACHE="lowis-zuschnittplaner-v21";
+const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./sw.js"];
 
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));

@@ -1,56 +1,36 @@
-LOWIS PLATTEN-ZUSCHNITTPLANER – V16 WEB-APP
+LOWIS PLATTEN-ZUSCHNITTPLANER – V21
 
-Warum die Knöpfe auf dem iPhone im ChatGPT-/Datei-Fenster nicht reagieren
-=========================================================================
-Das ist keine normale Safari-Webseite, sondern eine Dateivorschau (Quick Look /
-In-App-Vorschau). Dort werden lokale HTML-Dateien auf iPhone/iPad nicht zuverlässig
-als vollständige JavaScript-Webanwendung ausgeführt.
+Neu: Tastatur-Schnellsteuerung
+==============================
++ Taste:
+- fügt sofort eine neue Position unten an
+- keine Bestätigung
+- setzt den Cursor direkt in das Feld „Länge“
 
-Deshalb ist die universelle Lösung:
-Die Anwendung als normale statische HTTPS-Webseite bereitstellen.
+- Taste:
+- entfernt immer die unterste Position
+- beim nächsten Drücken die dann unterste Position usw.
+- vor jedem Entfernen erscheint eine Bestätigung
+- funktioniert auch mit dem Minus auf dem Nummernblock
 
-V16 ist genau dafür vorbereitet.
+Auch das X zum Löschen einer einzelnen Position fragt jetzt vor dem Entfernen
+noch einmal nach.
 
-Benötigt keinen PHP-Server
+Wichtig:
+In Textfeldern wie Bezeichnung, Name, E-Mail oder Telefon bleiben + und -
+normale Zeichen. Die Tastaturkürzel greifen dort nicht ein.
+
+Alle Funktionen aus V20 bleiben erhalten:
+- System / Hell / Dunkel
+- Theme-Auswahl wird gespeichert
+- technischer Schnittplan und PDF bleiben hell
+- optimierte Maßdarstellung für schmale Teile
+- GitHub-Pages/PWA-Unterstützung
+
+GitHub Pages aktualisieren
 ==========================
-Für den eigentlichen Schnittplaner werden nur statische Dateien benötigt:
-
+Im bestehenden Repository ersetzen:
 - index.html
 - manifest.webmanifest
 - sw.js
 - icon.svg
-
-Diese vier Dateien können in einen beliebigen HTTPS-Webspace gelegt werden.
-
-iPhone / iPad
-=============
-1. HTTPS-Link in Safari öffnen.
-2. Alle Buttons funktionieren als normale Webanwendung.
-3. Safari -> Teilen -> „Zum Home-Bildschirm“.
-4. Danach erscheint der Zuschnittplaner als App-Symbol auf dem Gerät.
-5. Nach dem ersten Laden kann die App durch den Service Worker auch offline
-   weiter geöffnet werden.
-
-Android / Chrome
-================
-Bei unterstützten Browsern erscheint eine Installationsmöglichkeit.
-Danach kann der Planer ebenfalls wie eine App gestartet werden.
-
-Windows / macOS
-===============
-Normal im Browser verwenden oder – je nach Browser – als Web-App installieren.
-
-Zusätzlich neu
-==============
-- Der aktuelle Zuschnitt-Entwurf wird automatisch lokal auf dem jeweiligen
-  Gerät gespeichert (localStorage).
-- Nach Neuladen/Schließen bleiben Materialwahl und Zuschnittpositionen auf
-  diesem Gerät erhalten.
-- Keine Cloud-Synchronisation; die Daten verlassen das Gerät dadurch nicht.
-
-Wichtig
-=======
-Der ChatGPT-Sandbox-Link selbst ist KEIN Webhosting. Für einen realen iPhone-Test
-muss der entpackte V16-Ordner auf einem normalen HTTPS-Webspace liegen.
-
-Der Schnittplaner benötigt dafür keine Datenbank und kein PHP.

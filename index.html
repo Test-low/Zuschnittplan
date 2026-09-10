@@ -40,7 +40,19 @@ button,input,select,textarea{font:inherit}
 .brand{
   display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;
 }
-.logo-box{
+.brand.brand-textonly{
+  padding-left:2px;
+  border-left:6px solid var(--lowis);
+}
+.brand.brand-textonly .brand-copy strong{
+  font-size:19px;
+  color:var(--lowis-dark);
+}
+.brand.brand-textonly .brand-copy small{
+  color:#4c7055;
+}
+.logo-box{display:none;
+
   width:136px;height:58px;background:var(--lowis);position:relative;overflow:hidden;
   display:flex;align-items:center;justify-content:center;color:white;font-size:29px;
   font-weight:800;font-style:italic;letter-spacing:-1.5px;
@@ -632,6 +644,248 @@ svg{width:100%;height:auto;display:block}
   }
 }
 
+
+/* =========================================================
+   HELL / DUNKEL / SYSTEM
+   Der technische Schnittplan selbst bleibt bewusst hell.
+   ========================================================= */
+.topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.theme-switch{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  border:1px solid #d8ded8;
+  background:#f2f5f2;
+  border-radius:999px;
+  white-space:nowrap;
+}
+.theme-option{
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:#5f6861;
+  min-height:30px;
+  padding:5px 9px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:10px;
+  line-height:1;
+  font-weight:800;
+}
+.theme-option:hover{background:rgba(120,184,42,.10)}
+.theme-option.active{
+  background:var(--lowis-dark);
+  color:#fff;
+  box-shadow:0 2px 7px rgba(20,45,28,.16);
+}
+.theme-option:focus-visible{
+  outline:2px solid var(--lowis);
+  outline-offset:2px;
+}
+
+/* Dark palette */
+html[data-theme="dark"]{
+  --ink:#eef4ef;
+  --muted:#aeb9b1;
+  --line:#38423b;
+  --surface:#171d19;
+  --surface-2:#1e2621;
+  --shadow:0 12px 32px rgba(0,0,0,.26);
+  background:#0f1411;
+  color:var(--ink);
+  color-scheme:dark;
+}
+html[data-theme="dark"] body{background:#0f1411;color:var(--ink)}
+html[data-theme="dark"] .topbar{
+  background:#131915;
+  border-bottom-color:#2b352e;
+}
+html[data-theme="dark"] .brand.brand-textonly .brand-copy strong{color:#8dca42}
+html[data-theme="dark"] .brand.brand-textonly .brand-copy small,
+html[data-theme="dark"] .topnote{color:#9eaaa1}
+html[data-theme="dark"] .theme-switch{
+  border-color:#39443c;
+  background:#202822;
+}
+html[data-theme="dark"] .theme-option{color:#aeb9b1}
+html[data-theme="dark"] .theme-option:hover{background:#2b372d}
+html[data-theme="dark"] .theme-option.active{
+  background:var(--lowis);
+  color:#11200f;
+}
+html[data-theme="dark"] .panel{
+  background:var(--surface);
+  border-color:#303a33;
+}
+html[data-theme="dark"] .panel-head{border-bottom-color:#2a332d}
+html[data-theme="dark"] .panel-head p,
+html[data-theme="dark"] .results-top p,
+html[data-theme="dark"] .help,
+html[data-theme="dark"] .material-preview small,
+html[data-theme="dark"] .request-card>p,
+html[data-theme="dark"] .modal p,
+html[data-theme="dark"] .legend,
+html[data-theme="dark"] .plan-modal-note{color:var(--muted)}
+html[data-theme="dark"] label{color:#c2ccc5}
+html[data-theme="dark"] select,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea{
+  background:#101612;
+  color:#edf3ee;
+  border-color:#424e45;
+}
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus{
+  border-color:var(--lowis);
+  box-shadow:0 0 0 3px rgba(120,184,42,.18);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{color:#7f8b82}
+html[data-theme="dark"] .locked-row{
+  background:#1c241f;
+  border-color:#344039;
+}
+html[data-theme="dark"] .locked{color:#97a39a}
+html[data-theme="dark"] .material-preview{
+  background:linear-gradient(135deg,#1b281d,#141a16);
+  border-color:#334736;
+}
+html[data-theme="dark"] .material-preview .tag{color:#8dca42}
+html[data-theme="dark"] .parts-table th,
+html[data-theme="dark"] .parts-table td{border-bottom-color:#2b352e}
+html[data-theme="dark"] .parts-table th{color:#aab5ad}
+html[data-theme="dark"] .icon-btn{
+  background:#3a2221;
+  color:#ffaaa3;
+}
+html[data-theme="dark"] .btn-soft{
+  background:#263129;
+  color:#e2eae4;
+}
+html[data-theme="dark"] .btn-outline{
+  background:#151b17;
+  border-color:#465248;
+  color:#e2eae4;
+}
+html[data-theme="dark"] .notice{
+  border-color:#36423a;
+  background:#1d2520;
+  color:#c6d0c8;
+}
+html[data-theme="dark"] .notice.success{
+  background:#15281b;
+  border-color:#315b3c;
+  color:#9fd8ae;
+}
+html[data-theme="dark"] .notice.error{
+  background:#321b1a;
+  border-color:#623633;
+  color:#f2aaa5;
+}
+html[data-theme="dark"] .status-chip{
+  background:#203319;
+  color:#a8d875;
+  border-color:#38582c;
+}
+html[data-theme="dark"] .stat{
+  border-color:#303a33;
+  background:#1b221d;
+}
+html[data-theme="dark"] .stat .num{color:#edf4ef}
+html[data-theme="dark"] .toolbar{
+  border-color:#303a33;
+  background:#1b221d;
+}
+html[data-theme="dark"] .sheet{
+  background:#171d19;
+  border-color:#303a33;
+}
+html[data-theme="dark"] .sheet-badge{
+  color:#b1bcb4;
+  background:#252e28;
+}
+html[data-theme="dark"] .subsection{border-top-color:#303a33}
+html[data-theme="dark"] .summary-table th,
+html[data-theme="dark"] .summary-table td{border-bottom-color:#303a33}
+html[data-theme="dark"] .summary-table th{
+  background:#202822;
+  color:#b4beb7;
+}
+html[data-theme="dark"] .request-card{
+  border-color:#334536;
+  background:linear-gradient(135deg,#19241b,#151b17);
+}
+html[data-theme="dark"] .modal-backdrop{background:rgba(0,0,0,.68)}
+html[data-theme="dark"] .modal{
+  background:#171d19;
+  color:#eef4ef;
+}
+html[data-theme="dark"] .runtime-notice{
+  background:#302815;
+  border-color:#5e4e25;
+  color:#ead794;
+}
+html[data-theme="dark"] .install-bar{
+  background:#19241b;
+  border-color:#334536;
+}
+html[data-theme="dark"] .install-bar strong{color:#dbe8dd}
+html[data-theme="dark"] .install-bar span{color:#a7b2a9}
+html[data-theme="dark"] .plan-modal{
+  background:#0f1411;
+  color:#edf3ee;
+}
+/* Der Zeichenbereich bleibt weiß für optimale technische Lesbarkeit. */
+html[data-theme="dark"] .plan-modal-body{
+  background:#fff;
+  border-color:#445047;
+}
+html[data-theme="dark"] .sheet svg{
+  background:#fff;
+  border-radius:8px;
+}
+html[data-theme="dark"] .swatch{background:#fff}
+html[data-theme="dark"] .swatch.rest{
+  background:repeating-linear-gradient(45deg,#fff 0,#fff 5px,#b9c7bb 5px,#b9c7bb 6px);
+}
+html[data-theme="dark"] .swatch.kerf{
+  background:#cfd5d0;
+  border-color:#cfd5d0;
+}
+
+@media(max-width:760px){
+  .topbar-actions{gap:8px}
+  .theme-switch{padding:2px}
+  .theme-option{
+    min-height:32px;
+    padding:5px 8px;
+    font-size:9px;
+  }
+}
+@media(max-width:520px){
+  .brand.brand-textonly .brand-copy small{display:none}
+  .brand.brand-textonly .brand-copy strong{font-size:13px}
+  .brand.brand-textonly{border-left-width:4px}
+  .theme-option{
+    padding:5px 6px;
+    font-size:8px;
+  }
+}
+@media print{
+  html,html[data-theme="dark"],html[data-theme="dark"] body{
+    background:#fff!important;
+    color:#000!important;
+    color-scheme:light;
+  }
+  .theme-switch{display:none!important}
+}
+
 @media print{
   @page{size:A4 portrait;margin:10mm}
   body{background:white}
@@ -648,14 +902,20 @@ svg{width:100%;height:auto;display:block}
 
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="brand">
-      <div class="logo-box"><span>Lowis</span></div>
+    <div class="brand brand-textonly">
       <div class="brand-copy">
-        <strong>Holzhandlung</strong>
-        <small>Plattenzuschnitt · Web-App-Testversion</small>
+        <strong>Lowis Holzhandlung</strong>
+        <small>Plattenzuschnitt · Web-App</small>
       </div>
     </div>
-    <div class="topnote">Unverbindliche Zuschnittanfrage<br>Preis und Termin nach Prüfung</div>
+    <div class="topbar-actions">
+      <div class="topnote">Unverbindliche Zuschnittanfrage<br>Preis und Termin nach Prüfung</div>
+      <div class="theme-switch" role="group" aria-label="Darstellung">
+        <button class="theme-option" type="button" data-theme-choice="system" aria-pressed="true">System</button>
+        <button class="theme-option" type="button" data-theme-choice="light" aria-pressed="false">Hell</button>
+        <button class="theme-option" type="button" data-theme-choice="dark" aria-pressed="false">Dunkel</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -733,7 +993,7 @@ svg{width:100%;height:auto;display:block}
               <button class="btn btn-outline" id="loadExample" type="button">Beispiel laden</button>
               <button class="btn btn-outline" id="clearParts" type="button">Leeren</button>
             </div>
-            <div class="help">Die Bezeichnung ist optional, z. B. „Küche“, „Bad“, „OG Zimmer 1“ oder „Schrank links“. Länge = Richtung der langen Rohplattenseite. Es gibt kein Mindestmaß für Zuschnitte.</div>
+            <div class="help">Die Bezeichnung ist optional, z. B. „Küche“, „Bad“, „OG Zimmer 1“ oder „Schrank links“. Länge = Richtung der langen Rohplattenseite. Es gibt kein Mindestmaß für Zuschnitte. <strong>Tastatur:</strong> + = neue Position, − = letzte Position entfernen.</div>
             <button class="btn btn-primary full-btn" id="calculate" type="button">Schnittplan berechnen</button>
           </div>
         </div>
@@ -827,9 +1087,6 @@ svg{width:100%;height:auto;display:block}
   <div class="plan-modal-note">Auf Smartphone und Tablet kannst du den Plan verschieben und mit der üblichen Browser-Geste vergrößern.</div>
 </div>
 
-<div class="footer">
-  Web-App-Testversion des Platten-Zuschnittplaners für Desktop, Tablet und Smartphone. Identische Plattenbelegungen werden nur einmal dargestellt. Das Drehen der Fertigteile ist als Standard immer automatisch aktiv. Rohplatten und Bestände können später über OPTI-NET übernommen werden.
-</div>
 
 <div id="modalBackdrop" class="modal-backdrop hidden">
   <div class="modal">
@@ -848,6 +1105,54 @@ svg{width:100%;height:auto;display:block}
 
 <script>
 "use strict";
+
+
+const THEME_STORAGE_KEY="lowis-zuschnittplaner-theme";
+const systemThemeQuery=window.matchMedia("(prefers-color-scheme: dark)");
+
+function getSavedThemeChoice(){
+  const saved=localStorage.getItem(THEME_STORAGE_KEY);
+  return ["system","light","dark"].includes(saved) ? saved : "system";
+}
+
+function effectiveTheme(choice){
+  return choice==="system" ? (systemThemeQuery.matches ? "dark" : "light") : choice;
+}
+
+function applyTheme(choice,save=true){
+  if(!["system","light","dark"].includes(choice)) choice="system";
+  const effective=effectiveTheme(choice);
+
+  document.documentElement.dataset.theme=effective;
+  document.documentElement.dataset.themeChoice=choice;
+
+  document.querySelectorAll(".theme-option").forEach(btn=>{
+    const active=btn.dataset.themeChoice===choice;
+    btn.classList.toggle("active",active);
+    btn.setAttribute("aria-pressed",active ? "true" : "false");
+  });
+
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content",effective==="dark" ? "#0f1411" : "#2f6f3e");
+
+  if(save) localStorage.setItem(THEME_STORAGE_KEY,choice);
+}
+
+document.querySelectorAll(".theme-option").forEach(btn=>{
+  btn.addEventListener("click",()=>applyTheme(btn.dataset.themeChoice,true));
+});
+
+const onSystemThemeChanged=()=>{
+  if(getSavedThemeChoice()==="system") applyTheme("system",false);
+};
+if(systemThemeQuery.addEventListener){
+  systemThemeQuery.addEventListener("change",onSystemThemeChanged);
+}else if(systemThemeQuery.addListener){
+  systemThemeQuery.addListener(onSystemThemeChanged);
+}
+
+applyTheme(getSavedThemeChoice(),false);
+
 
 // TESTDATEN. Später kann diese Funktion ihre Daten aus OPTI-NET erhalten.
 const MATERIALS = [
@@ -1230,28 +1535,28 @@ const MATERIALS = [
     "thickness": 6
   },
   {
-    "group": "Spanplatte roh V20",
+    "group": "Spanplatte roh",
     "edge": "Standard",
     "width": 2800,
     "height": 2070,
     "thickness": 10
   },
   {
-    "group": "Spanplatte roh V20",
+    "group": "Spanplatte roh",
     "edge": "Standard",
     "width": 2800,
     "height": 2070,
     "thickness": 12
   },
   {
-    "group": "Spanplatte roh V20",
+    "group": "Spanplatte roh",
     "edge": "Standard",
     "width": 2800,
     "height": 2070,
     "thickness": 16
   },
   {
-    "group": "Spanplatte roh V20",
+    "group": "Spanplatte roh",
     "edge": "Standard",
     "width": 2800,
     "height": 2070,
@@ -1467,17 +1772,99 @@ function pieceLabel(item){
   return item.name ? `Pos. ${item.pos} · ${item.name}` : `Pos. ${item.pos}`;
 }
 function calloutCode(index){ return String(index+1); }
-function needsPieceCallout(p,drawW,drawH){
-  const label=pieceLabel(p.item);
-  const hDim=`${Math.round(p.w)} mm`;
-  const vDim=`${Math.round(p.h)} mm`;
-  const labelNeed=Math.min(220,Math.max(54,label.length*5.5+10));
-  const hNeed=Math.max(48,hDim.length*5.3+10);
-  const vNeed=Math.max(38,vDim.length*5.0+10);
-  return drawW<Math.max(labelNeed,hNeed) || drawH<vNeed;
+
+function textApprox(text,size){
+  return String(text).length * size * 0.56;
 }
 
-function addPartRow(w="",h="",q=1,name=""){
+/*
+  full    = Bezeichnung/Position + beide Kantenmaße im Teil
+  compact = reduzierte Beschriftung + beide Kantenmaße im Teil
+  measure = bei kleinen Teilen steht das Fertigmaß direkt im Teil.
+            Es wird automatisch entlang der längeren sichtbaren Seite gedreht.
+*/
+function pieceLayoutMode(p,drawW,drawH){
+  const label=pieceLabel(p.item)+(p.rotated?" ↻":"");
+  const widthText=`${Math.round(p.w)} mm`;
+  const heightText=`${Math.round(p.h)} mm`;
+
+  const fullLabelSize=Math.max(7,Math.min(10,drawH/5,drawW/12));
+  const fullDimSize=Math.max(7,Math.min(10,drawH/5,drawW/12));
+
+  const fullFits =
+    drawW >= Math.max(54, Math.min(230, textApprox(label, fullLabelSize) + 12)) &&
+    drawW >= Math.max(34, textApprox(widthText, fullDimSize) + 10) &&
+    drawH >= Math.max(26, textApprox(heightText, fullDimSize) * 0.72 + 10) &&
+    drawH >= 34;
+
+  if(fullFits) return "full";
+
+  const compactFits =
+    drawW >= Math.max(32, textApprox(widthText, 7) + 8) &&
+    drawH >= Math.max(22, textApprox(heightText, 7) * 0.72 + 8) &&
+    drawH >= 24;
+
+  if(compactFits) return "compact";
+
+  return "measure";
+}
+
+function tinyMeasureSpec(p,drawW,drawH){
+  const text=`${Math.round(p.w)}×${Math.round(p.h)}`;
+  const vertical=drawH>drawW;
+  const along=vertical?drawH:drawW;
+  const across=vertical?drawW:drawH;
+
+  // So groß wie möglich. Ziel: Maße so lange wie technisch sinnvoll
+  // direkt im Teil halten – auch bei sehr schmalen Streifen.
+  const byLength=(along-3)/(Math.max(1,text.length)*0.55);
+  const byThickness=Math.max(0,across-1.2);
+  const font=Math.min(9,byLength,byThickness);
+
+  return {
+    text,
+    vertical,
+    font,
+    readable:font>=4.4 && along>=14 && across>=5.4
+  };
+}
+
+function needsPieceCallout(p,drawW,drawH){
+  if(pieceLayoutMode(p,drawW,drawH)!=="measure") return false;
+  return !tinyMeasureSpec(p,drawW,drawH).readable || !!p.item.name;
+}
+
+function describePartRow(tr){
+  const w=String(tr.querySelector(".pw")?.value||"").trim();
+  const h=String(tr.querySelector(".ph")?.value||"").trim();
+  const q=String(tr.querySelector(".pq")?.value||"").trim();
+  const name=String(tr.querySelector(".pname")?.value||"").trim();
+  const bits=[];
+  if(w && h) bits.push(`${w} × ${h} mm`);
+  if(q) bits.push(`${q} Stk.`);
+  if(name) bits.push(name);
+  return bits.join(" · ");
+}
+
+function confirmRemoveRow(tr){
+  const rows=[...$("partsBody").querySelectorAll("tr")];
+  const pos=rows.indexOf(tr)+1;
+  const detail=describePartRow(tr);
+  const message=detail
+    ? `Position ${pos} (${detail}) wirklich entfernen?`
+    : `Position ${pos} wirklich entfernen?`;
+  return window.confirm(message);
+}
+
+function removePartRow(tr,confirmFirst=true){
+  if(!tr) return false;
+  if(confirmFirst && !confirmRemoveRow(tr)) return false;
+  tr.remove();
+  saveDraft();
+  return true;
+}
+
+function addPartRow(w="",h="",q=1,name="",focusNew=false){
   const tr=document.createElement("tr");
   tr.innerHTML=`
     <td><input class="pw" type="number" min="1" step="1" value="${w}"></td>
@@ -1485,8 +1872,20 @@ function addPartRow(w="",h="",q=1,name=""){
     <td><input class="pq" type="number" min="1" step="1" value="${q}"></td>
     <td><input class="pname" type="text" maxlength="80" placeholder="z. B. Küche" value="${escapeAttr(name)}"></td>
     <td><button class="icon-btn" type="button" title="Position löschen">×</button></td>`;
-  tr.querySelector("button").addEventListener("click",()=>{tr.remove();saveDraft();});
+  tr.querySelector("button").addEventListener("click",()=>removePartRow(tr,true));
   $("partsBody").appendChild(tr);
+
+  if(focusNew){
+    requestAnimationFrame(()=>{
+      const input=tr.querySelector(".pw");
+      if(input){
+        input.focus();
+        input.select();
+        tr.scrollIntoView({block:"nearest",behavior:"smooth"});
+      }
+    });
+  }
+  return tr;
 }
 
 function readPositions(){
@@ -2041,16 +2440,17 @@ function makeSvg(sheet,no,SW,SH){
   const scale=(VW-L-R)/SW;
   const BW=SW*scale,BH=SH*scale;
 
-  const smallPositions=[];
-  const smallPosSet=new Set();
+  const infoPositions=[];
+  const infoPosSet=new Set();
   sheet.placements.forEach(p=>{
-    if(needsPieceCallout(p,p.w*scale,p.h*scale) && !smallPosSet.has(p.item.pos)){
-      smallPosSet.add(p.item.pos);
-      smallPositions.push(p.item.pos);
+    const mode=pieceLayoutMode(p,p.w*scale,p.h*scale);
+    if(mode==="measure" && needsPieceCallout(p,p.w*scale,p.h*scale) && !infoPosSet.has(p.item.pos)){
+      infoPosSet.add(p.item.pos);
+      infoPositions.push(p.item.pos);
     }
   });
 
-  const legendExtra=smallPositions.length ? 38+smallPositions.length*16 : 0;
+  const legendExtra=infoPositions.length ? 38+infoPositions.length*16 : 0;
   const B=40+legendExtra;
   const VH=T+BH+B;
   const pid=`hatch-${no}`;
@@ -2060,13 +2460,9 @@ function makeSvg(sheet,no,SW,SH){
       <pattern id="${pid}" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <line x1="0" y1="0" x2="0" y2="10" stroke="#b8c5b9" stroke-width="2"/>
       </pattern>
-      <marker id="arrow-${no}" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-        <path d="M0,0 L6,3 L0,6 Z" fill="#5a645d"/>
-      </marker>
     </defs>
     <rect x="${L}" y="${T}" width="${BW}" height="${BH}" fill="url(#${pid})" stroke="#213325" stroke-width="2"/>`;
 
-  // Sägefugen / Streifen
   for(let i=0;i<sheet.strips.length-1;i++){
     const st=sheet.strips[i];
     if(sheet.axis==="x"){
@@ -2092,18 +2488,14 @@ function makeSvg(sheet,no,SW,SH){
     }
   });
 
-  // Teile
   sheet.placements.forEach(p=>{
     const x=L+p.x*scale,y=T+p.y*scale,w=p.w*scale,h=p.h*scale;
-    const small=smallPosSet.has(p.item.pos);
+    const mode=pieceLayoutMode(p,w,h);
 
     s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#1f2f22" stroke-width="1.4"/>
       <rect x="${x}" y="${y}" width="${Math.min(5,w)}" height="${h}" fill="#78b82a" opacity=".9"/>`;
 
-    if(small){
-      const fs=Math.max(7,Math.min(13,w*.32,h*.42));
-      s+=`<text x="${x+w/2}" y="${y+h/2+fs*.34}" text-anchor="middle" font-family="Arial" font-size="${fs}" font-weight="700" fill="#1f2b22">Pos. ${p.item.pos}</text>`;
-    }else{
+    if(mode==="full"){
       const label=escapeHtmlText(pieceLabel(p.item)+(p.rotated?" ↻":""));
       const labelFs=Math.max(7,Math.min(10,h/5,w/12));
       const dimFs=Math.max(7,Math.min(10,h/5,w/12));
@@ -2111,44 +2503,32 @@ function makeSvg(sheet,no,SW,SH){
       s+=`<text x="${x+7}" y="${y+Math.max(11,labelFs+3)}" text-anchor="start" font-family="Arial" font-size="${labelFs}" font-weight="700" fill="#1f2b22">${label}</text>
         <text x="${x+w/2}" y="${y+h-5}" text-anchor="middle" font-family="Arial" font-size="${dimFs}" fill="#404a42">${p.w} mm</text>
         <text x="${x+w-5}" y="${y+h/2}" text-anchor="middle" font-family="Arial" font-size="${dimFs}" fill="#404a42" transform="rotate(-90 ${x+w-5} ${y+h/2})">${p.h} mm</text>`;
+    }else if(mode==="compact"){
+      const posText=`Pos. ${p.item.pos}`;
+      const posFs=Math.max(6,Math.min(8,h/4.5,w/10));
+      const dimFs=Math.max(6,Math.min(8,h/4.5,w/10));
+      s+=`<text x="${x+4}" y="${y+Math.max(9,posFs+2)}" text-anchor="start" font-family="Arial" font-size="${posFs}" font-weight="700" fill="#1f2b22">${posText}</text>
+        <text x="${x+w/2}" y="${y+h-4}" text-anchor="middle" font-family="Arial" font-size="${dimFs}" fill="#404a42">${p.w} mm</text>
+        <text x="${x+w-4}" y="${y+h/2}" text-anchor="middle" font-family="Arial" font-size="${dimFs}" fill="#404a42" transform="rotate(-90 ${x+w-4} ${y+h/2})">${p.h} mm</text>`;
+    }else{
+      const spec=tinyMeasureSpec(p,w,h);
+      if(spec.readable){
+        if(spec.vertical){
+          s+=`<text x="${x+w/2}" y="${y+h/2}" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="${spec.font}" font-weight="700" fill="#1f2b22" transform="rotate(-90 ${x+w/2} ${y+h/2})">${spec.text}</text>`;
+        }else{
+          s+=`<text x="${x+w/2}" y="${y+h/2}" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="${spec.font}" font-weight="700" fill="#1f2b22">${spec.text}</text>`;
+        }
+      }
     }
   });
 
-  // Rohplattenmaße
   s+=`<text x="${L+BW/2}" y="${T+BH+24}" text-anchor="middle" font-family="Arial" font-size="11" fill="#5d675f">${SW} mm</text>
       <text x="${L-32}" y="${T+BH/2}" text-anchor="middle" font-family="Arial" font-size="11" fill="#5d675f" transform="rotate(-90 ${L-32} ${T+BH/2})">${SH} mm</text>`;
 
-  // Für kleine Teile: externe Bemaßung, sofern am Plattenrand ausreichend Platz ist.
-  // Falls nicht, bleibt die eindeutige Positionsnummer im Teil und die Infozeile darunter.
-  const extPieces=sheet.placements.filter(p=>smallPosSet.has(p.item.pos));
-  const topTaken=[], leftTaken=[];
-
-  extPieces.forEach(p=>{
-    const x=L+p.x*scale,y=T+p.y*scale,w=p.w*scale,h=p.h*scale;
-    const canTop=y-T>16 || p.y<1;
-    const canLeft=x-L>18 || p.x<1;
-
-    if(canTop){
-      const yy=Math.max(8,y-10);
-      s+=`<line x1="${x}" y1="${yy}" x2="${x+w}" y2="${yy}" stroke="#5a645d" stroke-width="1" marker-start="url(#arrow-${no})" marker-end="url(#arrow-${no})"/>
-          <line x1="${x}" y1="${yy-3}" x2="${x}" y2="${y}" stroke="#8a938c" stroke-width=".8"/>
-          <line x1="${x+w}" y1="${yy-3}" x2="${x+w}" y2="${y}" stroke="#8a938c" stroke-width=".8"/>
-          <text x="${x+w/2}" y="${yy-3}" text-anchor="middle" font-family="Arial" font-size="9" fill="#4c564f">${p.w} mm</text>`;
-    }
-
-    if(canLeft){
-      const xx=Math.max(8,x-12);
-      s+=`<line x1="${xx}" y1="${y}" x2="${xx}" y2="${y+h}" stroke="#5a645d" stroke-width="1" marker-start="url(#arrow-${no})" marker-end="url(#arrow-${no})"/>
-          <line x1="${xx-3}" y1="${y}" x2="${x}" y2="${y}" stroke="#8a938c" stroke-width=".8"/>
-          <line x1="${xx-3}" y1="${y+h}" x2="${x}" y2="${y+h}" stroke="#8a938c" stroke-width=".8"/>
-          <text x="${xx-3}" y="${y+h/2}" text-anchor="middle" font-family="Arial" font-size="9" fill="#4c564f" transform="rotate(-90 ${xx-3} ${y+h/2})">${p.h} mm</text>`;
-    }
-  });
-
-  if(smallPositions.length){
+  if(infoPositions.length){
     const firstY=T+BH+48;
-    s+=`<text x="${L}" y="${firstY}" text-anchor="start" font-family="Arial" font-size="10" font-weight="700" fill="#354039">Kleine Zuschnitte:</text>`;
-    smallPositions.forEach((pos,index)=>{
+    s+=`<text x="${L}" y="${firstY}" text-anchor="start" font-family="Arial" font-size="10" font-weight="700" fill="#354039">Zusatzinfo zu kleinen Zuschnitten:</text>`;
+    infoPositions.forEach((pos,index)=>{
       const p=sheet.placements.find(pl=>pl.item.pos===pos);
       const name=p.item.name ? ` · ${escapeHtmlText(p.item.name)}` : "";
       const rot=p.rotated ? " · im Plan gedreht" : "";
@@ -2403,9 +2783,51 @@ $("edgeSelect").addEventListener("change",()=>{rebuildFormats();});
 $("formatSelect").addEventListener("change",()=>{rebuildThicknesses();});
 $("thicknessSelect").addEventListener("change",()=>{updateMaterialPreview();});
 
-$("addPart").addEventListener("click",()=>{addPartRow();setTimeout(saveDraft,0);});
+$("addPart").addEventListener("click",()=>{addPartRow("","",1,"",true);setTimeout(saveDraft,0);});
 $("loadExample").addEventListener("click",()=>{loadExample();setTimeout(saveDraft,0);});
 $("clearParts").addEventListener("click",clearParts);
+
+
+function keyboardShortcutAllowed(ev){
+  if(ev.ctrlKey || ev.metaKey || ev.altKey || ev.repeat) return false;
+
+  const el=ev.target;
+  if(!el) return true;
+  if(el.isContentEditable) return false;
+
+  const tag=String(el.tagName||"").toLowerCase();
+  if(tag==="textarea" || tag==="select") return false;
+
+  if(tag==="input"){
+    // In Text-, Mail-, Telefonfeldern usw. müssen + und - normal tippbar bleiben.
+    // In den Zahlenfeldern der Zuschnittliste dienen sie als Schnellsteuerung.
+    return el.type==="number" && !!el.closest("#partsBody");
+  }
+  return true;
+}
+
+document.addEventListener("keydown",ev=>{
+  if(!keyboardShortcutAllowed(ev)) return;
+
+  const isPlus=ev.key==="+" || ev.code==="NumpadAdd";
+  const isMinus=ev.key==="-" || ev.key==="−" || ev.code==="NumpadSubtract";
+
+  if(isPlus){
+    ev.preventDefault();
+    addPartRow("","",1,"",true);
+    saveDraft();
+    return;
+  }
+
+  if(isMinus){
+    ev.preventDefault();
+    const rows=[...$("partsBody").querySelectorAll("tr")];
+    const lastRow=rows[rows.length-1];
+    if(!lastRow) return;
+    removePartRow(lastRow,true);
+  }
+});
+
 
 function openPlanModal(groupIndex){
   if(!currentResult) return;
@@ -2570,13 +2992,14 @@ function makePlanPdfBase64(result, customer){
     for(let d=-bh;d<bw;d+=12){ p+=ln(bx+d,by,bx+d+bh,by+bh); }
     p+="0 G 0.8 w\n"+rc(bx,by,bw,bh,false);
 
-    const pdfSmallPositions=[];
-    const pdfSmallSet=new Set();
+    const pdfInfoPositions=[];
+    const pdfInfoSet=new Set();
     sh.placements.forEach(pl=>{
       const drawW=pl.w*sc,drawH=pl.h*sc;
-      if(needsPieceCallout(pl,drawW,drawH) && !pdfSmallSet.has(pl.item.pos)){
-        pdfSmallSet.add(pl.item.pos);
-        pdfSmallPositions.push(pl.item.pos);
+      const mode=pieceLayoutMode(pl,drawW,drawH);
+      if(mode==="measure" && needsPieceCallout(pl,drawW,drawH) && !pdfInfoSet.has(pl.item.pos)){
+        pdfInfoSet.add(pl.item.pos);
+        pdfInfoPositions.push(pl.item.pos);
       }
     });
 
@@ -2584,24 +3007,36 @@ function makePlanPdfBase64(result, customer){
       const x=bx+pl.x*sc;
       const y0=by+(result.m.height-(pl.y+pl.h))*sc;
       const w=pl.w*sc,h=pl.h*sc;
+      const mode=pieceLayoutMode(pl,w,h);
       p+="1 g\n"+rc(x,y0,w,h,true)+"0 g\n";
 
-      const small=pdfSmallSet.has(pl.item.pos);
-      if(small){
-        p+=t(x+Math.max(2,w/2-12),y0+h/2-3,7,`Pos. ${pl.item.pos}`,true);
-      }else{
+      if(mode==="full"){
         const ident=`Pos. ${pl.item.pos}${pl.item.name ? " - "+pl.item.name : ""}${pl.rotated ? " gedreht" : ""}`;
         p+=t(x+4,y0+h-10,7,ident,true);
         p+=t(x+4,y0+4,7,`${pl.w} mm`);
         p+=tv(x+w-4,y0+4,7,`${pl.h} mm`);
+      }else if(mode==="compact"){
+        p+=t(x+4,y0+h-10,6,`Pos. ${pl.item.pos}`,true);
+        p+=t(x+4,y0+4,6,`${pl.w} mm`);
+        p+=tv(x+w-4,y0+4,6,`${pl.h} mm`);
+      }else{
+        const spec=tinyMeasureSpec(pl,w,h);
+        if(spec.readable){
+          const fs=Math.max(5,Math.min(7,spec.font));
+          if(spec.vertical){
+            p+=tv(x+w/2,y0+Math.max(3,h/2-textApprox(spec.text,fs)/2),fs,spec.text,true);
+          }else{
+            p+=t(x+Math.max(2,w/2-textApprox(spec.text,fs)/2),y0+h/2-2,fs,spec.text,true);
+          }
+        }
       }
     });
 
     let infoY=405;
-    if(pdfSmallPositions.length){
-      p+=t(45,infoY,8,"Kleine Zuschnitte:",true);
+    if(pdfInfoPositions.length){
+      p+=t(45,infoY,8,"Zusatzinfo zu kleinen Zuschnitten:",true);
       infoY-=13;
-      pdfSmallPositions.forEach((pos)=>{
+      pdfInfoPositions.forEach((pos)=>{
         const pl=sh.placements.find(x=>x.item.pos===pos);
         const desc=`Pos. ${pl.item.pos} | Fertigmass ${pl.item.w} x ${pl.item.h} mm${pl.item.name ? " | "+pl.item.name : ""}${pl.rotated ? " | im Plan gedreht" : ""}`;
         p+=t(45,infoY,7,desc);
