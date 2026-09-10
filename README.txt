@@ -1,4 +1,4 @@
-LOWIS ZUSCHNITTPLANER – GITHUB-PAGES-PAKET V24
+LOWIS ZUSCHNITTPLANER – GITHUB-PAGES-PAKET V25
 ================================================
 
 Enthaltene Dateien:
@@ -16,8 +16,10 @@ INSTALLATION / UPDATE AUF GITHUB
 
 WICHTIG BEI ALTEM CACHE
 -----------------------
-Der Service-Worker-Cache wurde für diese Version auf V24 angehoben. Dadurch wird eine
+Der Service-Worker-Cache wurde für diese Version auf V25 angehoben. Dadurch wird eine
 vorherige V21-Version beim nächsten Laden ersetzt. Falls ein Browser trotzdem eine alte
 Ansicht zeigt, Seite einmal hart neu laden (Strg+F5).
 
 Stand: 10.09.2026
+
+V25: Im Projektmodus werden die hinterlegten Rohlängen direkt je Material-/Dimensionsposition angezeigt. Bei mehreren Rohlängen können einzelne Längen an-/abgewählt werden; gleiche Gruppen bleiben synchron.

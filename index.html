@@ -1019,13 +1019,18 @@ html[data-theme="dark"] .length-rest{color:#526057}
 .project-parts-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .project-parts-table th,.project-parts-table td{padding:5px 3px;border-bottom:1px solid #edf0ed;vertical-align:top}
 .project-parts-table th{font-size:10px;color:#707870;text-align:left;text-transform:uppercase;letter-spacing:.04em}
-.project-parts-table th:nth-child(1),.project-parts-table td:nth-child(1){width:22%}
-.project-parts-table th:nth-child(2),.project-parts-table td:nth-child(2){width:16%}
-.project-parts-table th:nth-child(3),.project-parts-table td:nth-child(3){width:14%}
-.project-parts-table th:nth-child(4),.project-parts-table td:nth-child(4){width:10%}
-.project-parts-table th:nth-child(5),.project-parts-table td:nth-child(5){width:auto}
-.project-parts-table th:nth-child(6),.project-parts-table td:nth-child(6){width:40px}
+.project-parts-table th:nth-child(1),.project-parts-table td:nth-child(1){width:18%}
+.project-parts-table th:nth-child(2),.project-parts-table td:nth-child(2){width:12%}
+.project-parts-table th:nth-child(3),.project-parts-table td:nth-child(3){width:25%}
+.project-parts-table th:nth-child(4),.project-parts-table td:nth-child(4){width:12%}
+.project-parts-table th:nth-child(5),.project-parts-table td:nth-child(5){width:8%}
+.project-parts-table th:nth-child(6),.project-parts-table td:nth-child(6){width:auto}
+.project-parts-table th:nth-child(7),.project-parts-table td:nth-child(7){width:40px}
 .project-parts-table input,.project-parts-table select{padding:8px 7px;border-radius:9px;min-width:0;width:100%}
+.project-row-raws{min-width:160px}
+.project-row-raws .raw-choice-wrap{gap:5px;margin-top:0}
+.project-row-raws .raw-choice{padding:7px 9px;font-size:11px}
+.project-row-raws .raw-choice-note{margin-top:4px;font-size:9px}
 .project-raw-settings{display:grid;gap:9px;margin-top:10px}
 .project-raw-card{border:1px solid #e0e6e1;border-radius:12px;padding:10px 11px;background:#fafcf9}
 .project-raw-card-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:4px}
@@ -1056,12 +1061,14 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-mini-s
 @media(max-width:760px){
   .project-parts-table thead{display:none}
   .project-parts-table,.project-parts-table tbody{display:block;width:100%}
-  .project-parts-table tr{display:grid;grid-template-columns:1fr 1fr 1fr 56px;grid-template-areas:"mat mat dim del" "len qty name name";gap:7px 8px;padding:10px 0;border-bottom:1px solid #edf0ed}
+  .project-parts-table tr{display:grid;grid-template-columns:1fr 1fr 1fr 56px;grid-template-areas:"mat mat dim del" "raw raw raw raw" "len qty name name";gap:7px 8px;padding:10px 0;border-bottom:1px solid #edf0ed}
   html[data-theme="dark"] .project-parts-table tr{border-bottom-color:#303a33}
   .project-parts-table td{display:block;width:auto!important;padding:0;border:0!important}
-  .project-parts-table td:nth-child(1){grid-area:mat}.project-parts-table td:nth-child(2){grid-area:dim}.project-parts-table td:nth-child(3){grid-area:len}.project-parts-table td:nth-child(4){grid-area:qty}.project-parts-table td:nth-child(5){grid-area:name}.project-parts-table td:nth-child(6){grid-area:del;align-self:start}
-  .project-parts-table td:nth-child(-n+5)::before{display:block;font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
-  .project-parts-table td:nth-child(1)::before{content:"Material"}.project-parts-table td:nth-child(2)::before{content:"Dimension"}.project-parts-table td:nth-child(3)::before{content:"Länge cm"}.project-parts-table td:nth-child(4)::before{content:"Stk."}.project-parts-table td:nth-child(5)::before{content:"Bezeichnung"}
+  .project-parts-table td:nth-child(1){grid-area:mat}.project-parts-table td:nth-child(2){grid-area:dim}.project-parts-table td:nth-child(3){grid-area:raw}.project-parts-table td:nth-child(4){grid-area:len}.project-parts-table td:nth-child(5){grid-area:qty}.project-parts-table td:nth-child(6){grid-area:name}.project-parts-table td:nth-child(7){grid-area:del;align-self:start}
+  .project-parts-table td:nth-child(-n+6)::before{display:block;font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .project-parts-table td:nth-child(1)::before{content:"Material"}.project-parts-table td:nth-child(2)::before{content:"Dimension"}.project-parts-table td:nth-child(3)::before{content:"Rohlängen cm"}.project-parts-table td:nth-child(4)::before{content:"Länge cm"}.project-parts-table td:nth-child(5)::before{content:"Stk."}.project-parts-table td:nth-child(6)::before{content:"Bezeichnung"}
+  .project-row-raws{min-width:0}
+  .project-row-raws .raw-choice{padding:8px 10px;font-size:12px}
   .project-parts-table input,.project-parts-table select{min-height:42px;font-size:15px}
   .length-group-title{display:block}.length-sale-rule{display:inline-block;margin-top:6px}
 }
@@ -1331,7 +1338,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-mini-s
             <h3>Projektpositionen eingeben</h3>
             <div class="parts-scroll">
               <table class="project-parts-table">
-                <thead><tr><th>Materialart</th><th>Dimension</th><th>Länge cm</th><th>Stk.</th><th>Bezeichnung</th><th></th></tr></thead>
+                <thead><tr><th>Materialart</th><th>Dimension</th><th>Rohlängen cm</th><th>Länge cm</th><th>Stk.</th><th>Bezeichnung</th><th></th></tr></thead>
                 <tbody id="projectPartsBody"></tbody>
               </table>
             </div>
@@ -1340,9 +1347,8 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-mini-s
               <button class="btn btn-outline" id="projectExample" type="button">Dachstuhl-Beispiel</button>
               <button class="btn btn-outline" id="projectClear" type="button">Leeren</button>
             </div>
-            <div class="help"><strong>Tastatur:</strong> + = neue Position, − = letzte Position entfernen. Gleiche Materialart und Dimension werden automatisch gemeinsam optimiert.</div>
-            <label style="margin-top:12px">Rohlängen in cm</label>
-            <div id="projectRawLengthSettings" class="project-raw-settings"></div>
+            <div class="help"><strong>Tastatur:</strong> + = neue Position, − = letzte Position entfernen. Die Rohlängen wählst du direkt in der jeweiligen Projektposition. Gleiche Materialart und Dimension werden automatisch gemeinsam optimiert und verwenden dieselbe Rohlängen-Auswahl.</div>
+            <div id="projectRawLengthSettings" class="hidden"></div>
             <div class="help length-stock-disclaimer">Hinweis: Die angezeigten Rohlängen dienen ausschließlich der Zuschnittplanung. Sie stellen keine Bestandsauskunft, Reservierung oder Liefer-/Verfügbarkeitszusage dar. Die tatsächliche Verfügbarkeit ist vor Bestellung bzw. Abholung gesondert zu prüfen.</div>
             <div class="locked-row"><span>Sägefuge</span><span><strong>0,5 cm (5 mm)</strong> <span class="locked">fest</span></span></div>
             <button class="btn btn-primary full-btn" id="projectCalculate" type="button">Projekt berechnen</button>
@@ -3517,11 +3523,11 @@ function sendRequest(ev){
 
 
 /* =========================================================
-   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V24
+   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V25
    ========================================================= */
 window.activePlannerMode="plate";
 let activeLengthMode="single";
-const LENGTH_DRAFT_KEY="lowis-laengenzuschnitt-draft-v4";
+const LENGTH_DRAFT_KEY="lowis-laengenzuschnitt-draft-v5";
 let currentLengthResult=null;
 const LENGTH_KERF_CM=0.5;
 const singleRawSelection={};
@@ -3676,7 +3682,7 @@ function projectDimensionOptions(material,selected){return Object.keys(LENGTH_CA
 function addProjectPartRow(material="KVH",dimension="",len="",q=1,name="",focus=false){
   if(!LENGTH_CATALOG[material])material="KVH";const dims=Object.keys(LENGTH_CATALOG[material]);if(!dims.includes(dimension))dimension=dims[0]||"";
   const tr=document.createElement("tr");
-  tr.innerHTML=`<td><select class="pmat">${projectMaterialOptions(material)}</select></td><td><select class="pdim">${projectDimensionOptions(material,dimension)}</select></td><td><input class="plen" type="number" min="0.1" step="0.1" inputmode="decimal" value="${escapeAttr(len)}"></td><td><input class="pqty" type="number" min="1" step="1" inputmode="numeric" value="${escapeAttr(q)}"></td><td><input class="pname2" type="text" value="${escapeAttr(name)}" placeholder="z. B. Sparren"></td><td><button class="icon-btn project-row-delete" type="button" aria-label="Position entfernen">×</button></td>`;
+  tr.innerHTML=`<td><select class="pmat">${projectMaterialOptions(material)}</select></td><td><select class="pdim">${projectDimensionOptions(material,dimension)}</select></td><td class="project-row-raws"></td><td><input class="plen" type="number" min="0.1" step="0.1" inputmode="decimal" value="${escapeAttr(len)}"></td><td><input class="pqty" type="number" min="1" step="1" inputmode="numeric" value="${escapeAttr(q)}"></td><td><input class="pname2" type="text" value="${escapeAttr(name)}" placeholder="z. B. Sparren"></td><td><button class="icon-btn project-row-delete" type="button" aria-label="Position entfernen">×</button></td>`;
   $("projectPartsBody").appendChild(tr);
   tr.querySelector(".pmat").addEventListener("change",()=>{const m=tr.querySelector(".pmat").value;tr.querySelector(".pdim").innerHTML=projectDimensionOptions(m,Object.keys(LENGTH_CATALOG[m]||{})[0]);rebuildProjectRawSettings();saveLengthDraft();});
   tr.querySelector(".pdim").addEventListener("change",()=>{rebuildProjectRawSettings();saveLengthDraft();});
@@ -3692,19 +3698,25 @@ function loadProjectExample(){
 }
 function readProjectPositions(){return [...$("projectPartsBody").querySelectorAll("tr")].map((tr,i)=>({pos:i+1,material:tr.querySelector(".pmat")?.value||"",dimension:tr.querySelector(".pdim")?.value||"",len:Math.round((Number(tr.querySelector(".plen")?.value)||0)*10)/10,q:Math.round(Number(tr.querySelector(".pqty")?.value)||0),name:String(tr.querySelector(".pname2")?.value||"").trim()})).filter(p=>p.len>0||p.name);}
 function rebuildProjectRawSettings(){
-  const rows=[...$("projectPartsBody").querySelectorAll("tr")].map(tr=>({material:tr.querySelector(".pmat")?.value||"",dimension:tr.querySelector(".pdim")?.value||""})).filter(r=>r.material&&r.dimension);const unique=new Map();
-  rows.forEach(r=>{const key=lengthGroupKey(r.material,r.dimension);if(!unique.has(key))unique.set(key,{material:r.material,dimension:r.dimension,raws:catalogRaws(r.material,r.dimension)});});
-  if(!unique.size){$("projectRawLengthSettings").innerHTML='<div class="length-empty-note">Sobald eine Projektposition vorhanden ist, erscheinen hier die zugehörigen Rohlängen.</div>';return;}
-  $("projectRawLengthSettings").innerHTML=[...unique.entries()].map(([key,g])=>{
-    const selected=ensureSelection(projectRawSelection,key,g.raws);
-    return `<div class="project-raw-card" data-key="${escapeAttr(key)}"><div class="project-raw-card-head"><strong>${escapeHtmlText(g.material)} · ${escapeHtmlText(g.dimension)} cm</strong><span>${g.raws.length>1?"Längen anklickbar":"feste Rohlänge"}</span></div><div class="raw-choice-wrap">${g.raws.map(r=>`<button type="button" class="raw-choice ${selected.has(Number(r))?"active":""}" data-raw="${r}" aria-pressed="${selected.has(Number(r))}">${lengthFmt(r)} cm</button>`).join("")}</div><div class="raw-choice-note">${escapeHtmlText(saleRuleText(g.material,g.raws))}</div></div>`;
-  }).join("");
-  $("projectRawLengthSettings").querySelectorAll(".project-raw-card").forEach(card=>{
-    const key=card.dataset.key;const [material,dimension]=key.split("||");const raws=catalogRaws(material,dimension);
-    card.querySelectorAll(".raw-choice").forEach(btn=>btn.addEventListener("click",()=>{
+  const rows=[...$("projectPartsBody").querySelectorAll("tr")];
+  rows.forEach(tr=>{
+    const material=tr.querySelector(".pmat")?.value||"";
+    const dimension=tr.querySelector(".pdim")?.value||"";
+    const cell=tr.querySelector(".project-row-raws");
+    if(!cell)return;
+    const raws=catalogRaws(material,dimension);
+    if(!material||!dimension||!raws.length){cell.innerHTML='<span class="raw-choice-note">–</span>';return;}
+    const key=lengthGroupKey(material,dimension);
+    const selected=ensureSelection(projectRawSelection,key,raws);
+    cell.innerHTML=`<div class="raw-choice-wrap">${raws.map(r=>`<button type="button" class="raw-choice ${selected.has(Number(r))?"active":""}" data-raw="${r}" aria-pressed="${selected.has(Number(r))}">${lengthFmt(r)} cm</button>`).join("")}</div><div class="raw-choice-note">${raws.length>1?"Anklicken zum Ein-/Ausschalten":"Feste Rohlänge"}</div>`;
+    cell.querySelectorAll(".raw-choice").forEach(btn=>btn.addEventListener("click",()=>{
       const raw=Number(btn.dataset.raw),set=ensureSelection(projectRawSelection,key,raws);
-      if(set.has(raw)){if(set.size===1){setLengthNotice("error","Mindestens eine Rohlänge je Material/Dimension muss berücksichtigt werden.");return;}set.delete(raw);}else set.add(raw);
-      btn.classList.toggle("active",set.has(raw));btn.setAttribute("aria-pressed",String(set.has(raw)));saveLengthDraft();
+      if(set.has(raw)){
+        if(set.size===1){setLengthNotice("error","Mindestens eine Rohlänge je Material/Dimension muss berücksichtigt werden.");return;}
+        set.delete(raw);
+      }else set.add(raw);
+      rebuildProjectRawSettings();
+      saveLengthDraft();
     }));
   });
 }
