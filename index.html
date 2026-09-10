@@ -1042,6 +1042,7 @@ html[data-theme="dark"] .length-rest{color:#526057}
 .length-group-title h3{font-size:16px;margin:0;color:#1c3021}
 .length-group-title p{font-size:10px;color:var(--muted);margin:3px 0 0;line-height:1.4}
 .length-sale-rule{font-size:9px;font-weight:800;border-radius:999px;padding:5px 8px;background:#eef3ef;color:#536057;white-space:nowrap}
+.length-global-sale-rule{font-size:9px;font-weight:800;border-radius:999px;padding:5px 8px;background:#eef3ef;color:#536057;display:inline-block;margin:0 0 10px;white-space:nowrap}
 .length-rest.customer{background:repeating-linear-gradient(135deg,#edf2ed 0,#edf2ed 6px,#dfe7df 6px,#dfe7df 12px)}
 .length-rest.warehouse{background:repeating-linear-gradient(135deg,#f7f9f7 0,#f7f9f7 6px,#d6dfd7 6px,#d6dfd7 12px);outline:2px solid #63816b;outline-offset:-2px}
 .length-rest-label{font-size:8px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:clip;padding:0 3px}
@@ -1057,7 +1058,7 @@ html[data-theme="dark"] .project-parts-table th{color:#aab5ad}
 html[data-theme="dark"] .project-raw-card{background:#171d19;border-color:#303a33}
 html[data-theme="dark"] .length-group{border-top-color:#303a33}
 html[data-theme="dark"] .length-group-title h3{color:#e1e9e3}
-html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-mini-stat{background:#252e28;color:#b5c0b8}
+html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global-sale-rule,html[data-theme="dark"] .length-mini-stat{background:#252e28;color:#b5c0b8}
 @media(max-width:760px){
   .project-parts-table thead{display:none}
   .project-parts-table,.project-parts-table tbody{display:block;width:100%}
@@ -1150,9 +1151,11 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-mini-s
   .length-group-title{margin:0 0 .8mm!important;gap:1.2mm!important}
   .length-group-title h3{font-size:9pt!important;line-height:1.05!important}
   .length-group-title p{font-size:6.2pt!important;line-height:1.05!important;margin:.3mm 0 0!important}
-  .length-sale-rule{font-size:5.8pt!important;padding:.45mm 1mm!important}
-  .length-group-summary{gap:.7mm!important;margin:.5mm 0 .8mm!important}
-  .length-mini-stat{font-size:6pt!important;padding:.45mm 1mm!important}
+  .length-sale-rule{display:none!important}
+  .length-global-sale-rule{font-size:5.8pt!important;line-height:1!important;padding:.45mm 1mm!important;margin:0 0 .8mm!important;white-space:nowrap!important}
+  .length-group-summary{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:1.3mm!important;margin:.35mm 0 .65mm!important;white-space:nowrap!important}
+  .length-mini-stat{font-size:5.8pt!important;line-height:1!important;padding:0!important;background:transparent!important;border-radius:0!important}
+  .length-mini-stat+ .length-mini-stat:before{content:"·";margin-right:1.3mm;color:#7b847d}
 
   /* Balkenkarten und Balken deutlich schmaler */
   .length-bar-card{padding:.7mm 1mm!important;margin:0 0 .9mm!important;border-radius:1mm!important}
@@ -3687,6 +3690,13 @@ function saleRuleText(material,raws){
   if(!special&&normal) return "Komplette Handelslänge wird verkauft; verbleibender Rest gehört zum Kunden.";
   return "502-cm-Länge komplett verkauft; bei 1302 cm gilt: Rest < 200 cm Kunde, ab 200 cm Lager.";
 }
+function combinedSaleRuleText(groups){
+  let special=false,normal=false;
+  (groups||[]).forEach(g=>(g.raws||[]).forEach(r=>{if(isPartialSaleRaw(g.material,r)) special=true; else normal=true;}));
+  if(special&&!normal) return "Zuschnittverkauf: Rest < 200 cm zum Kunden, ab 200 cm Lagerrest.";
+  if(!special&&normal) return "Komplette Handelslänge wird verkauft; verbleibender Rest gehört zum Kunden.";
+  return "Restregel nur KVH 1302 / BSH 1202: < 200 cm Kunde, ab 200 cm Lager; andere Rohlängen = Komplettverkauf.";
+}
 function ensureSelection(store,key,raws){
   const valid=new Set(raws.map(Number));
   if(!store[key]||![...store[key]].some(v=>valid.has(Number(v)))) store[key]=new Set(raws.map(Number));
@@ -3867,7 +3877,7 @@ function calculateLengths(){
   const maxRaw=Math.max(...raws),tooLong=pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos} mit ${lengthFmt(tooLong.len)} cm passt inklusive Sägefuge in keine aktivierte Rohlänge.`);return;}
   const items=expandLengthPositions(pos),bars=optimizeLengths(items,raws,LENGTH_KERF_CM,cfg.material);if(!bars){setLengthNotice("error","Für diese Eingaben konnte kein Längenzuschnitt erzeugt werden.");return;}
   const sum=summarizeBars(cfg.material,bars),group={material:cfg.material,dimension:cfg.dimension,raws,pos,items,bars};currentLengthResult={mode:"single",groups:[group],pos,items};
-  const patterns=groupLengthBars(bars,cfg.material);$("lengthBars").innerHTML=`<div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(cfg.material)} · ${escapeHtmlText(cfg.dimension)} cm</h3><p>Rohlängen ${raws.map(lengthFmt).join(" / ")} cm</p></div><span class="length-sale-rule">${escapeHtmlText(saleRuleText(cfg.material,raws))}</span></div><div class="length-group-summary"><span class="length-mini-stat">${bars.length} Rohstück${bars.length===1?"":"e"}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((g,i)=>renderLengthBar(g.bar,i+1,g.count,cfg.material)).join("")}</div>`;
+  const patterns=groupLengthBars(bars,cfg.material);$("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(saleRuleText(cfg.material,raws))}</div><div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(cfg.material)} · ${escapeHtmlText(cfg.dimension)} cm</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">Rohlängen ${raws.map(lengthFmt).join(" / ")} cm</span><span class="length-mini-stat">Fertigteile ${items.length}</span><span class="length-mini-stat">Rohstück${bars.length===1?"":"e"} ${bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((g,i)=>renderLengthBar(g.bar,i+1,g.count,cfg.material)).join("")}</div>`;
   $("lengthResultTitle").textContent="Optimierter Längenzuschnitt";$("lengthResultMaterial").textContent=`${cfg.material} · ${cfg.dimension} cm · Rohlängen ${raws.map(lengthFmt).join(" / ")} cm`;updateLengthStats([group],items.length);renderSingleSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Berechnung abgeschlossen: <strong>${bars.length} Rohstück${bars.length===1?"":"e"}</strong>. ${escapeHtmlText(saleRuleText(cfg.material,raws))}`);
 }
 function calculateProject(){
@@ -3875,7 +3885,7 @@ function calculateProject(){
   const by=new Map();for(const p of pos){const key=lengthGroupKey(p.material,p.dimension);if(!by.has(key))by.set(key,{material:p.material,dimension:p.dimension,pos:[]});by.get(key).pos.push(p);}
   const groups=[];for(const [key,g] of by){const allRaws=catalogRaws(g.material,g.dimension),set=ensureSelection(projectRawSelection,key,allRaws),raws=allRaws.filter(r=>set.has(Number(r)));if(!raws.length){setLengthNotice("error",`${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm: Bitte mindestens eine Rohlänge aktivieren.`);return;}const maxRaw=Math.max(...raws),tooLong=g.pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos}: ${lengthFmt(tooLong.len)} cm passt bei ${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm in keine aktivierte Rohlänge.`);return;}const items=expandLengthPositions(g.pos),bars=optimizeLengths(items,raws,LENGTH_KERF_CM,g.material);if(!bars){setLengthNotice("error",`Für ${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm konnte kein Zuschnitt erzeugt werden.`);return;}groups.push({...g,raws,items,bars});}
   currentLengthResult={mode:"project",groups,pos,items:groups.flatMap(g=>g.items)};
-  $("lengthBars").innerHTML=groups.map(g=>{const sum=summarizeBars(g.material,g.bars),patterns=groupLengthBars(g.bars,g.material);return `<div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(g.material)} · ${escapeHtmlText(g.dimension)} cm</h3><p>Rohlängen ${g.raws.map(lengthFmt).join(" / ")} cm · ${g.items.length} Fertigteile</p></div><span class="length-sale-rule">${escapeHtmlText(saleRuleText(g.material,g.raws))}</span></div><div class="length-group-summary"><span class="length-mini-stat">${g.bars.length} Rohstück${g.bars.length===1?"":"e"}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((x,i)=>renderLengthBar(x.bar,i+1,x.count,g.material)).join("")}</div>`;}).join("");
+  $("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(combinedSaleRuleText(groups))}</div>`+groups.map(g=>{const sum=summarizeBars(g.material,g.bars),patterns=groupLengthBars(g.bars,g.material);return `<div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(g.material)} · ${escapeHtmlText(g.dimension)} cm</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">Rohlängen ${g.raws.map(lengthFmt).join(" / ")} cm</span><span class="length-mini-stat">Fertigteile ${g.items.length}</span><span class="length-mini-stat">Rohstück${g.bars.length===1?"":"e"} ${g.bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((x,i)=>renderLengthBar(x.bar,i+1,x.count,g.material)).join("")}</div>`;}).join("");
   $("lengthResultTitle").textContent="Optimierter Projekt-Zuschnitt";$("lengthResultMaterial").textContent=`${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"} · automatische getrennte Optimierung`;updateLengthStats(groups,currentLengthResult.items.length);renderProjectSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Projekt berechnet: <strong>${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"}</strong> und <strong>${groups.reduce((a,g)=>a+g.bars.length,0)} Rohstücke</strong>. Die 200-cm-Restregel gilt ausschließlich für KVH 1302 cm und BSH 1202 cm.`);
 }
 function lengthCsvText(){
