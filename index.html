@@ -1,0 +1,2779 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2f6f3e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Platten-Zuschnittplaner | Lowis</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{
+  --lowis:#78b82a;
+  --lowis-dark:#26733b;
+  --lowis-deep:#15562b;
+  --ink:#202124;
+  --muted:#6c737a;
+  --line:#d9ddda;
+  --surface:#ffffff;
+  --surface-2:#f6f8f5;
+  --success:#1f7a42;
+  --danger:#aa2b23;
+  --shadow:0 12px 32px rgba(20,45,28,.08);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html{background:#eef2ed;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+body{margin:0;min-height:100vh}
+button,input,select,textarea{font:inherit}
+
+.topbar{
+  background:#fff;
+  border-bottom:1px solid #e4e9e4;
+}
+.topbar-inner{
+  max-width:1320px;margin:auto;display:flex;align-items:center;justify-content:space-between;
+  gap:24px;padding:14px 24px;
+}
+.brand{
+  display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;
+}
+.logo-box{
+  width:136px;height:58px;background:var(--lowis);position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;color:white;font-size:29px;
+  font-weight:800;font-style:italic;letter-spacing:-1.5px;
+}
+.logo-box:before,.logo-box:after{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(90deg,transparent 33%,rgba(255,255,255,.9) 33%,rgba(255,255,255,.9) 33.8%,transparent 33.8%,transparent 66%,rgba(255,255,255,.9) 66%,rgba(255,255,255,.9) 66.8%,transparent 66.8%),
+    linear-gradient(0deg,transparent 33%,rgba(255,255,255,.9) 33%,rgba(255,255,255,.9) 34%,transparent 34%,transparent 67%,rgba(255,255,255,.9) 67%,rgba(255,255,255,.9) 68%,transparent 68%);
+  opacity:.55;pointer-events:none;
+}
+.logo-box span{position:relative;z-index:1;text-shadow:0 1px 1px rgba(0,0,0,.12)}
+.brand-copy strong{display:block;font-size:16px}
+.brand-copy small{display:block;color:var(--muted);margin-top:2px}
+.topnote{font-size:12px;color:var(--muted);text-align:right}
+
+.hero{
+  background:
+    linear-gradient(105deg,rgba(16,77,39,.94),rgba(34,111,58,.87)),
+    repeating-linear-gradient(90deg,#1d6d39 0,#1d6d39 54px,#246f3d 54px,#246f3d 108px);
+  color:white;
+}
+.hero-inner{max-width:1320px;margin:auto;padding:36px 24px 40px}
+.hero-eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:700;opacity:.8}
+.hero h1{font-size:38px;line-height:1.05;margin:8px 0 10px;max-width:780px}
+.hero p{margin:0;max-width:760px;line-height:1.55;color:rgba(255,255,255,.88)}
+
+.app{max-width:1320px;margin:-18px auto 42px;padding:0 24px}
+.shell{
+  display:grid;grid-template-columns:1fr;gap:22px;align-items:start;
+}
+.panel{
+  background:var(--surface);border:1px solid #e0e5e0;border-radius:var(--radius);box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.panel-head{padding:19px 20px 14px;border-bottom:1px solid #eef1ee}
+.panel-head h2{margin:0;font-size:18px}
+.panel-head p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+.panel-body{padding:18px 20px 22px}
+.left-panel .panel-body{
+  display:grid;
+  grid-template-columns:minmax(300px,.85fr) minmax(560px,1.55fr);
+  gap:28px;
+  align-items:start;
+}
+.left-panel .step{margin:0}
+
+
+.step{
+  display:flex;gap:12px;align-items:flex-start;margin:0 0 18px;
+}
+.step:last-child{margin-bottom:0}
+.step-no{
+  width:30px;height:30px;flex:0 0 30px;border-radius:50%;display:grid;place-items:center;
+  background:var(--lowis);color:#fff;font-weight:800;font-size:13px;box-shadow:0 4px 12px rgba(120,184,42,.22)
+}
+.step-main{min-width:0;flex:1}
+.step-main h3{font-size:14px;margin:4px 0 11px}
+label{display:block;font-size:11px;font-weight:800;color:#4d5550;margin:10px 0 5px;text-transform:uppercase;letter-spacing:.04em}
+select,input,textarea{
+  width:100%;border:1px solid #cbd2cd;border-radius:11px;background:#fff;padding:10px 11px;color:#1f2421;
+  transition:.15s border,.15s box-shadow;
+}
+select:focus,input:focus,textarea:focus{outline:0;border-color:var(--lowis);box-shadow:0 0 0 3px rgba(120,184,42,.14)}
+textarea{min-height:84px;resize:vertical}
+.inline-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+.locked-row{
+  margin-top:10px;padding:10px 11px;border-radius:11px;background:#f4f7f3;border:1px solid #e0e6df;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px
+}
+.locked-row strong{font-size:13px}
+.locked{color:#7b837d;font-size:11px}
+
+.material-preview{
+  background:linear-gradient(135deg,#f4faee,#fff);border:1px solid #dbead1;border-radius:13px;
+  padding:12px 13px;margin-top:11px;
+}
+.material-preview .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--lowis-dark);font-weight:800}
+.material-preview strong{display:block;margin-top:3px;font-size:14px;line-height:1.35}
+.material-preview small{display:block;color:var(--muted);margin-top:4px}
+
+.parts-table{width:100%;border-collapse:collapse;table-layout:fixed}
+
+.parts-scroll{width:100%;overflow:visible;padding-bottom:2px}
+.parts-table th:nth-child(1),.parts-table td:nth-child(1){width:18%}
+.parts-table th:nth-child(2),.parts-table td:nth-child(2){width:18%}
+.parts-table th:nth-child(3),.parts-table td:nth-child(3){width:12%}
+.parts-table th:nth-child(4),.parts-table td:nth-child(4){width:auto}
+.parts-table th:nth-child(5),.parts-table td:nth-child(5){width:40px}
+.parts-table .pname{min-width:0}
+
+.parts-table th,.parts-table td{padding:5px 3px;border-bottom:1px solid #edf0ed}
+.parts-table th{font-size:10px;color:#707870;text-align:left;text-transform:uppercase;letter-spacing:.04em}
+.parts-table input{padding:8px 7px;border-radius:9px}
+.icon-btn{width:34px;height:34px;padding:0;border:0;border-radius:9px;background:#f8e9e8;color:var(--danger);font-weight:800;cursor:pointer}
+.button-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{
+  border:0;border-radius:11px;padding:10px 14px;cursor:pointer;font-weight:800;font-size:13px;
+  transition:transform .08s ease,box-shadow .15s ease,background .15s ease;
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--lowis);color:#fff;box-shadow:0 5px 14px rgba(120,184,42,.22)}
+.btn-primary:hover{background:#6aa61e}
+.btn-dark{background:var(--lowis-dark);color:#fff}
+.btn-soft{background:#edf1ed;color:#344039}
+.btn-outline{background:#fff;border:1px solid #cfd6d0;color:#37433b}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.full-btn{width:100%;padding:12px 14px;margin-top:13px}
+.help{font-size:11px;color:var(--muted);line-height:1.5;margin-top:9px}
+
+.notice{
+  padding:12px 14px;border-radius:12px;font-size:12px;line-height:1.45;margin-bottom:14px;
+  border:1px solid #dfe6df;background:#f7f9f7;color:#465047
+}
+.notice.success{background:#eef9f1;border-color:#c7e5d0;color:#205a34}
+.notice.error{background:#fff0ef;border-color:#efc3bf;color:#7c261f}
+.hidden{display:none!important}
+
+.results{padding:20px}
+.results-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:14px}
+.results-top h2{font-size:20px;margin:0}
+.results-top p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.status-chip{
+  background:#eff8e7;color:#3f6e18;border:1px solid #d7e9c3;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800;white-space:nowrap
+}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:17px}
+.stat{
+  border:1px solid #e2e7e2;border-radius:14px;background:#fbfcfb;padding:13px
+}
+.stat .num{font-size:22px;font-weight:900;color:#1d2c20}
+.stat .label{margin-top:3px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+
+.toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:11px 12px;border:1px solid #e2e7e2;background:#f7f9f7;border-radius:13px;margin-bottom:17px
+}
+.legend{display:flex;gap:13px;flex-wrap:wrap;color:var(--muted);font-size:10px}
+.legend span{display:flex;align-items:center;gap:5px}
+.swatch{width:21px;height:12px;border:1px solid #263329;background:#fff}
+.swatch.rest{background:repeating-linear-gradient(45deg,#fff 0,#fff 5px,#b9c7bb 5px,#b9c7bb 6px)}
+.swatch.kerf{background:#cfd5d0;border-color:#cfd5d0}
+
+.sheet{
+  border:1px solid #e2e7e2;border-radius:16px;padding:14px;margin-bottom:16px;background:#fff;page-break-inside:avoid
+}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.sheet-head strong{font-size:14px}
+.sheet-badge{font-size:10px;color:#536056;background:#f1f4f1;border-radius:999px;padding:4px 8px}
+svg{width:100%;height:auto;display:block}
+.sequence-title{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#687169;font-weight:800;margin-top:9px}
+.sequence{padding-left:21px;margin:7px 0 0;font-size:11px;line-height:1.55;color:#3c443e}
+
+.subsection{
+  margin-top:18px;border-top:1px solid #e7ebe7;padding-top:18px
+}
+.subsection h3{margin:0 0 10px;font-size:15px}
+.summary-table{width:100%;border-collapse:collapse}
+.summary-table th,.summary-table td{padding:8px 9px;border-bottom:1px solid #e8ece8;font-size:11px;text-align:left}
+.summary-table th{background:#f6f8f6;color:#5f6861;text-transform:uppercase;letter-spacing:.04em;font-size:10px}
+
+.request-card{
+  margin-top:18px;border:1px solid #dce7d7;background:linear-gradient(135deg,#fbfef9,#f3f9ef);border-radius:16px;padding:16px
+}
+.request-card h3{margin:0;font-size:16px}
+.request-card>p{font-size:11px;color:var(--muted);line-height:1.5;margin:5px 0 12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.form-grid .full{grid-column:1/-1}
+
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(19,31,22,.55);display:grid;place-items:center;padding:18px;z-index:50
+}
+.modal{
+  width:min(520px,100%);background:#fff;border-radius:20px;box-shadow:0 24px 70px rgba(0,0,0,.2);overflow:hidden
+}
+.modal-accent{height:7px;background:var(--lowis)}
+.modal-body{padding:22px}
+.modal h3{margin:0 0 7px;font-size:20px}
+.modal p{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 15px}
+.modal .button-row{justify-content:flex-end}
+
+.footer{max-width:1320px;margin:0 auto 30px;padding:0 24px;color:#7b837e;font-size:10px;line-height:1.5}
+
+@media(max-width:980px){
+  .shell{grid-template-columns:1fr}
+  .left-panel .panel-body{grid-template-columns:1fr}
+  .app{margin-top:-14px}
+}
+@media(max-width:650px){
+  .topbar-inner{padding:11px 14px}.topnote{display:none}
+  .hero-inner{padding:28px 14px 33px}.hero h1{font-size:30px}
+  .app{padding:0 12px}.panel-body,.results{padding:15px}
+  .stats{grid-template-columns:1fr 1fr}
+  .form-grid,.inline-grid{grid-template-columns:1fr}
+  .form-grid .full{grid-column:auto}
+  .parts-table th,.parts-table td{padding-left:2px;padding-right:2px}
+  .parts-table input{padding:7px 5px}
+  .parts-table th{font-size:9px}
+}
+
+/* =========================================================
+   UNIVERSAL / RESPONSIVE
+   Eine HTML-Version für Desktop, Tablet und Smartphone.
+   ========================================================= */
+
+.plan-mobile-actions{display:none}
+.plan-modal{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:#eef2ed;
+  padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));
+  display:flex;
+  flex-direction:column;
+}
+.plan-modal.hidden{display:none!important}
+.plan-modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:2px 2px 10px;
+}
+.plan-modal-head strong{
+  font-size:15px;
+  line-height:1.25;
+}
+.plan-modal-body{
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  background:#fff;
+  border:1px solid #dce3dc;
+  border-radius:14px;
+  padding:10px;
+  touch-action:pan-x pan-y pinch-zoom;
+}
+.plan-modal-body svg{
+  width:max(980px,100%);
+  max-width:none;
+  height:auto;
+}
+.plan-modal-note{
+  margin:8px 2px 0;
+  font-size:10px;
+  color:#69726b;
+  line-height:1.4;
+}
+
+/* Große Desktops */
+@media(min-width:1200px){
+  .app{max-width:1380px}
+  .left-panel .panel-body{
+    grid-template-columns:minmax(340px,.82fr) minmax(640px,1.55fr);
+    gap:34px;
+  }
+}
+
+/* Tablet / kleinere Notebooks */
+@media(max-width:1050px){
+  .left-panel .panel-body{
+    grid-template-columns:1fr;
+    gap:24px;
+  }
+  .inline-grid{grid-template-columns:1fr 1fr}
+}
+
+/* Smartphone / kleine Tablets */
+@media(max-width:760px){
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{font-size:16px}
+
+  .topbar-inner{
+    padding:10px 12px;
+    gap:10px;
+  }
+  .topnote{display:none}
+  .logo-box{
+    width:92px;
+    height:42px;
+    font-size:22px;
+    border-radius:12px;
+  }
+  .brand-copy strong{font-size:14px}
+  .brand-copy small{font-size:10px}
+
+  .hero-inner{padding:22px 12px 29px}
+  .hero h1{
+    margin:5px 0 8px;
+    font-size:27px;
+    line-height:1.08;
+  }
+  .hero p{
+    font-size:12px;
+    line-height:1.5;
+  }
+
+  .app{
+    padding:0 9px;
+    margin-top:-12px;
+  }
+  .panel{
+    border-radius:15px;
+  }
+  .panel-head{
+    padding:15px 14px 12px;
+  }
+  .panel-head h2{font-size:17px}
+  .panel-head p{font-size:11px}
+  .panel-body,.results{padding:13px}
+
+  .left-panel .panel-body{
+    display:block;
+  }
+
+  .step{
+    gap:9px;
+    margin-bottom:20px;
+  }
+  .left-panel .step{margin-bottom:20px}
+  .step-no{
+    width:28px;
+    height:28px;
+    flex-basis:28px;
+    font-size:12px;
+  }
+  .step-main h3{
+    margin-top:4px;
+    font-size:14px;
+  }
+
+  label{
+    font-size:10px;
+    margin-top:9px;
+  }
+  select,input,textarea{
+    min-height:44px;
+    font-size:16px;
+    padding:9px 10px;
+    border-radius:10px;
+  }
+  .inline-grid{
+    grid-template-columns:1fr;
+    gap:5px;
+  }
+  .locked-row{
+    padding:9px 10px;
+    font-size:11px;
+  }
+
+  /* Zuschnitt-Eingabe wird auf Mobilgeräten zu einzelnen Karten.
+     Kein horizontaler Schieber. */
+  .parts-scroll{overflow:visible!important}
+  .parts-table{
+    display:block;
+    width:100%;
+    table-layout:auto;
+  }
+  .parts-table thead{display:none}
+  .parts-table tbody{display:block}
+  .parts-table tr{
+    display:grid;
+    grid-template-columns:1fr 1fr 76px 42px;
+    grid-template-areas:
+      "len wid qty del"
+      "name name name del";
+    gap:8px;
+    position:relative;
+    margin:0 0 10px;
+    padding:10px;
+    border:1px solid #dfe6df;
+    border-radius:12px;
+    background:#fafcfa;
+  }
+  .parts-table td{
+    display:block;
+    width:auto!important;
+    padding:0!important;
+    border:0!important;
+  }
+  .parts-table td:nth-child(1){grid-area:len}
+  .parts-table td:nth-child(2){grid-area:wid}
+  .parts-table td:nth-child(3){grid-area:qty}
+  .parts-table td:nth-child(4){grid-area:name}
+  .parts-table td:nth-child(5){
+    grid-area:del;
+    align-self:start;
+    justify-self:end;
+  }
+
+  .parts-table td:nth-child(1)::before,
+  .parts-table td:nth-child(2)::before,
+  .parts-table td:nth-child(3)::before,
+  .parts-table td:nth-child(4)::before{
+    display:block;
+    margin:0 0 4px;
+    font-size:9px;
+    line-height:1;
+    font-weight:800;
+    color:#69716c;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+  .parts-table td:nth-child(1)::before{content:"Länge mm"}
+  .parts-table td:nth-child(2)::before{content:"Breite mm"}
+  .parts-table td:nth-child(3)::before{content:"Stk."}
+  .parts-table td:nth-child(4)::before{content:"Bezeichnung"}
+
+  .parts-table input{
+    width:100%;
+    min-width:0!important;
+    min-height:42px;
+    padding:8px 9px;
+    font-size:16px;
+  }
+  .parts-table .pname{min-width:0!important}
+  .parts-table .icon-btn{
+    width:38px;
+    height:38px;
+  }
+
+  .button-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .button-row .btn{
+    width:100%;
+    min-height:44px;
+  }
+  #addPart{grid-column:1/-1}
+  #calculate{
+    min-height:48px;
+    font-size:14px;
+  }
+
+  .results-top{
+    display:block;
+  }
+  .results-top .status-chip{
+    display:inline-flex;
+    margin-top:9px;
+    white-space:normal;
+  }
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+  .stat{
+    padding:10px;
+  }
+  .stat .num{font-size:20px}
+
+  .toolbar{
+    display:block;
+  }
+  .toolbar .button-row{
+    margin-top:10px!important;
+  }
+
+  .sheet{
+    padding:10px;
+    border-radius:13px;
+  }
+  .sheet-head{
+    align-items:flex-start;
+    gap:8px;
+  }
+  .sheet-head strong{
+    font-size:12px;
+    line-height:1.35;
+  }
+  .sheet-badge{
+    font-size:9px;
+    white-space:normal;
+    text-align:right;
+  }
+  .sheet svg{
+    width:100%;
+    height:auto;
+    min-width:0;
+  }
+
+  .plan-mobile-actions{
+    display:block;
+    margin-top:8px;
+  }
+  .plan-mobile-actions .btn{
+    width:100%;
+    min-height:42px;
+  }
+
+  .summary-table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .summary-table{
+    min-width:560px;
+  }
+
+  .request-card{padding:13px}
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+  .form-grid .full{grid-column:auto}
+
+  .modal-backdrop{
+    align-items:flex-end;
+    padding:10px;
+  }
+  .modal{
+    border-radius:18px 18px 10px 10px;
+  }
+  .modal-body{
+    padding:17px;
+  }
+  .modal .button-row{
+    grid-template-columns:1fr;
+  }
+
+  .footer{
+    padding:0 12px max(18px,env(safe-area-inset-bottom));
+  }
+}
+
+/* Sehr kleine Smartphones */
+@media(max-width:430px){
+  .hero h1{font-size:24px}
+  .parts-table tr{
+    grid-template-columns:1fr 1fr 64px 38px;
+    gap:7px;
+  }
+  .button-row{
+    grid-template-columns:1fr;
+  }
+  #addPart{grid-column:auto}
+  .stats{grid-template-columns:1fr 1fr}
+}
+
+/* Landscape-Smartphones: möglichst viel Schnittplanfläche */
+@media(max-width:900px) and (orientation:landscape){
+  .hero{display:none}
+  .app{margin-top:12px}
+  .plan-modal-body svg{width:max(1100px,100%)}
+}
+
+
+.runtime-notice,
+.install-bar{
+  max-width:1320px;
+  margin:10px auto 0;
+  padding:10px 14px;
+  border-radius:12px;
+  box-sizing:border-box;
+}
+.runtime-notice{
+  background:#fff4d7;
+  border:1px solid #ead08b;
+  color:#665318;
+  font-size:11px;
+  line-height:1.45;
+}
+.install-bar{
+  background:#f5faf3;
+  border:1px solid #d7e5d0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.install-bar strong{display:block;font-size:12px;color:#244a2c}
+.install-bar span{display:block;margin-top:2px;font-size:10px;color:#667068;line-height:1.35}
+.install-bar .btn{flex:0 0 auto}
+.install-bar.hidden,.runtime-notice.hidden{display:none!important}
+
+@media(max-width:760px){
+  .runtime-notice,.install-bar{
+    margin:8px 9px 0;
+    padding:10px 11px;
+  }
+  .install-bar{
+    align-items:flex-start;
+  }
+  .install-bar .btn{
+    min-height:40px;
+    padding:8px 11px;
+  }
+}
+
+@media print{
+  @page{size:A4 portrait;margin:10mm}
+  body{background:white}
+  .topbar,.hero,.left-panel,.toolbar,.request-card,.notice,.footer{display:none!important}
+  .app{max-width:none;margin:0;padding:0}
+  .shell{display:block}
+  .panel{box-shadow:none;border:0}
+  .results{padding:0}
+  .sheet{break-inside:avoid;border:0;padding:0;margin-bottom:10mm}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="logo-box"><span>Lowis</span></div>
+      <div class="brand-copy">
+        <strong>Holzhandlung</strong>
+        <small>Plattenzuschnitt · Web-App-Testversion</small>
+      </div>
+    </div>
+    <div class="topnote">Unverbindliche Zuschnittanfrage<br>Preis und Termin nach Prüfung</div>
+  </div>
+</div>
+
+
+<div id="runtimeNotice" class="runtime-notice hidden"></div>
+<div id="installBar" class="install-bar hidden">
+  <div>
+    <strong>Als App nutzen</strong>
+    <span id="installText">Der Zuschnittplaner kann auf diesem Gerät zum Startbildschirm hinzugefügt werden.</span>
+  </div>
+  <button class="btn btn-soft" id="installAppBtn" type="button">Installieren</button>
+</div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Online-Service</div>
+    <h1>Platten-Zuschnittplaner</h1>
+    <p>Material auswählen, Fertigmaße manuell eingeben und einen optimierten Schnittplan berechnen. Priorität: möglichst wenige Platten und anschließend möglichst große, zusammenhängende Reststücke. Für den Funktionstest sind bereits verschiedene Plattenarten aus eurem Lagerprogramm hinterlegt. Später können Rohplattenmaße und Verfügbarkeiten direkt aus der Warenwirtschaft übernommen werden.</p>
+  </div>
+</section>
+
+<main class="app">
+  <div class="shell">
+
+    <section class="panel left-panel">
+      <div class="panel-head">
+        <h2>Zuschnitt konfigurieren</h2>
+        <p>Die Sägefuge ist fest vorgegeben. Das Drehen der Fertigteile läuft automatisch im Hintergrund und ist immer aktiv.</p>
+      </div>
+      <div class="panel-body">
+
+        <div class="step">
+          <div class="step-no">1</div>
+          <div class="step-main">
+            <h3>Platte auswählen</h3>
+
+            <label>Materialgruppe</label>
+            <select id="groupSelect"></select>
+
+            <div id="edgeField">
+              <label>Ausführung</label>
+              <select id="edgeSelect"></select>
+            </div>
+
+            <div class="inline-grid">
+              <div>
+                <label>Plattenformat</label>
+                <select id="formatSelect"></select>
+              </div>
+              <div>
+                <label>Stärke</label>
+                <select id="thicknessSelect"></select>
+              </div>
+            </div>
+
+            <div class="material-preview" id="materialPreview"></div>
+            <div class="locked-row"><span>Sägefuge</span><span><strong>3 mm</strong> <span class="locked">fest</span></span></div>
+            <div class="locked-row"><span>Optimierung</span><span><strong>Drehen automatisch aktiv</strong></span></div>
+            <div class="help">Der Optimierer darf Fertigteile automatisch um 90° drehen, wenn dadurch weniger Platten oder ein besserer Zuschnitt entstehen.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-no">2</div>
+          <div class="step-main">
+            <h3>Fertigmaße eingeben</h3>
+            <div class="parts-scroll">
+              <table class="parts-table">
+                <thead><tr><th>Länge mm</th><th>Breite mm</th><th>Stk.</th><th>Bezeichnung</th><th></th></tr></thead>
+                <tbody id="partsBody"></tbody>
+              </table>
+            </div>
+            <div class="button-row">
+              <button class="btn btn-soft" id="addPart" type="button">+ Position</button>
+              <button class="btn btn-outline" id="loadExample" type="button">Beispiel laden</button>
+              <button class="btn btn-outline" id="clearParts" type="button">Leeren</button>
+            </div>
+            <div class="help">Die Bezeichnung ist optional, z. B. „Küche“, „Bad“, „OG Zimmer 1“ oder „Schrank links“. Länge = Richtung der langen Rohplattenseite. Es gibt kein Mindestmaß für Zuschnitte.</div>
+            <button class="btn btn-primary full-btn" id="calculate" type="button">Schnittplan berechnen</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="results">
+        <div id="notice" class="notice">Klicke oben auf <strong>„Beispiel laden“</strong> oder gib eigene Maße ein.</div>
+
+        <div id="resultArea" class="hidden">
+          <div class="results-top">
+            <div>
+              <h2>Optimierter Schnittplan</h2>
+              <p id="resultMaterial">–</p>
+            </div>
+            <div class="status-chip">3-mm-Sägefuge berücksichtigt</div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><div class="num" id="sumSheets">–</div><div class="label">Platten</div></div>
+            <div class="stat"><div class="num" id="sumParts">–</div><div class="label">Fertigteile</div></div>
+            <div class="stat"><div class="num" id="sumUse">–</div><div class="label">Nutzfläche</div></div>
+            <div class="stat"><div class="num" id="sumRest">–</div><div class="label">Restfläche</div></div>
+          </div>
+
+          <div class="toolbar">
+            <div class="legend">
+              <span><i class="swatch"></i> Fertigteil</span>
+              <span><i class="swatch rest"></i> Restmaterial</span>
+              <span><i class="swatch kerf"></i> Sägefuge</span>
+            </div>
+            <div class="button-row" style="margin:0">
+              <button class="btn btn-soft" id="downloadCsv" type="button">Stückliste CSV</button>
+              <button class="btn btn-dark" id="printPlan" type="button">Drucken / PDF</button>
+            </div>
+          </div>
+
+          <div id="sheets"></div>
+
+          <div class="subsection">
+            <h3>Stückliste</h3>
+            <div id="pieceSummary"></div>
+          </div>
+
+          <div class="request-card">
+            <h3>Unverbindliche Anfrage</h3>
+            <p>Für den lokalen PC-Test wird eine fertige E-Mail-Datei (.eml) erzeugt. Empfänger, Nachricht, PDF-Schnittplan und CSV-Stückliste sind bereits enthalten. Die Datei anschließend im Mailprogramm öffnen und nur noch senden.</p>
+            <form id="requestForm">
+              <div class="form-grid">
+                <div>
+                  <label>Name *</label>
+                  <input name="name" required>
+                </div>
+                <div>
+                  <label>Firma</label>
+                  <input name="company">
+                </div>
+                <div>
+                  <label>E-Mail *</label>
+                  <input name="email" type="email" required>
+                </div>
+                <div>
+                  <label>Telefon</label>
+                  <input name="phone">
+                </div>
+                <div class="full">
+                  <label>Bemerkung</label>
+                  <textarea name="remarks"></textarea>
+                </div>
+              </div>
+              <button class="btn btn-primary full-btn" id="sendRequestBtn" type="submit">E-Mail-Anfrage erstellen</button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+
+<div id="planModal" class="plan-modal hidden" aria-hidden="true">
+  <div class="plan-modal-head">
+    <strong id="planModalTitle">Schnittplan</strong>
+    <button class="btn btn-outline" id="planModalClose" type="button">Schließen</button>
+  </div>
+  <div class="plan-modal-body" id="planModalBody"></div>
+  <div class="plan-modal-note">Auf Smartphone und Tablet kannst du den Plan verschieben und mit der üblichen Browser-Geste vergrößern.</div>
+</div>
+
+<div class="footer">
+  Web-App-Testversion des Platten-Zuschnittplaners für Desktop, Tablet und Smartphone. Identische Plattenbelegungen werden nur einmal dargestellt. Das Drehen der Fertigteile ist als Standard immer automatisch aktiv. Rohplatten und Bestände können später über OPTI-NET übernommen werden.
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-accent"></div>
+    <div class="modal-body">
+      <h3>E-Mail-Anfrage wurde erstellt</h3>
+      <p id="modalText"></p>
+      <div class="button-row">
+        <button class="btn btn-soft" id="modalCsv" type="button">Stückliste laden</button>
+        <button class="btn btn-dark" id="modalPrint" type="button">Schnittplan / PDF</button>
+        <button class="btn btn-primary" id="modalClose" type="button">Schließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+// TESTDATEN. Später kann diese Funktion ihre Daten aus OPTI-NET erhalten.
+const MATERIALS = [
+  {
+    "group": "OSB",
+    "edge": "mit Nut & Feder",
+    "width": 2500,
+    "height": 625,
+    "thickness": 12
+  },
+  {
+    "group": "OSB",
+    "edge": "mit Nut & Feder",
+    "width": 2500,
+    "height": 625,
+    "thickness": 15
+  },
+  {
+    "group": "OSB",
+    "edge": "mit Nut & Feder",
+    "width": 2500,
+    "height": 625,
+    "thickness": 18
+  },
+  {
+    "group": "OSB",
+    "edge": "mit Nut & Feder",
+    "width": 2500,
+    "height": 625,
+    "thickness": 22
+  },
+  {
+    "group": "OSB",
+    "edge": "mit Nut & Feder",
+    "width": 2500,
+    "height": 625,
+    "thickness": 25
+  },
+  {
+    "group": "OSB",
+    "edge": "mit Nut & Feder",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 15
+  },
+  {
+    "group": "OSB",
+    "edge": "mit Nut & Feder",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 18
+  },
+  {
+    "group": "OSB",
+    "edge": "mit Nut & Feder",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 22
+  },
+  {
+    "group": "OSB",
+    "edge": "ohne Nut & Feder",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 12
+  },
+  {
+    "group": "OSB",
+    "edge": "ohne Nut & Feder",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 15
+  },
+  {
+    "group": "OSB",
+    "edge": "ohne Nut & Feder",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 18
+  },
+  {
+    "group": "OSB",
+    "edge": "ohne Nut & Feder",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 22
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 1530,
+    "height": 1530,
+    "thickness": 3
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 1530,
+    "height": 1530,
+    "thickness": 4
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 1530,
+    "height": 1530,
+    "thickness": 5
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 6.5
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 9
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 12
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 15
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 18
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 21
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 9
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 12
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 15
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 18
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 21
+  },
+  {
+    "group": "Birke Multiplex",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 40
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 9
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 12
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 15
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 18
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 21
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 12
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 15
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 18
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 3000,
+    "height": 1500,
+    "thickness": 21
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 4100,
+    "height": 2020,
+    "thickness": 15
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 4100,
+    "height": 2020,
+    "thickness": 18
+  },
+  {
+    "group": "Siebfilm",
+    "edge": "Standard",
+    "width": 4100,
+    "height": 2020,
+    "thickness": 21
+  },
+  {
+    "group": "Betonplan",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 4
+  },
+  {
+    "group": "Betonplan",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 8
+  },
+  {
+    "group": "Betonplan",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 21
+  },
+  {
+    "group": "Rotholzsperrholz",
+    "edge": "Standard",
+    "width": 2440,
+    "height": 1220,
+    "thickness": 4
+  },
+  {
+    "group": "Rotholzsperrholz",
+    "edge": "Standard",
+    "width": 2440,
+    "height": 1220,
+    "thickness": 6
+  },
+  {
+    "group": "Rotholzsperrholz",
+    "edge": "Standard",
+    "width": 2440,
+    "height": 1220,
+    "thickness": 8
+  },
+  {
+    "group": "Rotholzsperrholz",
+    "edge": "Standard",
+    "width": 2440,
+    "height": 1220,
+    "thickness": 10
+  },
+  {
+    "group": "Rotholzsperrholz",
+    "edge": "Standard",
+    "width": 2440,
+    "height": 1220,
+    "thickness": 12
+  },
+  {
+    "group": "Rotholzsperrholz",
+    "edge": "Standard",
+    "width": 2440,
+    "height": 1220,
+    "thickness": 15
+  },
+  {
+    "group": "Rotholzsperrholz",
+    "edge": "Standard",
+    "width": 2440,
+    "height": 1220,
+    "thickness": 18
+  },
+  {
+    "group": "Elliottisperrholz",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 15
+  },
+  {
+    "group": "Elliottisperrholz",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 18
+  },
+  {
+    "group": "Elliottisperrholz",
+    "edge": "Standard",
+    "width": 2500,
+    "height": 1250,
+    "thickness": 20
+  },
+  {
+    "group": "Pappelsperrholz",
+    "edge": "Standard",
+    "width": 2520,
+    "height": 1720,
+    "thickness": 4
+  },
+  {
+    "group": "Pappelsperrholz",
+    "edge": "Standard",
+    "width": 2520,
+    "height": 1720,
+    "thickness": 6
+  },
+  {
+    "group": "Spanplatte roh V20",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 10
+  },
+  {
+    "group": "Spanplatte roh V20",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 12
+  },
+  {
+    "group": "Spanplatte roh V20",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 16
+  },
+  {
+    "group": "Spanplatte roh V20",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 19
+  },
+  {
+    "group": "Spanplatte Miniperl weiß",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 10
+  },
+  {
+    "group": "Spanplatte Miniperl weiß",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 13
+  },
+  {
+    "group": "Spanplatte Miniperl weiß",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 16
+  },
+  {
+    "group": "Spanplatte Miniperl weiß",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 19
+  },
+  {
+    "group": "Spanplatte Seidenmatt weiß",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 8
+  },
+  {
+    "group": "Spanplatte Seidenmatt weiß",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 16
+  },
+  {
+    "group": "Spanplatte Seidenmatt weiß",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 19
+  },
+  {
+    "group": "MDF roh",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 8
+  },
+  {
+    "group": "MDF roh",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 10
+  },
+  {
+    "group": "MDF roh",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 12
+  },
+  {
+    "group": "MDF roh",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 16
+  },
+  {
+    "group": "MDF roh",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 19
+  },
+  {
+    "group": "MDF Grundierfolie",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 8
+  },
+  {
+    "group": "MDF Grundierfolie",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 10
+  },
+  {
+    "group": "MDF Grundierfolie",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 12
+  },
+  {
+    "group": "MDF Grundierfolie",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 16
+  },
+  {
+    "group": "MDF Grundierfolie",
+    "edge": "Standard",
+    "width": 2800,
+    "height": 2070,
+    "thickness": 19
+  },
+  {
+    "group": "Hartfaser",
+    "edge": "Standard",
+    "width": 2440,
+    "height": 1220,
+    "thickness": 3.2
+  },
+  {
+    "group": "Hartfaser",
+    "edge": "Standard",
+    "width": 2520,
+    "height": 1720,
+    "thickness": 3.2
+  }
+];
+
+const KERF = 3;
+let currentResult = null;
+const $ = id => document.getElementById(id);
+
+function uniq(arr){ return [...new Set(arr)]; }
+
+function initGroups(){
+  const groups=uniq(MATERIALS.map(m=>m.group));
+  $("groupSelect").innerHTML=groups.map(g=>`<option value="${g}">${g}</option>`).join("");
+  if(groups.includes("OSB")) $("groupSelect").value="OSB";
+  rebuildMaterialSelectors();
+}
+
+function rebuildMaterialSelectors(){
+  const group = $("groupSelect").value;
+  const edges = uniq(MATERIALS.filter(m=>m.group===group).map(m=>m.edge));
+  const oldEdge = $("edgeSelect").value;
+  $("edgeSelect").innerHTML = edges.map(v=>`<option>${v}</option>`).join("");
+  if(edges.includes(oldEdge)) $("edgeSelect").value = oldEdge;
+
+  // Bei Materialien ohne Varianten muss der Kunde kein bedeutungsloses "Standard" auswählen.
+  $("edgeField").classList.toggle("hidden", edges.length===1 && edges[0]==="Standard");
+
+  rebuildFormats();
+}
+
+function rebuildFormats(){
+  const group=$("groupSelect").value, edge=$("edgeSelect").value;
+  const mats=MATERIALS.filter(m=>m.group===group && m.edge===edge);
+  const formats=uniq(mats.map(m=>`${m.width}x${m.height}`));
+  const old=$("formatSelect").value;
+  $("formatSelect").innerHTML=formats.map(v=>{
+    const [w,h]=v.split("x");
+    return `<option value="${v}">${w} × ${h} mm</option>`;
+  }).join("");
+  if(formats.includes(old)) $("formatSelect").value=old;
+  rebuildThicknesses();
+}
+
+function rebuildThicknesses(){
+  const group=$("groupSelect").value, edge=$("edgeSelect").value, format=$("formatSelect").value;
+  const mats=MATERIALS.filter(m=>m.group===group && m.edge===edge && `${m.width}x${m.height}`===format);
+  const vals=uniq(mats.map(m=>m.thickness)).sort((a,b)=>a-b);
+  const old=Number($("thicknessSelect").value);
+  $("thicknessSelect").innerHTML=vals.map(v=>`<option value="${v}">${String(v).replace(".",",")} mm</option>`).join("");
+  if(vals.includes(old)) $("thicknessSelect").value=String(old);
+  updateMaterialPreview();
+}
+
+function currentMaterial(){
+  const group=$("groupSelect").value, edge=$("edgeSelect").value, format=$("formatSelect").value, th=Number($("thicknessSelect").value);
+  return MATERIALS.find(m=>m.group===group && m.edge===edge && `${m.width}x${m.height}`===format && m.thickness===th) || MATERIALS[0];
+}
+
+function updateMaterialPreview(){
+  const m=currentMaterial();
+  $("materialPreview").innerHTML=
+    `<div class="tag">Ausgewählte Lagerplatte</div>
+     <strong>${m.group} ${String(m.thickness).replace(".",",")} mm · ${m.width} × ${m.height} mm</strong>
+     <small>${m.edge==="Standard" ? "Lagerformat" : m.edge}</small>`;
+}
+
+function escapeHtmlText(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+function escapeAttr(value){ return escapeHtmlText(value); }
+function pieceLabel(item){
+  return item.name ? `Pos. ${item.pos} · ${item.name}` : `Pos. ${item.pos}`;
+}
+function calloutCode(index){ return String(index+1); }
+function needsPieceCallout(p,drawW,drawH){
+  const label=pieceLabel(p.item);
+  const hDim=`${Math.round(p.w)} mm`;
+  const vDim=`${Math.round(p.h)} mm`;
+  const labelNeed=Math.min(220,Math.max(54,label.length*5.5+10));
+  const hNeed=Math.max(48,hDim.length*5.3+10);
+  const vNeed=Math.max(38,vDim.length*5.0+10);
+  return drawW<Math.max(labelNeed,hNeed) || drawH<vNeed;
+}
+
+function addPartRow(w="",h="",q=1,name=""){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td><input class="pw" type="number" min="1" step="1" value="${w}"></td>
+    <td><input class="ph" type="number" min="1" step="1" value="${h}"></td>
+    <td><input class="pq" type="number" min="1" step="1" value="${q}"></td>
+    <td><input class="pname" type="text" maxlength="80" placeholder="z. B. Küche" value="${escapeAttr(name)}"></td>
+    <td><button class="icon-btn" type="button" title="Position löschen">×</button></td>`;
+  tr.querySelector("button").addEventListener("click",()=>{tr.remove();saveDraft();});
+  $("partsBody").appendChild(tr);
+}
+
+function readPositions(){
+  const rows=[...$("partsBody").querySelectorAll("tr")];
+  const pos=[];
+  rows.forEach((tr,i)=>{
+    const name=String(tr.querySelector(".pname")?.value||"").trim();
+    const w=Number(tr.querySelector(".pw").value);
+    const h=Number(tr.querySelector(".ph").value);
+    const q=Number(tr.querySelector(".pq").value);
+    if(w>0 && h>0 && Number.isInteger(q) && q>0) pos.push({pos:i+1,name,w,h,q});
+  });
+  return pos;
+}
+
+function expandPositions(pos){
+  const items=[];
+  pos.forEach(p=>{
+    for(let i=0;i<p.q;i++) items.push({pos:p.pos,name:p.name||"",w:p.w,h:p.h,q:p.q,copy:i+1});
+  });
+  return items;
+}
+
+function rotationAllowed(){
+  return true;
+}
+
+function validate(pos,m){
+  if(!pos.length) return "Bitte mindestens eine vollständige Zuschnittposition eingeben.";
+  const allowRotate=rotationAllowed();
+  for(const p of pos){
+    const direct=p.w<=m.width && p.h<=m.height;
+    const rotated=allowRotate && p.h<=m.width && p.w<=m.height;
+    if(!direct && !rotated){
+      return `Pos. ${p.pos}${p.name ? " · "+p.name : ""} (${p.w} × ${p.h} mm) passt ${allowRotate ? "auch gedreht " : ""}nicht auf die gewählte Platte ${m.width} × ${m.height} mm.`;
+    }
+  }
+  return "";
+}
+
+/*
+  Praxisnahes Streifen-/Guillotine-Packing.
+  Teile können je nach Auswahl gedreht werden.
+  axis=x: Streifen über die Plattenlänge, Teile im Streifen nacheinander.
+  axis=y: transponierte Streifenstrategie.
+*/
+function orientations(item){
+  const out=[{w:item.w,h:item.h,rotated:false}];
+  if(rotationAllowed() && item.w!==item.h){
+    out.push({w:item.h,h:item.w,rotated:true});
+  }
+  return out;
+}
+
+function pack(items,SW,SH,axis,sorter){
+  const list=items.slice().sort(sorter);
+  const sheets=[];
+  const fresh=()=>({axis,strips:[],placements:[]});
+
+  function stripSpan(sheet){
+    if(!sheet.strips.length) return 0;
+    return sheet.strips.reduce((a,s)=>a+s.size,0)+KERF*(sheet.strips.length-1);
+  }
+
+  for(const item of list){
+    const candidates=[];
+
+    for(let si=0;si<=sheets.length;si++){
+      const sheet=si<sheets.length?sheets[si]:fresh();
+
+      for(const o of orientations(item)){
+        sheet.strips.forEach((st,ti)=>{
+          if(axis==="x"){
+            const x=st.used+(st.used>0?KERF:0);
+            if(o.h<=st.size && x+o.w<=SW){
+              candidates.push({
+                si,ti,newStrip:false,x,y:st.offset,o,
+                score:si*1e12+(st.size-o.h)*1e6+(SW-x-o.w)
+              });
+            }
+          }else{
+            const y=st.used+(st.used>0?KERF:0);
+            if(o.w<=st.size && y+o.h<=SH){
+              candidates.push({
+                si,ti,newStrip:false,x:st.offset,y,o,
+                score:si*1e12+(st.size-o.w)*1e6+(SH-y-o.h)
+              });
+            }
+          }
+        });
+
+        const used=stripSpan(sheet);
+        const off=sheet.strips.length?used+KERF:0;
+        if(axis==="x" && o.w<=SW && off+o.h<=SH){
+          candidates.push({
+            si,ti:sheet.strips.length,newStrip:true,x:0,y:off,o,
+            score:si*1e12+5e9+(SH-off-o.h)*1e4+(SW-o.w)
+          });
+        }
+        if(axis==="y" && o.h<=SH && off+o.w<=SW){
+          candidates.push({
+            si,ti:sheet.strips.length,newStrip:true,x:off,y:0,o,
+            score:si*1e12+5e9+(SW-off-o.w)*1e4+(SH-o.h)
+          });
+        }
+      }
+    }
+
+    if(!candidates.length) return null;
+    candidates.sort((a,b)=>a.score-b.score);
+    const b=candidates[0];
+
+    if(b.si===sheets.length) sheets.push(fresh());
+    const sheet=sheets[b.si];
+
+    if(b.newStrip){
+      sheet.strips.push({
+        offset:axis==="x"?b.y:b.x,
+        size:axis==="x"?b.o.h:b.o.w,
+        used:0,
+        items:[]
+      });
+    }
+
+    const st=sheet.strips[b.ti];
+    const pl={
+      item,
+      x:b.x,y:b.y,
+      w:b.o.w,h:b.o.h,
+      rotated:b.o.rotated
+    };
+    st.items.push(pl);
+    sheet.placements.push(pl);
+    st.used=axis==="x"?pl.x+pl.w:pl.y+pl.h;
+  }
+  return sheets;
+}
+
+function stripSpanOf(sheet){
+  if(!sheet.strips.length) return 0;
+  return sheet.strips.reduce((a,s)=>a+s.size,0)+KERF*(sheet.strips.length-1);
+}
+
+/*
+  Liefert die zusammenhängenden, nach dem Streifenschnitt praktisch
+  weiterverwendbaren Rest-Rechtecke. Kleine Restflächen innerhalb eines
+  Streifens werden nicht künstlich zu einem großen Rest zusammengerechnet.
+*/
+function restRectangles(sheet,SW,SH){
+  const rects=[];
+
+  if(sheet.axis==="x"){
+    sheet.strips.forEach(st=>{
+      const freeW=SW-st.used-(st.used>0?KERF:0);
+      if(freeW>0 && st.size>0) rects.push({w:freeW,h:st.size});
+    });
+
+    const span=stripSpanOf(sheet);
+    const freeH=SH-span-(sheet.strips.length?KERF:0);
+    if(freeH>0) rects.push({w:SW,h:freeH});
+  }else{
+    sheet.strips.forEach(st=>{
+      const freeH=SH-st.used-(st.used>0?KERF:0);
+      if(freeH>0 && st.size>0) rects.push({w:st.size,h:freeH});
+    });
+
+    const span=stripSpanOf(sheet);
+    const freeW=SW-span-(sheet.strips.length?KERF:0);
+    if(freeW>0) rects.push({w:freeW,h:SH});
+  }
+
+  return rects;
+}
+
+function solutionMetrics(sheets,SW,SH){
+  const boardArea=SW*SH;
+  let concentration=0;
+  let largest=0;
+  let reusable=0;
+  let shapeQuality=0;
+  let fragments=0;
+  let strips=0;
+
+  sheets.forEach(sheet=>{
+    strips+=sheet.strips.length;
+    const rects=restRectangles(sheet,SW,SH);
+    fragments+=rects.length;
+
+    rects.forEach(r=>{
+      const area=r.w*r.h;
+      const f=area/boardArea;
+      const shortSide=Math.min(r.w,r.h)/Math.min(SW,SH);
+
+      // Quadratische Gewichtung belohnt wenige große Reststücke
+      // deutlich stärker als viele kleine Restfetzen.
+      concentration+=f*f;
+      reusable+=f;
+      largest=Math.max(largest,f);
+      shapeQuality+=f*f*Math.max(0,Math.min(1,shortSide));
+    });
+  });
+
+  return {
+    sheets:sheets.length,
+    concentration,
+    largest,
+    reusable,
+    shapeQuality,
+    fragments,
+    strips
+  };
+}
+
+function isBetterSolution(a,b,SW,SH){
+  if(!a) return false;
+  if(!b) return true;
+
+  const A=solutionMetrics(a,SW,SH);
+  const B=solutionMetrics(b,SW,SH);
+  const eps=1e-10;
+
+  // Ziel 1: immer zuerst so wenig Platten wie möglich.
+  if(A.sheets!==B.sheets) return A.sheets<B.sheets;
+
+  // Ziel 2: Rest möglichst in großen, zusammenhängenden Stücken bündeln.
+  if(Math.abs(A.concentration-B.concentration)>eps) return A.concentration>B.concentration;
+  if(Math.abs(A.largest-B.largest)>eps) return A.largest>B.largest;
+
+  // Bei nahezu gleicher Restgröße: kompakter/breiter Rest vor langen Splittern.
+  if(Math.abs(A.shapeQuality-B.shapeQuality)>eps) return A.shapeQuality>B.shapeQuality;
+
+  // Danach möglichst viel praktisch weiterverwendbaren Rest erhalten.
+  if(Math.abs(A.reusable-B.reusable)>eps) return A.reusable>B.reusable;
+
+  // Zum Schluss weniger Restfragmente und weniger Streifen/Schnitte.
+  if(A.fragments!==B.fragments) return A.fragments<B.fragments;
+  if(A.strips!==B.strips) return A.strips<B.strips;
+
+  return false;
+}
+
+function cloneSheetForTrial(sheet){
+  return {
+    axis:sheet.axis,
+    strips:sheet.strips.map(st=>({
+      offset:st.offset,
+      size:st.size,
+      used:st.used,
+      items:st.items.slice()
+    })),
+    placements:sheet.placements.slice()
+  };
+}
+
+function applyCandidate(sheet,b,axis,item){
+  if(b.newStrip){
+    sheet.strips.push({
+      offset:axis==="x"?b.y:b.x,
+      size:axis==="x"?b.o.h:b.o.w,
+      used:0,
+      items:[]
+    });
+  }
+
+  const st=sheet.strips[b.ti];
+  const pl={
+    item,
+    x:b.x,y:b.y,
+    w:b.o.w,h:b.o.h,
+    rotated:b.o.rotated
+  };
+  st.items.push(pl);
+  sheet.placements.push(pl);
+  st.used=axis==="x"?pl.x+pl.w:pl.y+pl.h;
+}
+
+/*
+  Zweite Packstrategie:
+  - keine starre Bevorzugung von "Platte 1, Platte 2, ..."
+  - vorhandene, bereits gut gefüllte Platten werden bevorzugt
+  - innerhalb einer Platte wird die Variante gewählt, die größere
+    zusammenhängende Restrechtecke übrig lässt
+*/
+function packConcentrated(items,SW,SH,axis,sorter){
+  const list=items.slice().sort(sorter);
+  const sheets=[];
+  const fresh=()=>({axis,strips:[],placements:[]});
+
+  for(const item of list){
+    const candidates=[];
+
+    for(let si=0;si<=sheets.length;si++){
+      const isNewSheet=si===sheets.length;
+      const sheet=isNewSheet?fresh():sheets[si];
+      const usedPieceArea=sheet.placements.reduce((a,p)=>a+p.w*p.h,0);
+
+      for(const o of orientations(item)){
+        sheet.strips.forEach((st,ti)=>{
+          if(axis==="x"){
+            const x=st.used+(st.used>0?KERF:0);
+            if(o.h<=st.size && x+o.w<=SW){
+              candidates.push({si,ti,newStrip:false,x,y:st.offset,o,isNewSheet,usedPieceArea});
+            }
+          }else{
+            const y=st.used+(st.used>0?KERF:0);
+            if(o.w<=st.size && y+o.h<=SH){
+              candidates.push({si,ti,newStrip:false,x:st.offset,y,o,isNewSheet,usedPieceArea});
+            }
+          }
+        });
+
+        const used=stripSpanOf(sheet);
+        const off=sheet.strips.length?used+KERF:0;
+
+        if(axis==="x" && o.w<=SW && off+o.h<=SH){
+          candidates.push({
+            si,ti:sheet.strips.length,newStrip:true,x:0,y:off,o,isNewSheet,usedPieceArea
+          });
+        }
+        if(axis==="y" && o.h<=SH && off+o.w<=SW){
+          candidates.push({
+            si,ti:sheet.strips.length,newStrip:true,x:off,y:0,o,isNewSheet,usedPieceArea
+          });
+        }
+      }
+    }
+
+    if(!candidates.length) return null;
+
+    candidates.forEach(c=>{
+      const base=c.isNewSheet?fresh():sheets[c.si];
+      const trial=cloneSheetForTrial(base);
+      applyCandidate(trial,c,axis,item);
+      const m=solutionMetrics([trial],SW,SH);
+      c.trialMetrics=m;
+    });
+
+    candidates.sort((a,b)=>{
+      // Nie eine neue Platte anfangen, wenn das Teil noch auf eine vorhandene passt.
+      if(a.isNewSheet!==b.isNewSheet) return a.isNewSheet?1:-1;
+
+      // Bereits stärker belegte Platte zuerst: so werden Restflächen gebündelt.
+      if(a.usedPieceArea!==b.usedPieceArea) return b.usedPieceArea-a.usedPieceArea;
+
+      const A=a.trialMetrics, B=b.trialMetrics;
+      const eps=1e-10;
+      if(Math.abs(A.concentration-B.concentration)>eps) return B.concentration-A.concentration;
+      if(Math.abs(A.largest-B.largest)>eps) return B.largest-A.largest;
+      if(Math.abs(A.shapeQuality-B.shapeQuality)>eps) return B.shapeQuality-A.shapeQuality;
+      if(A.fragments!==B.fragments) return A.fragments-B.fragments;
+      if(A.strips!==B.strips) return A.strips-B.strips;
+      return 0;
+    });
+
+    const b=candidates[0];
+    if(b.si===sheets.length) sheets.push(fresh());
+    applyCandidate(sheets[b.si],b,axis,item);
+  }
+
+  return sheets;
+}
+
+/*
+  Ein einzelnes Blatt möglichst voll packen, nicht passende Teile zunächst
+  überspringen. Damit darf jede benötigte Platte ihre eigene sinnvolle
+  Streifenrichtung (x oder y) bekommen.
+*/
+function packSingleSkipping(items,SW,SH,axis,sorter){
+  const list=items.slice().sort(sorter);
+  const sheet={axis,strips:[],placements:[]};
+  const placed=new Set();
+
+  for(const item of list){
+    const candidates=[];
+
+    for(const o of orientations(item)){
+      sheet.strips.forEach((st,ti)=>{
+        if(axis==="x"){
+          const x=st.used+(st.used>0?KERF:0);
+          if(o.h<=st.size && x+o.w<=SW){
+            candidates.push({ti,newStrip:false,x,y:st.offset,o});
+          }
+        }else{
+          const y=st.used+(st.used>0?KERF:0);
+          if(o.w<=st.size && y+o.h<=SH){
+            candidates.push({ti,newStrip:false,x:st.offset,y,o});
+          }
+        }
+      });
+
+      const used=stripSpanOf(sheet);
+      const off=sheet.strips.length?used+KERF:0;
+      if(axis==="x" && o.w<=SW && off+o.h<=SH){
+        candidates.push({ti:sheet.strips.length,newStrip:true,x:0,y:off,o});
+      }
+      if(axis==="y" && o.h<=SH && off+o.w<=SW){
+        candidates.push({ti:sheet.strips.length,newStrip:true,x:off,y:0,o});
+      }
+    }
+
+    if(!candidates.length) continue;
+
+    candidates.forEach(c=>{
+      const trial=cloneSheetForTrial(sheet);
+      applyCandidate(trial,c,axis,item);
+      c.m=solutionMetrics([trial],SW,SH);
+    });
+
+    candidates.sort((a,b)=>{
+      const eps=1e-10;
+      if(Math.abs(a.m.concentration-b.m.concentration)>eps) return b.m.concentration-a.m.concentration;
+      if(Math.abs(a.m.largest-b.m.largest)>eps) return b.m.largest-a.m.largest;
+      if(Math.abs(a.m.shapeQuality-b.m.shapeQuality)>eps) return b.m.shapeQuality-a.m.shapeQuality;
+      if(a.m.fragments!==b.m.fragments) return a.m.fragments-b.m.fragments;
+      return a.m.strips-b.m.strips;
+    });
+
+    applyCandidate(sheet,candidates[0],axis,item);
+    placed.add(item);
+  }
+
+  return {sheet,placed};
+}
+
+function packMixedAxes(items,SW,SH,sorter){
+  let remaining=items.slice();
+  const sheets=[];
+
+  while(remaining.length){
+    const options=[];
+
+    for(const axis of ["x","y"]){
+      const candidate=packSingleSkipping(remaining,SW,SH,axis,sorter);
+      if(!candidate.placed.size) continue;
+
+      const usedArea=candidate.sheet.placements.reduce((a,p)=>a+p.w*p.h,0);
+      const metrics=solutionMetrics([candidate.sheet],SW,SH);
+      options.push({...candidate,usedArea,metrics});
+    }
+
+    if(!options.length) return null;
+
+    options.sort((a,b)=>{
+      // Ein Blatt möglichst dicht belegen, damit spätere Blätter mehr großen Rest behalten.
+      if(a.usedArea!==b.usedArea) return b.usedArea-a.usedArea;
+      if(a.placed.size!==b.placed.size) return b.placed.size-a.placed.size;
+
+      const eps=1e-10;
+      if(Math.abs(a.metrics.concentration-b.metrics.concentration)>eps){
+        return b.metrics.concentration-a.metrics.concentration;
+      }
+      if(Math.abs(a.metrics.largest-b.metrics.largest)>eps){
+        return b.metrics.largest-a.metrics.largest;
+      }
+      return a.metrics.strips-b.metrics.strips;
+    });
+
+    const best=options[0];
+    sheets.push(best.sheet);
+    remaining=remaining.filter(item=>!best.placed.has(item));
+  }
+
+  return sheets;
+}
+
+function seededNumber(item,seed){
+  let x=(item.pos*73856093)^(item.copy*19349663)^(item.w*83492791)^(item.h*2654435761)^seed;
+  x=(x^(x>>>16))*2246822519;
+  x=(x^(x>>>13))*3266489917;
+  x=x^(x>>>16);
+  return (x>>>0)/4294967295;
+}
+
+function optimize(items,SW,SH){
+  const baseSorters=[
+    (a,b)=>b.w*b.h-a.w*a.h,
+    (a,b)=>b.h-a.h||b.w-a.w,
+    (a,b)=>b.w-a.w||b.h-a.h,
+    (a,b)=>Math.max(b.w,b.h)-Math.max(a.w,a.h),
+    (a,b)=>Math.min(b.w,b.h)-Math.min(a.w,a.h)||b.w*b.h-a.w*a.h,
+    (a,b)=>(b.w+b.h)-(a.w+a.h),
+    (a,b)=>Math.abs(b.w-b.h)-Math.abs(a.w-a.h)||b.w*b.h-a.w*a.h
+  ];
+
+  // Zusätzliche deterministische Varianten verhindern, dass ein ungünstiger
+  // Eingabereihenfolge-Zufall die Reststücke unnötig zerstückelt.
+  const jitterSorters=[];
+  for(let seed=1;seed<=8;seed++){
+    jitterSorters.push((a,b)=>{
+      const av=a.w*a.h*(0.82+0.36*seededNumber(a,seed));
+      const bv=b.w*b.h*(0.82+0.36*seededNumber(b,seed));
+      return bv-av;
+    });
+  }
+
+  const sorters=baseSorters.concat(jitterSorters);
+  let best=null;
+
+  function consider(result){
+    if(result && isBetterSolution(result,best,SW,SH)) best=result;
+  }
+
+  // Bewährte V10-Strategie bleibt als Sicherheitsnetz enthalten.
+  for(const axis of ["x","y"]){
+    for(const sorter of baseSorters){
+      consider(pack(items,SW,SH,axis,sorter));
+    }
+  }
+
+  // Neue restorientierte Varianten.
+  for(const axis of ["x","y"]){
+    for(const sorter of sorters){
+      consider(packConcentrated(items,SW,SH,axis,sorter));
+    }
+  }
+
+  // Zusätzlich dürfen verschiedene Platten unterschiedliche Streifenrichtungen haben.
+  for(const sorter of sorters){
+    consider(packMixedAxes(items,SW,SH,sorter));
+  }
+
+  /*
+    Nachoptimierung:
+    Teile, die in der aktuell letzten Platte liegen, werden in weiteren
+    Versuchen bewusst früher einsortiert. Dadurch finden sie häufig noch Platz
+    in vorherigen Platten und die letzte Platte behält einen größeren Rest.
+  */
+  for(let round=0;round<3 && best && best.length>1;round++){
+    const lastItems=new Set(best[best.length-1].placements.map(p=>p.item));
+    const pullLast=(a,b)=>{
+      const al=lastItems.has(a)?0:1;
+      const bl=lastItems.has(b)?0:1;
+      if(al!==bl) return al-bl;
+      return b.w*b.h-a.w*a.h;
+    };
+
+    const before=best;
+    for(const axis of ["x","y"]){
+      consider(pack(items,SW,SH,axis,pullLast));
+      consider(packConcentrated(items,SW,SH,axis,pullLast));
+    }
+    consider(packMixedAxes(items,SW,SH,pullLast));
+
+    if(best===before) break;
+  }
+
+  return best;
+}
+
+function makeSvg(sheet,no,SW,SH){
+  const L=64,T=30,R=22,VW=930;
+  const scale=(VW-L-R)/SW;
+  const BW=SW*scale,BH=SH*scale;
+
+  const smallPositions=[];
+  const smallPosSet=new Set();
+  sheet.placements.forEach(p=>{
+    if(needsPieceCallout(p,p.w*scale,p.h*scale) && !smallPosSet.has(p.item.pos)){
+      smallPosSet.add(p.item.pos);
+      smallPositions.push(p.item.pos);
+    }
+  });
+
+  const legendExtra=smallPositions.length ? 38+smallPositions.length*16 : 0;
+  const B=40+legendExtra;
+  const VH=T+BH+B;
+  const pid=`hatch-${no}`;
+
+  let s=`<svg viewBox="0 0 ${VW} ${VH}" role="img" aria-label="Schnittplan Platte ${no}">
+    <defs>
+      <pattern id="${pid}" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="10" stroke="#b8c5b9" stroke-width="2"/>
+      </pattern>
+      <marker id="arrow-${no}" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#5a645d"/>
+      </marker>
+    </defs>
+    <rect x="${L}" y="${T}" width="${BW}" height="${BH}" fill="url(#${pid})" stroke="#213325" stroke-width="2"/>`;
+
+  // Sägefugen / Streifen
+  for(let i=0;i<sheet.strips.length-1;i++){
+    const st=sheet.strips[i];
+    if(sheet.axis==="x"){
+      const y=T+(st.offset+st.size)*scale;
+      s+=`<rect x="${L}" y="${y}" width="${BW}" height="${Math.max(1,KERF*scale)}" fill="#cfd5d0"/>`;
+    }else{
+      const x=L+(st.offset+st.size)*scale;
+      s+=`<rect x="${x}" y="${T}" width="${Math.max(1,KERF*scale)}" height="${BH}" fill="#cfd5d0"/>`;
+    }
+  }
+
+  sheet.strips.forEach(st=>{
+    const a=st.items.slice().sort((p,q)=>sheet.axis==="x"?p.x-q.x:p.y-q.y);
+    for(let i=0;i<a.length-1;i++){
+      const p=a[i];
+      if(sheet.axis==="x"){
+        const x=L+(p.x+p.w)*scale;
+        s+=`<rect x="${x}" y="${T+st.offset*scale}" width="${Math.max(1,KERF*scale)}" height="${st.size*scale}" fill="#cfd5d0"/>`;
+      }else{
+        const y=T+(p.y+p.h)*scale;
+        s+=`<rect x="${L+st.offset*scale}" y="${y}" width="${st.size*scale}" height="${Math.max(1,KERF*scale)}" fill="#cfd5d0"/>`;
+      }
+    }
+  });
+
+  // Teile
+  sheet.placements.forEach(p=>{
+    const x=L+p.x*scale,y=T+p.y*scale,w=p.w*scale,h=p.h*scale;
+    const small=smallPosSet.has(p.item.pos);
+
+    s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#1f2f22" stroke-width="1.4"/>
+      <rect x="${x}" y="${y}" width="${Math.min(5,w)}" height="${h}" fill="#78b82a" opacity=".9"/>`;
+
+    if(small){
+      const fs=Math.max(7,Math.min(13,w*.32,h*.42));
+      s+=`<text x="${x+w/2}" y="${y+h/2+fs*.34}" text-anchor="middle" font-family="Arial" font-size="${fs}" font-weight="700" fill="#1f2b22">Pos. ${p.item.pos}</text>`;
+    }else{
+      const label=escapeHtmlText(pieceLabel(p.item)+(p.rotated?" ↻":""));
+      const labelFs=Math.max(7,Math.min(10,h/5,w/12));
+      const dimFs=Math.max(7,Math.min(10,h/5,w/12));
+
+      s+=`<text x="${x+7}" y="${y+Math.max(11,labelFs+3)}" text-anchor="start" font-family="Arial" font-size="${labelFs}" font-weight="700" fill="#1f2b22">${label}</text>
+        <text x="${x+w/2}" y="${y+h-5}" text-anchor="middle" font-family="Arial" font-size="${dimFs}" fill="#404a42">${p.w} mm</text>
+        <text x="${x+w-5}" y="${y+h/2}" text-anchor="middle" font-family="Arial" font-size="${dimFs}" fill="#404a42" transform="rotate(-90 ${x+w-5} ${y+h/2})">${p.h} mm</text>`;
+    }
+  });
+
+  // Rohplattenmaße
+  s+=`<text x="${L+BW/2}" y="${T+BH+24}" text-anchor="middle" font-family="Arial" font-size="11" fill="#5d675f">${SW} mm</text>
+      <text x="${L-32}" y="${T+BH/2}" text-anchor="middle" font-family="Arial" font-size="11" fill="#5d675f" transform="rotate(-90 ${L-32} ${T+BH/2})">${SH} mm</text>`;
+
+  // Für kleine Teile: externe Bemaßung, sofern am Plattenrand ausreichend Platz ist.
+  // Falls nicht, bleibt die eindeutige Positionsnummer im Teil und die Infozeile darunter.
+  const extPieces=sheet.placements.filter(p=>smallPosSet.has(p.item.pos));
+  const topTaken=[], leftTaken=[];
+
+  extPieces.forEach(p=>{
+    const x=L+p.x*scale,y=T+p.y*scale,w=p.w*scale,h=p.h*scale;
+    const canTop=y-T>16 || p.y<1;
+    const canLeft=x-L>18 || p.x<1;
+
+    if(canTop){
+      const yy=Math.max(8,y-10);
+      s+=`<line x1="${x}" y1="${yy}" x2="${x+w}" y2="${yy}" stroke="#5a645d" stroke-width="1" marker-start="url(#arrow-${no})" marker-end="url(#arrow-${no})"/>
+          <line x1="${x}" y1="${yy-3}" x2="${x}" y2="${y}" stroke="#8a938c" stroke-width=".8"/>
+          <line x1="${x+w}" y1="${yy-3}" x2="${x+w}" y2="${y}" stroke="#8a938c" stroke-width=".8"/>
+          <text x="${x+w/2}" y="${yy-3}" text-anchor="middle" font-family="Arial" font-size="9" fill="#4c564f">${p.w} mm</text>`;
+    }
+
+    if(canLeft){
+      const xx=Math.max(8,x-12);
+      s+=`<line x1="${xx}" y1="${y}" x2="${xx}" y2="${y+h}" stroke="#5a645d" stroke-width="1" marker-start="url(#arrow-${no})" marker-end="url(#arrow-${no})"/>
+          <line x1="${xx-3}" y1="${y}" x2="${x}" y2="${y}" stroke="#8a938c" stroke-width=".8"/>
+          <line x1="${xx-3}" y1="${y+h}" x2="${x}" y2="${y+h}" stroke="#8a938c" stroke-width=".8"/>
+          <text x="${xx-3}" y="${y+h/2}" text-anchor="middle" font-family="Arial" font-size="9" fill="#4c564f" transform="rotate(-90 ${xx-3} ${y+h/2})">${p.h} mm</text>`;
+    }
+  });
+
+  if(smallPositions.length){
+    const firstY=T+BH+48;
+    s+=`<text x="${L}" y="${firstY}" text-anchor="start" font-family="Arial" font-size="10" font-weight="700" fill="#354039">Kleine Zuschnitte:</text>`;
+    smallPositions.forEach((pos,index)=>{
+      const p=sheet.placements.find(pl=>pl.item.pos===pos);
+      const name=p.item.name ? ` · ${escapeHtmlText(p.item.name)}` : "";
+      const rot=p.rotated ? " · im Plan gedreht" : "";
+      s+=`<text x="${L}" y="${firstY+16+index*16}" text-anchor="start" font-family="Arial" font-size="10" fill="#465047">Pos. ${p.item.pos} · Fertigmaß ${p.item.w} × ${p.item.h} mm${name}${rot}</text>`;
+    });
+  }
+
+  s+=`</svg>`;
+  return s;
+}
+
+function cutSequence(sheet){
+  const arr=[];
+  if(sheet.axis==="x"){
+    sheet.strips.forEach(st=>{
+      arr.push(`${st.size} mm breiten Streifen über die Plattenlänge abtrennen.`);
+      st.items.slice().sort((a,b)=>a.x-b.x).forEach(p=>arr.push(`Pos. ${p.item.pos} auf ${p.w} mm ablängen.`));
+    });
+  }else{
+    sheet.strips.forEach(st=>{
+      arr.push(`${st.size} mm breiten Querstreifen abtrennen.`);
+      st.items.slice().sort((a,b)=>a.y-b.y).forEach(p=>arr.push(`Pos. ${p.item.pos} auf ${p.h} mm ablängen.`));
+    });
+  }
+  return arr;
+}
+
+function setNotice(type,html){
+  $("notice").className="notice"+(type?" "+type:"");
+  $("notice").innerHTML=html;
+}
+
+
+function sheetSignature(sheet){
+  const placements=sheet.placements.slice()
+    .sort((a,b)=>a.y-b.y || a.x-b.x || a.item.pos-b.item.pos)
+    .map(p=>`${p.item.pos}:${p.x},${p.y},${p.w},${p.h},${p.rotated?1:0}`)
+    .join("|");
+  const strips=sheet.strips
+    .map(s=>`${s.offset},${s.size}`)
+    .join("|");
+  return `${sheet.axis}#${strips}#${placements}`;
+}
+
+function groupIdenticalSheets(sheets){
+  const groups=[];
+  const map=new Map();
+
+  sheets.forEach((sheet,index)=>{
+    const sig=sheetSignature(sheet);
+    if(map.has(sig)){
+      map.get(sig).count++;
+      map.get(sig).sheetNumbers.push(index+1);
+    }else{
+      const g={sheet,count:1,sheetNumbers:[index+1]};
+      map.set(sig,g);
+      groups.push(g);
+    }
+  });
+
+  return groups;
+}
+
+function render(result){
+  const {m,pos,items,sheets,use}=result;
+  $("resultMaterial").textContent=`${m.group} ${String(m.thickness).replace(".",",")} mm · ${m.width} × ${m.height} mm${m.edge!=="Standard" ? " · "+m.edge : ""}`;
+  $("sumSheets").textContent=sheets.length;
+  $("sumParts").textContent=items.length;
+  $("sumUse").textContent=use.toFixed(1).replace(".",",")+" %";
+  $("sumRest").textContent=(100-use).toFixed(1).replace(".",",")+" %";
+
+  const groups=groupIdenticalSheets(sheets);
+
+  $("sheets").innerHTML=groups.map((g,i)=>{
+    const multi=g.count>1;
+    const title=multi
+      ? `${g.count}× identisch schneiden · ${m.width} × ${m.height} mm`
+      : `Platte ${g.sheetNumbers[0]} · ${m.width} × ${m.height} mm`;
+
+    const detail=multi
+      ? `gilt für Platten ${g.sheetNumbers.join(", ")}`
+      : (g.sheet.axis==="x"?"Längsstreifen":"Querstreifen");
+
+    return `
+      <section class="sheet">
+        <div class="sheet-head">
+          <strong>${title}</strong>
+          <span class="sheet-badge">${detail}</span>
+        </div>
+        ${makeSvg(g.sheet,i+1,m.width,m.height)}
+        <div class="plan-mobile-actions">
+          <button class="btn btn-outline plan-open-btn" type="button" data-group-index="${i}">Plan groß ansehen</button>
+        </div>
+      </section>`;
+  }).join("");
+
+  $("pieceSummary").innerHTML=`
+    <div class="summary-table-wrap">
+    <table class="summary-table">
+      <thead><tr><th>Pos.</th><th>Fertigmaß</th><th>Menge</th><th>Bezeichnung</th></tr></thead>
+      <tbody>${pos.map(p=>`<tr><td>${p.pos}</td><td>${p.w} × ${p.h} mm</td><td>${p.q}</td><td>${escapeHtmlText(p.name||"–")}</td></tr>`).join("")}</tbody>
+    </table>
+    </div>`;
+
+  $("resultArea").classList.remove("hidden");
+}
+
+function calculate(){
+  saveDraft();
+  const m=currentMaterial();
+  const pos=readPositions();
+  const err=validate(pos,m);
+  if(err){
+    setNotice("error",err);
+    $("resultArea").classList.add("hidden");
+    return;
+  }
+  const items=expandPositions(pos);
+  const sheets=optimize(items,m.width,m.height);
+  if(!sheets){
+    setNotice("error","Für diese Eingaben konnte kein praktikabler Schnittplan erzeugt werden.");
+    $("resultArea").classList.add("hidden");
+    return;
+  }
+  const usedArea=items.reduce((a,p)=>a+p.w*p.h,0);
+  const totalArea=sheets.length*m.width*m.height;
+  const use=100*usedArea/totalArea;
+  currentResult={m,pos,items,sheets,use};
+  render(currentResult);
+  setNotice("success",`Berechnung abgeschlossen: <strong>${sheets.length} Platte${sheets.length===1?"":"n"}</strong> erforderlich. Optimierung: <strong>minimale Plattenzahl → große zusammenhängende Reststücke</strong>. Drehen: <strong>automatisch aktiv</strong>.`);
+}
+
+function loadExample(){
+  $("partsBody").innerHTML="";
+  // Kleinere, sofort verständliche Teststücke für 2500 x 1250.
+  [
+    [1200,600,2,"Küche"],
+    [800,400,2,"Bad"],
+    [500,300,3,"Hauswirtschaft"]
+  ].forEach(x=>addPartRow(x[0],x[1],x[2],x[3]));
+  calculate();
+}
+
+function clearParts(){
+  $("partsBody").innerHTML="";
+  addPartRow();
+  try{localStorage.removeItem(DRAFT_KEY);}catch(_){}
+  currentResult=null;
+  $("resultArea").classList.add("hidden");
+  setNotice("","Neue Maße eingeben und anschließend auf <strong>„Schnittplan berechnen“</strong> klicken.");
+}
+
+function csvCell(value){
+  const s=String(value??"");
+  return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+function csvText(){
+  if(!currentResult) return "";
+  const m=currentResult.m;
+  const rows=[
+    ["Material",`${m.group} ${m.thickness} mm${m.edge!=="Standard" ? " "+m.edge : ""}`],
+    ["Rohplatte",`${m.width} x ${m.height} mm`],
+    ["Saegefuge","3 mm"],
+    ["Drehen","Automatisch aktiv"],
+    ["Plattenbedarf",currentResult.sheets.length],
+    [],
+    ["Pos.","Laenge mm","Breite mm","Menge","Bezeichnung"],
+    ...currentResult.pos.map(p=>[p.pos,p.w,p.h,p.q,p.name||""])
+  ];
+  return rows.map(r=>r.map(csvCell).join(";")).join("\r\n");
+}
+
+function downloadCsv(){
+  if(!currentResult) return;
+  const blob=new Blob(["\ufeff"+csvText()],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="stueckliste-zuschnitt.csv";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+
+function openModal(text){
+  $("modalText").textContent=text;
+  $("modalBackdrop").classList.remove("hidden");
+}
+function closeModal(){ $("modalBackdrop").classList.add("hidden"); }
+
+
+const DRAFT_KEY="lowis-zuschnittplaner-draft-v16";
+
+function draftData(){
+  return {
+    group:$("groupSelect").value,
+    edge:$("edgeSelect").value,
+    format:$("formatSelect").value,
+    thickness:$("thicknessSelect").value,
+    parts:[...$("partsBody").querySelectorAll("tr")].map(tr=>({
+      w:tr.querySelector(".pw")?.value||"",
+      h:tr.querySelector(".ph")?.value||"",
+      q:tr.querySelector(".pq")?.value||"1",
+      name:tr.querySelector(".pname")?.value||""
+    }))
+  };
+}
+
+function saveDraft(){
+  try{
+    localStorage.setItem(DRAFT_KEY,JSON.stringify(draftData()));
+  }catch(_){}
+}
+
+function restoreDraft(){
+  let d=null;
+  try{ d=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null"); }catch(_){}
+  if(!d || !Array.isArray(d.parts)) return false;
+
+  if(d.group && [...$("groupSelect").options].some(o=>o.value===d.group)){
+    $("groupSelect").value=d.group;
+    rebuildMaterialSelectors();
+
+    if(d.edge && [...$("edgeSelect").options].some(o=>o.value===d.edge)){
+      $("edgeSelect").value=d.edge;
+      rebuildFormats();
+    }
+    if(d.format && [...$("formatSelect").options].some(o=>o.value===d.format)){
+      $("formatSelect").value=d.format;
+      rebuildThicknesses();
+    }
+    if(d.thickness && [...$("thicknessSelect").options].some(o=>o.value===String(d.thickness))){
+      $("thicknessSelect").value=String(d.thickness);
+    }
+    updateMaterialPreview();
+  }
+
+  $("partsBody").innerHTML="";
+  d.parts.forEach(p=>addPartRow(p.w,p.h,Number(p.q)||1,p.name||""));
+  if(!d.parts.length) addPartRow();
+  return true;
+}
+
+document.addEventListener("input",ev=>{
+  if(ev.target.closest("#partsBody")) saveDraft();
+});
+document.addEventListener("change",ev=>{
+  if(ev.target.closest(".left-panel")) setTimeout(saveDraft,0);
+});
+
+$("groupSelect").addEventListener("change",()=>{rebuildMaterialSelectors();});
+$("edgeSelect").addEventListener("change",()=>{rebuildFormats();});
+$("formatSelect").addEventListener("change",()=>{rebuildThicknesses();});
+$("thicknessSelect").addEventListener("change",()=>{updateMaterialPreview();});
+
+$("addPart").addEventListener("click",()=>{addPartRow();setTimeout(saveDraft,0);});
+$("loadExample").addEventListener("click",()=>{loadExample();setTimeout(saveDraft,0);});
+$("clearParts").addEventListener("click",clearParts);
+
+function openPlanModal(groupIndex){
+  if(!currentResult) return;
+  const groups=groupIdenticalSheets(currentResult.sheets);
+  const g=groups[Number(groupIndex)];
+  if(!g) return;
+
+  const multi=g.count>1;
+  $("planModalTitle").textContent=multi
+    ? `${g.count}× identisch schneiden`
+    : `Platte ${g.sheetNumbers[0]}`;
+
+  $("planModalBody").innerHTML=makeSvg(
+    g.sheet,
+    Number(groupIndex)+1,
+    currentResult.m.width,
+    currentResult.m.height
+  );
+
+  $("planModal").classList.remove("hidden");
+  $("planModal").setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+}
+
+function closePlanModal(){
+  $("planModal").classList.add("hidden");
+  $("planModal").setAttribute("aria-hidden","true");
+  $("planModalBody").innerHTML="";
+  document.body.style.overflow="";
+}
+
+document.addEventListener("click",ev=>{
+  const btn=ev.target.closest(".plan-open-btn");
+  if(btn) openPlanModal(btn.dataset.groupIndex);
+});
+
+$("planModalClose").addEventListener("click",closePlanModal);
+
+document.addEventListener("keydown",ev=>{
+  if(ev.key==="Escape" && !$("planModal").classList.contains("hidden")){
+    closePlanModal();
+  }
+});
+
+
+let deferredInstallPrompt=null;
+
+function isIOSDevice(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+}
+function isStandaloneMode(){
+  return window.matchMedia?.("(display-mode: standalone)")?.matches ||
+         navigator.standalone===true;
+}
+function showRuntimeGuidance(){
+  const notice=$("runtimeNotice");
+  const bar=$("installBar");
+  const installBtn=$("installAppBtn");
+  const installText=$("installText");
+
+  if(location.protocol==="file:"){
+    notice.classList.remove("hidden");
+    notice.innerHTML="<strong>Lokale Datei erkannt.</strong> Auf Windows/macOS kann das funktionieren. Auf iPhone/iPad öffnet die Dateien-/ChatGPT-Vorschau HTML jedoch häufig ohne vollständige JavaScript-Bedienung. Für iPhone/iPad diese Version deshalb über einen normalen HTTPS-Weblink in Safari öffnen.";
+  }
+
+  if(isStandaloneMode()){
+    bar.classList.add("hidden");
+    return;
+  }
+
+  if(isIOSDevice() && location.protocol.startsWith("http")){
+    bar.classList.remove("hidden");
+    installBtn.classList.add("hidden");
+    installText.textContent="iPhone/iPad: In Safari auf Teilen tippen und „Zum Home-Bildschirm“ wählen. Danach startet der Planer wie eine App und bleibt auf dem Gerät hinterlegt.";
+  }
+}
+
+window.addEventListener("beforeinstallprompt",ev=>{
+  ev.preventDefault();
+  deferredInstallPrompt=ev;
+  $("installBar").classList.remove("hidden");
+  $("installAppBtn").classList.remove("hidden");
+  $("installText").textContent="Auf diesem Gerät kann der Zuschnittplaner installiert und wie eine App gestartet werden.";
+});
+
+$("installAppBtn").addEventListener("click",async()=>{
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  try{await deferredInstallPrompt.userChoice;}catch(_){}
+  deferredInstallPrompt=null;
+  $("installBar").classList.add("hidden");
+});
+
+window.addEventListener("appinstalled",()=>{
+  $("installBar").classList.add("hidden");
+});
+
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
+
+$("calculate").addEventListener("click",calculate);
+$("printPlan").addEventListener("click",()=>window.print());
+$("downloadCsv").addEventListener("click",downloadCsv);
+
+
+function pdfAscii(s){
+  return String(s).replace(/[^\x20-\x7E]/g,c=>({
+    "ä":"ae","ö":"oe","ü":"ue","Ä":"Ae","Ö":"Oe","Ü":"Ue","ß":"ss","×":"x","–":"-","&":"und"
+  }[c]||"?"));
+}
+function pdfEsc(s){return pdfAscii(s).replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)");}
+
+function makePlanPdfBase64(result, customer){
+  const pages=[];
+  const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
+  const tv=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf 0 1 -1 0 ${x} ${y} Tm (${pdfEsc(str)}) Tj ET\n`;
+  const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
+  const rc=(x,y,w,h,fill=false)=>`${x} ${y} ${w} ${h} re ${fill?"B":"S"}\n`;
+
+  let c="0 G 0 g 0.7 w\n";
+  c+=t(45,800,18,"Platten-Zuschnittplan",true);
+  c+=t(45,779,10,`${result.m.group} ${result.m.thickness} mm - ${result.m.edge}`);
+  c+=t(45,763,10,`Rohplatte: ${result.m.width} x ${result.m.height} mm | Saegefuge: 3 mm | Drehen: automatisch aktiv`);
+  c+=t(45,741,11,`Plattenbedarf: ${result.sheets.length}`,true);
+  c+=t(45,717,11,"Kunde",true);
+  c+=t(45,701,9,`${customer.name}${customer.company ? " | "+customer.company : ""}`);
+  c+=t(45,686,9,`${customer.email}${customer.phone ? " | "+customer.phone : ""}`);
+  c+=t(45,661,11,"Stueckliste",true);
+  let y=643;
+  result.pos.forEach(p=>{ c+=t(55,y,9,`Pos. ${p.pos}: ${p.q} x ${p.w} x ${p.h} mm${p.name ? " - "+p.name : ""}`); y-=15; });
+  if(customer.remarks){
+    y-=8;c+=t(45,y,10,"Bemerkung:",true);y-=15;
+    const chunks=pdfAscii(customer.remarks).match(/.{1,75}/g)||[];
+    chunks.slice(0,6).forEach(line=>{c+=t(55,y,8,line);y-=12;});
+  }
+  pages.push(c);
+
+  const pdfGroups=groupIdenticalSheets(result.sheets);
+
+  pdfGroups.forEach((group,idx)=>{
+    const sh=group.sheet;
+    let p="0 G 0 g 0.7 w\n";
+    const heading=group.count>1
+      ? `${group.count}x identisch schneiden`
+      : `Schnittplan - Platte ${group.sheetNumbers[0]}`;
+    p+=t(45,800,16,heading,true);
+    p+=t(45,781,9,`${result.m.width} x ${result.m.height} mm | ${result.m.group} ${result.m.thickness} mm | 3 mm Saegefuge`);
+    if(group.count>1){
+      p+=t(45,766,8,`Gilt fuer Platten: ${group.sheetNumbers.join(", ")}`);
+    }
+
+    const bx=50,by=430,maxW=495,maxH=305;
+    const sc=Math.min(maxW/result.m.width,maxH/result.m.height);
+    const bw=result.m.width*sc,bh=result.m.height*sc;
+
+    p+="0.95 g\n"+rc(bx,by,bw,bh,true)+"0 g\n";
+    p+="0.78 G 0.4 w\n";
+    for(let d=-bh;d<bw;d+=12){ p+=ln(bx+d,by,bx+d+bh,by+bh); }
+    p+="0 G 0.8 w\n"+rc(bx,by,bw,bh,false);
+
+    const pdfSmallPositions=[];
+    const pdfSmallSet=new Set();
+    sh.placements.forEach(pl=>{
+      const drawW=pl.w*sc,drawH=pl.h*sc;
+      if(needsPieceCallout(pl,drawW,drawH) && !pdfSmallSet.has(pl.item.pos)){
+        pdfSmallSet.add(pl.item.pos);
+        pdfSmallPositions.push(pl.item.pos);
+      }
+    });
+
+    sh.placements.forEach(pl=>{
+      const x=bx+pl.x*sc;
+      const y0=by+(result.m.height-(pl.y+pl.h))*sc;
+      const w=pl.w*sc,h=pl.h*sc;
+      p+="1 g\n"+rc(x,y0,w,h,true)+"0 g\n";
+
+      const small=pdfSmallSet.has(pl.item.pos);
+      if(small){
+        p+=t(x+Math.max(2,w/2-12),y0+h/2-3,7,`Pos. ${pl.item.pos}`,true);
+      }else{
+        const ident=`Pos. ${pl.item.pos}${pl.item.name ? " - "+pl.item.name : ""}${pl.rotated ? " gedreht" : ""}`;
+        p+=t(x+4,y0+h-10,7,ident,true);
+        p+=t(x+4,y0+4,7,`${pl.w} mm`);
+        p+=tv(x+w-4,y0+4,7,`${pl.h} mm`);
+      }
+    });
+
+    let infoY=405;
+    if(pdfSmallPositions.length){
+      p+=t(45,infoY,8,"Kleine Zuschnitte:",true);
+      infoY-=13;
+      pdfSmallPositions.forEach((pos)=>{
+        const pl=sh.placements.find(x=>x.item.pos===pos);
+        const desc=`Pos. ${pl.item.pos} | Fertigmass ${pl.item.w} x ${pl.item.h} mm${pl.item.name ? " | "+pl.item.name : ""}${pl.rotated ? " | im Plan gedreht" : ""}`;
+        p+=t(45,infoY,7,desc);
+        infoY-=12;
+      });
+      infoY-=3;
+    }
+    p+=t(45,Math.max(70,infoY),8,"Restmaterial ist schraffiert. 3-mm-Saegefuge wurde in der Berechnung beruecksichtigt.");
+    pages.push(p);
+  });
+
+  const objects=[null];
+  const add=o=>{objects.push(o);return objects.length-1;};
+  const f1=add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const f2=add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+  const contentIds=pages.map(pg=>add(`<< /Length ${pg.length} >>\nstream\n${pg}endstream`));
+  const pagesId=add("");
+  const pageIds=contentIds.map(cid=>add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${cid} 0 R >>`));
+  objects[pagesId]=`<< /Type /Pages /Kids [${pageIds.map(id=>`${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
+  const catalog=add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+
+  let pdf="%PDF-1.4\n", offsets=[0];
+  for(let i=1;i<objects.length;i++){offsets[i]=pdf.length;pdf+=`${i} 0 obj\n${objects[i]}\nendobj\n`;}
+  const xref=pdf.length;
+  pdf+=`xref\n0 ${objects.length}\n0000000000 65535 f \n`;
+  for(let i=1;i<objects.length;i++) pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";
+  pdf+=`trailer\n<< /Size ${objects.length} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+
+  return btoa(unescape(encodeURIComponent(pdf)));
+}
+
+function utf8Base64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+function emlSafeHeader(str){
+  return String(str).replace(/[\r\n]+/g," ").trim();
+}
+
+function makeEml(result, customer){
+  const boundary="----=_Lowis_Schnittplan_"+Date.now();
+  const ref="TEST-"+new Date().toISOString().replace(/[-:TZ.]/g,"").slice(0,14);
+  const subject=`TEST Platten-Zuschnittanfrage ${ref}`;
+  const material=`${result.m.group} ${String(result.m.thickness).replace(".",",")} mm · ${result.m.width} × ${result.m.height} mm${result.m.edge!=="Standard" ? " · "+result.m.edge : ""}`;
+  const grouped=groupIdenticalSheets(result.sheets);
+
+  const text=[
+    "Neue unverbindliche Platten-Zuschnittanfrage",
+    "",
+    `Referenz: ${ref}`,
+    `Kunde: ${customer.name}`,
+    customer.company ? `Firma: ${customer.company}` : "",
+    `E-Mail: ${customer.email}`,
+    customer.phone ? `Telefon: ${customer.phone}` : "",
+    "",
+    `Material: ${material}`,
+    "Sägefuge: 3 mm fest",
+    `Drehen: automatisch aktiv`,
+    `Berechneter Plattenbedarf: ${result.sheets.length}`,
+    `Unterschiedliche Schnittbilder: ${grouped.length}`,
+    "",
+    "Stückliste:",
+    ...result.pos.map(p=>`Pos. ${p.pos}: ${p.q} × ${p.w} × ${p.h} mm${p.name ? " · "+p.name : ""}`),
+    customer.remarks ? "" : null,
+    customer.remarks ? "Bemerkung:" : null,
+    customer.remarks || null,
+    "",
+    "Schnittplan-PDF und CSV-Stückliste sind angehängt."
+  ].filter(v=>v!==null).join("\r\n");
+
+  const pdfB64=makePlanPdfBase64(result,customer);
+  const csvB64=utf8Base64("\ufeff"+csvText());
+
+  const headers=[
+    "To: ",
+    `Reply-To: ${emlSafeHeader(customer.email)}`,
+    `Subject: =?UTF-8?B?${utf8Base64(subject)}?=`,
+    `Date: ${new Date().toUTCString()}`,
+    "MIME-Version: 1.0",
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    ""
+  ];
+
+  const parts=[
+    `--${boundary}`,
+    'Content-Type: text/plain; charset="UTF-8"',
+    "Content-Transfer-Encoding: base64",
+    "",
+    utf8Base64(text),
+
+    `--${boundary}`,
+    `Content-Type: application/pdf; name="schnittplan-${ref}.pdf"`,
+    `Content-Disposition: attachment; filename="schnittplan-${ref}.pdf"`,
+    "Content-Transfer-Encoding: base64",
+    "",
+    pdfB64.match(/.{1,76}/g).join("\r\n"),
+
+    `--${boundary}`,
+    `Content-Type: text/csv; charset="UTF-8"; name="stueckliste-${ref}.csv"`,
+    `Content-Disposition: attachment; filename="stueckliste-${ref}.csv"`,
+    "Content-Transfer-Encoding: base64",
+    "",
+    csvB64.match(/.{1,76}/g).join("\r\n"),
+
+    `--${boundary}--`,
+    ""
+  ];
+
+  return {ref,content:headers.concat(parts).join("\r\n")};
+}
+
+function downloadEml(content,filename){
+  const blob=new Blob([content],{type:"message/rfc822"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+
+function sendRequest(ev){
+  ev.preventDefault();
+  if(!currentResult){
+    setNotice("error","Bitte zuerst einen Schnittplan berechnen.");
+    return;
+  }
+
+  const fd=new FormData(ev.currentTarget);
+  const customer={
+    name:String(fd.get("name")||"").trim(),
+    company:String(fd.get("company")||"").trim(),
+    email:String(fd.get("email")||"").trim(),
+    phone:String(fd.get("phone")||"").trim(),
+    remarks:String(fd.get("remarks")||"").trim()
+  };
+
+  if(!customer.name || !customer.email){
+    setNotice("error","Bitte Name und E-Mail ausfüllen.");
+    return;
+  }
+
+  const btn=$("sendRequestBtn");
+  btn.disabled=true;
+  btn.textContent="E-Mail wird erstellt …";
+
+  try{
+    const eml=makeEml(currentResult,customer);
+    downloadEml(eml.content,`Lowis-Zuschnittanfrage-${eml.ref}.eml`);
+    openModal(
+      "Die fertige .eml-Datei wurde heruntergeladen. Öffne sie in Outlook, Thunderbird oder Windows Mail. "+
+      "PDF-Schnittplan und CSV-Stückliste sind angehängt. Den Empfänger bitte im Mailprogramm eintragen. "+
+      "Danach nur noch auf „Senden“ klicken."
+    );
+  }catch(err){
+    setNotice("error","Die E-Mail-Datei konnte nicht erstellt werden: "+err.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent="E-Mail-Anfrage erstellen";
+  }
+}
+
+$("requestForm").addEventListener("submit",sendRequest);
+
+$("modalClose").addEventListener("click",closeModal);
+$("modalPrint").addEventListener("click",()=>window.print());
+$("modalCsv").addEventListener("click",downloadCsv);
+$("modalBackdrop").addEventListener("click",ev=>{if(ev.target===$("modalBackdrop")) closeModal();});
+
+initGroups();
+if(!restoreDraft()) addPartRow();
+showRuntimeGuidance();
+</script>
+</body>
+</html>
