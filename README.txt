@@ -1,36 +1,23 @@
-LOWIS PLATTEN-ZUSCHNITTPLANER – V21
+LOWIS ZUSCHNITTPLANER – GITHUB-PAGES-PAKET V24
+================================================
 
-Neu: Tastatur-Schnellsteuerung
-==============================
-+ Taste:
-- fügt sofort eine neue Position unten an
-- keine Bestätigung
-- setzt den Cursor direkt in das Feld „Länge“
+Enthaltene Dateien:
+- index.html            Hauptanwendung: Platten- und Längenzuschnitt
+- manifest.webmanifest  PWA-/App-Metadaten
+- sw.js                 Offline-Cache / Service Worker
+- icon.svg              App-/Browser-Icon
 
-- Taste:
-- entfernt immer die unterste Position
-- beim nächsten Drücken die dann unterste Position usw.
-- vor jedem Entfernen erscheint eine Bestätigung
-- funktioniert auch mit dem Minus auf dem Nummernblock
+INSTALLATION / UPDATE AUF GITHUB
+--------------------------------
+1. Alle Dateien aus dieser ZIP in das Stammverzeichnis des GitHub-Pages-Repositories hochladen.
+2. Vorhandene Dateien gleichen Namens ersetzen.
+3. Die ZIP-Datei selbst muss NICHT ins Repository hochgeladen werden.
+4. Nach dem Upload GitHub Pages normal neu laden.
 
-Auch das X zum Löschen einer einzelnen Position fragt jetzt vor dem Entfernen
-noch einmal nach.
+WICHTIG BEI ALTEM CACHE
+-----------------------
+Der Service-Worker-Cache wurde für diese Version auf V24 angehoben. Dadurch wird eine
+vorherige V21-Version beim nächsten Laden ersetzt. Falls ein Browser trotzdem eine alte
+Ansicht zeigt, Seite einmal hart neu laden (Strg+F5).
 
-Wichtig:
-In Textfeldern wie Bezeichnung, Name, E-Mail oder Telefon bleiben + und -
-normale Zeichen. Die Tastaturkürzel greifen dort nicht ein.
-
-Alle Funktionen aus V20 bleiben erhalten:
-- System / Hell / Dunkel
-- Theme-Auswahl wird gespeichert
-- technischer Schnittplan und PDF bleiben hell
-- optimierte Maßdarstellung für schmale Teile
-- GitHub-Pages/PWA-Unterstützung
-
-GitHub Pages aktualisieren
-==========================
-Im bestehenden Repository ersetzen:
-- index.html
-- manifest.webmanifest
-- sw.js
-- icon.svg
+Stand: 10.09.2026
