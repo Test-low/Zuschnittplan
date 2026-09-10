@@ -1073,6 +1073,72 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-mini-s
   .length-group-title{display:block}.length-sale-rule{display:inline-block;margin-top:6px}
 }
 
+
+/* V27: kompakte Druckansicht – nur für Drucken/PDF */
+@media print{
+  @page{size:A4 portrait;margin:6mm}
+
+  html,body{font-size:9pt!important}
+  .app{max-width:none!important;margin:0!important;padding:0!important}
+  .shell{display:block!important;gap:0!important}
+  .panel{box-shadow:none!important;border:0!important;border-radius:0!important}
+  .results{padding:0!important}
+
+  /* Kopfbereich kompakt statt großflächig */
+  .results-top{margin:0 0 2.5mm!important;gap:3mm!important;align-items:flex-start!important}
+  .results-top h2{font-size:14pt!important;line-height:1.1!important;margin:0!important}
+  .results-top p{font-size:8pt!important;line-height:1.2!important;margin:1mm 0 0!important}
+  .status-chip{font-size:7pt!important;padding:1mm 2mm!important;border-radius:99px!important}
+
+  /* Kennzahlen bleiben sichtbar, brauchen aber kaum Höhe */
+  .stats{grid-template-columns:repeat(4,1fr)!important;gap:1.5mm!important;margin:0 0 2.5mm!important}
+  .stat{padding:1.5mm 2mm!important;border-radius:2mm!important}
+  .stat .num{font-size:12pt!important;line-height:1.05!important}
+  .stat .label{font-size:6.5pt!important;line-height:1.1!important;margin-top:.6mm!important;letter-spacing:.02em!important}
+
+  /* Plattenzuschnitt */
+  .sheet{break-inside:avoid-page!important;page-break-inside:avoid!important;border:0!important;padding:0!important;margin:0 0 4mm!important;border-radius:0!important}
+  .sheet-head{margin-bottom:1.5mm!important;gap:2mm!important}
+  .sheet-head strong{font-size:9pt!important;line-height:1.15!important}
+  .sheet-badge{font-size:6.5pt!important;padding:.8mm 1.5mm!important}
+  .sheet svg{width:100%!important;height:auto!important;max-height:235mm!important}
+  .sequence-title{font-size:7pt!important;margin-top:1.5mm!important}
+  .sequence{font-size:7.2pt!important;line-height:1.25!important;margin:1mm 0 0!important;padding-left:5mm!important}
+
+  /* Längenzuschnitt / Projektmodus */
+  .length-group{margin-top:4mm!important;padding-top:3mm!important;border-top-width:1px!important}
+  .length-group:first-child{margin-top:0!important;padding-top:0!important}
+  .length-group-title{margin:0 0 1.5mm!important;gap:2mm!important}
+  .length-group-title h3{font-size:10pt!important;line-height:1.1!important}
+  .length-group-title p{font-size:7pt!important;line-height:1.15!important;margin:.7mm 0 0!important}
+  .length-sale-rule{font-size:6.5pt!important;padding:.8mm 1.5mm!important}
+  .length-group-summary{gap:1mm!important;margin:1mm 0 1.5mm!important}
+  .length-mini-stat{font-size:6.8pt!important;padding:.8mm 1.5mm!important}
+
+  .length-bar-card{break-inside:avoid-page!important;page-break-inside:avoid!important;padding:1.5mm 2mm!important;margin:0 0 2mm!important;border-radius:2mm!important}
+  .length-bar-head{margin-bottom:1mm!important;gap:2mm!important}
+  .length-bar-head strong{font-size:8pt!important;line-height:1.1!important}
+  .length-bar-meta{font-size:6.7pt!important;line-height:1.15!important;margin-top:.5mm!important}
+  .length-bar-badge{font-size:6.3pt!important;padding:.7mm 1.4mm!important}
+  .length-track{height:12mm!important;border-width:1px!important}
+  .length-piece{font-size:7.5pt!important;line-height:1.05!important;padding:1px!important}
+  .length-piece small{font-size:5.8pt!important;margin-top:.3mm!important}
+  .length-rest{font-size:6.5pt!important}
+  .length-rest-label{font-size:5.8pt!important;padding:0 1px!important}
+  .length-ruler{font-size:6pt!important;margin-top:.7mm!important}
+  .length-sequence{font-size:6.7pt!important;line-height:1.2!important;margin-top:1mm!important}
+
+  /* Stücklisten kompakter */
+  .subsection{margin-top:3mm!important;padding-top:2.5mm!important}
+  .subsection h3{font-size:9.5pt!important;margin:0 0 1.5mm!important}
+  .summary-table th,.summary-table td{font-size:7pt!important;line-height:1.15!important;padding:1.2mm 1.5mm!important}
+  .summary-table th{font-size:6.5pt!important}
+  .summary-table-wrap{overflow:visible!important}
+
+  /* Browser soll Farben/Schraffuren im PDF möglichst beibehalten */
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
+
 </style>
 </head>
 <body>

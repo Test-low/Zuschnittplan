@@ -1,28 +1,16 @@
-LOWIS ZUSCHNITTPLANER – GITHUB-PAGES-PAKET V26
-================================================
+LOWIS ZUSCHNITTPLANER – V27
 
-Enthaltene Dateien:
-- index.html            Hauptanwendung: Platten- und Längenzuschnitt
-- manifest.webmanifest  PWA-/App-Metadaten
-- sw.js                 Offline-Cache / Service Worker
-- icon.svg              App-/Browser-Icon
+GitHub Pages:
+1. Alle Dateien aus dieser ZIP in das Repository hochladen.
+2. Vorhandene gleichnamige Dateien ersetzen.
+3. GitHub Pages bleibt auf main / (root).
 
-INSTALLATION / UPDATE AUF GITHUB
---------------------------------
-1. Alle Dateien aus dieser ZIP in das Stammverzeichnis des GitHub-Pages-Repositories hochladen.
-2. Vorhandene Dateien gleichen Namens ersetzen.
-3. Die ZIP-Datei selbst muss NICHT ins Repository hochgeladen werden.
-4. Nach dem Upload GitHub Pages normal neu laden.
-
-WICHTIG BEI ALTEM CACHE
------------------------
-Der Service-Worker-Cache wurde für diese Version auf V26 angehoben. Falls ein Browser
-noch die alte Ansicht zeigt, Seite einmal hart neu laden (Strg+F5).
-
-Stand: 10.09.2026
-
-V26: Rohlängen korrigiert:
-- KVH 500 cm -> 502 cm
-- KVH 1300 cm -> 1302 cm
-- BSH 1200 cm -> 1202 cm
-Die 200-cm-Restregel gilt entsprechend nur für KVH 1302 cm und BSH 1202 cm.
+V27:
+- Druck-/PDF-Ansicht deutlich kompakter
+- kleinere Seitenränder (6 mm)
+- kompakter Ergebnis-Kopf und Kennzahlen
+- weniger Abstand zwischen Platten- und Balkenplänen
+- Längenzuschnitt-Balken im Druck niedriger
+- Stücklisten kompakter
+- Bildschirmansicht unverändert
+- Service-Worker-Cache auf V27 angehoben
