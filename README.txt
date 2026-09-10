@@ -1,16 +1,16 @@
-Lowis Zuschnittplaner V30
+LOWIS ZUSCHNITTPLANER – V31
 
 GitHub Pages:
-- Alle Dateien in das Repository-Root hochladen bzw. vorhandene Dateien ersetzen.
-- index.html, manifest.webmanifest, sw.js und icon.svg gehören zusammen.
-- Service-Worker-Cache: V30.
+1. Alle Dateien aus diesem Ordner/ZIP in das bestehende Repository hochladen.
+2. Gleichnamige Dateien ersetzen.
+3. Enthalten: index.html, manifest.webmanifest, sw.js, icon.svg.
 
-V30:
-- Lokale Projektverwaltung im Längenzuschnitt-Projektmodus.
-- Projektname sowie Buttons für Projekt speichern, Gespeicherte Projekte und Neues Projekt.
-- Gespeicherte Projekte können geladen, umbenannt und gelöscht werden.
-- Projektpositionen und gewählte Rohlängen werden je Projekt gespeichert.
-- Speicherung erfolgt ausschließlich lokal im Browser auf dem jeweiligen Gerät (localStorage).
-- Automatischer Entwurf bleibt zusätzlich erhalten.
-- Projektname wird im berechneten Projekt-Zuschnitt und in der CSV-Ausgabe übernommen.
-- Kompakte Druckdarstellung und Restregeln aus V29 bleiben unverändert.
+Cache-Verhalten ab V31:
+- Die index.html wird bei normalem Online-Aufruf immer zuerst vom Server geladen.
+- Der Cache dient für die Seite nur noch als Offline-Fallback.
+- Der Service Worker wird ohne HTTP-Cache registriert und bei Seitenstart auf Updates geprüft.
+- Dadurch sollen neue GitHub-Versionen nach dem Deployment ohne wiederholtes Strg+F5 erscheinen.
+
+Hinweis beim einmaligen Wechsel von V30 auf V31:
+Ein bereits aktiver alter V30-Service-Worker kann die erste normale Aktualisierung noch abfangen.
+Nach dem Hochladen V31 einmal Strg+F5 verwenden oder den alten Service Worker abmelden. Danach greift die neue Update-Strategie.
