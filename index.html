@@ -1046,6 +1046,7 @@ html[data-theme="dark"] .length-rest{color:#526057}
 .length-rest.customer{background:repeating-linear-gradient(135deg,#edf2ed 0,#edf2ed 6px,#dfe7df 6px,#dfe7df 12px)}
 .length-rest.warehouse{background:repeating-linear-gradient(135deg,#f7f9f7 0,#f7f9f7 6px,#d6dfd7 6px,#d6dfd7 12px);outline:2px solid #63816b;outline-offset:-2px}
 .length-rest-label{font-size:8px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:clip;padding:0 3px}
+.warehouse-emphasis{font-weight:900;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
 .length-group-summary{display:flex;flex-wrap:wrap;gap:6px;margin:5px 0 12px}
 .length-mini-stat{font-size:10px;color:#556158;background:#f2f5f2;border-radius:999px;padding:5px 8px}
 
@@ -4179,10 +4180,11 @@ function renderLengthBar(bar,index,count,material,restLimit=DEFAULT_REST_LIMIT_C
   const raw=bar.raw,kerf=LENGTH_KERF_CM;let offset=0,pieces="";
   bar.pieces.forEach(p=>{const left=100*offset/raw,width=100*p.len/raw,showName=width>13&&p.name;pieces+=`<div class="length-piece" style="left:${left}%;width:${width}%" title="Pos. ${p.pos}: ${lengthFmt(p.len)} cm${p.name?" – "+escapeHtmlText(p.name):""}"><span>${lengthFmt(p.len)} cm${showName?`<small>${escapeHtmlText(p.name)}</small>`:""}</span></div>`;offset+=p.len;const kw=Math.max(.12,100*kerf/raw);pieces+=`<div class="length-kerf" style="left:${100*offset/raw}%;width:${kw}%"></div>`;offset+=kerf;});
   const rest=Math.max(0,Math.round((raw-offset)*10)/10),cls=classifyLengthRest(material,raw,rest,restLimit),restLeft=100*offset/raw;
-  const restHtml=rest>0?`<div class="length-rest ${cls.type}" style="left:${restLeft}%;width:${100*rest/raw}%"><span class="length-rest-label">${rest>=8?escapeHtmlText(cls.label):""}</span></div>`:"";
+  const restLabelHtml=cls.type==="warehouse"?`<span class="warehouse-emphasis">Lagerrest</span> ${lengthFmt(rest)} cm`:cls.type==="customer"?`Kundenrest ${lengthFmt(rest)} cm`:"kein Rest";
+  const restHtml=rest>0?`<div class="length-rest ${cls.type}" style="left:${restLeft}%;width:${100*rest/raw}%"><span class="length-rest-label">${rest>=8?restLabelHtml:""}</span></div>`:"";
   const seq=bar.pieces.map(p=>`${lengthFmt(p.len)} cm${p.name?" "+escapeHtmlText(p.name):""}`).join(" + ");
-  const meta=rest>0?cls.label:"kein Rest";
-  return `<div class="length-bar-card"><div class="length-bar-head"><div><strong>${count>1?count+"× identisch schneiden":"Rohstück "+index}</strong><div class="length-bar-meta">Rohlänge ${lengthFmt(raw)} cm · ${escapeHtmlText(meta)}</div></div><div class="length-bar-badge">${isPartialSaleRaw(material,raw)?"Zuschnittverkauf":"Komplettlänge"}</div></div><div class="length-track">${pieces}${restHtml}</div><div class="length-ruler"><span>0</span><span>${lengthFmt(raw)} cm</span></div><div class="length-sequence"><strong>Schnittfolge:</strong> ${seq}${rest?` · ${escapeHtmlText(cls.label)}`:""}</div></div>`;
+  const metaHtml=rest>0?restLabelHtml:"kein Rest";
+  return `<div class="length-bar-card"><div class="length-bar-head"><div><strong>${count>1?count+"× identisch schneiden":"Rohstück "+index}</strong><div class="length-bar-meta">Rohlänge ${lengthFmt(raw)} cm · ${metaHtml}</div></div><div class="length-bar-badge">${isPartialSaleRaw(material,raw)?"Zuschnittverkauf":"Komplettlänge"}</div></div><div class="length-track">${pieces}${restHtml}</div><div class="length-ruler"><span>0</span><span>${lengthFmt(raw)} cm</span></div><div class="length-sequence"><strong>Schnittfolge:</strong> ${seq}${rest?` · ${restLabelHtml}`:""}</div></div>`;
 }
 function summarizeBars(material,bars,restLimit=DEFAULT_REST_LIMIT_CM){let customerRest=0,warehouseRest=0,totalRaw=0;bars.forEach(b=>{totalRaw+=b.raw;const c=classifyLengthRest(material,b.raw,b.raw-b.used,restLimit);customerRest+=c.customer;warehouseRest+=c.warehouse;});return {customerRest:Math.round(customerRest*10)/10,warehouseRest:Math.round(warehouseRest*10)/10,totalRaw};}
 function renderSingleSummary(pos){$("lengthPieceSummary").innerHTML=`<div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>Pos.</th><th>Länge</th><th>Menge</th><th>Bezeichnung</th></tr></thead><tbody>${pos.map(p=>`<tr><td>${p.pos}</td><td>${lengthFmt(p.len)} cm</td><td>${p.q}</td><td>${escapeHtmlText(p.name||"–")}</td></tr>`).join("")}</tbody></table></div>`;}
@@ -4278,6 +4280,21 @@ function makeLengthPlanPdfBase64(result,customer){
   const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
   const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
   const rc=(x,y,w,h,fill=false)=>`${x} ${y} ${w} ${h} re ${fill?"B":"S"}\n`;
+  const tWarehouse=(x,y,size,str)=>{
+    const text=pdfAscii(str);
+    const word="Lagerrest";
+    const idx=text.indexOf(word);
+    if(idx<0) return t(x,y,size,text);
+    const before=text.slice(0,idx),after=text.slice(idx+word.length);
+    const wx=x+textApprox(before,size);
+    const ww=textApprox(word,size);
+    let out="";
+    if(before)out+=t(x,y,size,before);
+    out+=t(wx,y,size,word,true);
+    out+="0 G 0.65 w\n"+ln(wx,y-1.5,wx+ww,y-1.5)+"0 G 0.5 w\n";
+    if(after)out+=t(wx+ww,y,size,after);
+    return out;
+  };
   const wrapWords=(text,maxChars)=>{
     const words=pdfAscii(text).split(/\s+/).filter(Boolean),lines=[];let line="";
     words.forEach(word=>{
@@ -4373,7 +4390,7 @@ function makeLengthPlanPdfBase64(result,customer){
 
       const label=pat.count>1?`${pat.count}x identisch`:`Rohstueck ${idx+1}`;
       page+=t(35,y,9.2,label,true);
-      page+=t(318,y,7.8,`Rohlaenge ${lengthFmt(raw)} cm | ${rest?`${restLabel} ${lengthFmt(rest)} cm`:"kein Rest"}`);
+      page+=tWarehouse(318,y,7.8,`Rohlaenge ${lengthFmt(raw)} cm | ${rest?`${restLabel} ${lengthFmt(rest)} cm`:"kein Rest"}`);
       y-=15;
 
       const bx=35,bw=525,bh=15,by=y-bh;
@@ -4390,7 +4407,7 @@ function makeLengthPlanPdfBase64(result,customer){
       if(restW>0){const rx=bx+bw*((raw-rest)/raw);page+="0.93 g\n"+rc(rx,by,restW,bh,true)+"0 g\n"+rc(rx,by,restW,bh,false);}
       y=by-10;
 
-      seqLines.forEach(line=>{page+=t(39,y,7.2,line);y-=10.5;});
+      seqLines.forEach(line=>{page+=tWarehouse(39,y,7.2,line);y-=10.5;});
       y-=6;
     });
     previousPdfMaterial=group.material;

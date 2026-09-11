@@ -1,4 +1,4 @@
-const CACHE="lowis-zuschnittplaner-v41";
+const CACHE="lowis-zuschnittplaner-v42";
 const STATIC_ASSETS=["./manifest.webmanifest","./icon.svg"];
 
 self.addEventListener("install",event=>{
