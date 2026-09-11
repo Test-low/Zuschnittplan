@@ -1054,6 +1054,12 @@ html[data-theme="dark"] .length-rest{color:#526057}
 .local-project-manager label{margin-top:0}
 .local-project-main{display:grid;grid-template-columns:minmax(220px,1fr) auto auto auto;gap:8px;align-items:end}
 .local-project-name input{width:100%;min-height:40px}
+.project-rule-setting{display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:12px;align-items:end;margin:10px 0 14px;padding:11px 12px;border:1px solid #dfe6e0;background:#fff;border-radius:12px}
+.project-rule-setting label{display:block;margin:0 0 5px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.project-rule-input{display:flex;align-items:center;gap:7px}
+.project-rule-input input{width:120px;min-height:40px}
+.project-rule-input span{font-size:13px;font-weight:800;color:var(--text)}
+.project-rule-note{font-size:10px;line-height:1.45;color:var(--muted);align-self:center}
 .local-project-main .btn{white-space:nowrap;min-height:40px}
 .saved-project-panel{margin-top:10px;padding-top:10px;border-top:1px solid #dfe6e0}
 .saved-project-panel-row{display:grid;grid-template-columns:minmax(220px,1fr) auto auto auto;gap:8px;align-items:center}
@@ -1062,12 +1068,14 @@ html[data-theme="dark"] .length-rest{color:#526057}
 .project-storage-status{font-size:10px;font-weight:700;color:#536057;margin-top:7px;min-height:14px}
 .saved-project-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:#e7eee8;font-size:10px}
 html[data-theme="dark"] .local-project-manager{background:#171d19;border-color:#303a33}
+html[data-theme="dark"] .project-rule-setting{background:#151b17;border-color:#303a33}
 html[data-theme="dark"] .saved-project-panel{border-top-color:#303a33}
 html[data-theme="dark"] .project-storage-status{color:#b5c0b8}
 html[data-theme="dark"] .saved-project-count{background:#2a352d;color:#dbe5dd}
 @media(max-width:900px){
   .local-project-main{grid-template-columns:1fr 1fr}
   .local-project-name{grid-column:1/-1}
+  .project-rule-setting{grid-template-columns:1fr}
   .saved-project-panel-row{grid-template-columns:1fr 1fr 1fr}
   .saved-project-panel-row select{grid-column:1/-1}
 }
@@ -1492,6 +1500,13 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
               </div>
               <div id="projectStorageStatus" class="project-storage-status"></div>
               <div class="project-storage-note">Projekte werden nur lokal in diesem Browser auf diesem Gerät gespeichert. Der aktuelle Entwurf wird zusätzlich automatisch zwischengespeichert. Beim Löschen der Browserdaten können lokal gespeicherte Projekte verloren gehen.</div>
+            </div>
+            <div class="project-rule-setting">
+              <div>
+                <label for="projectRestLimit">Grenze Kundenrest / Lagerrest</label>
+                <div class="project-rule-input"><input id="projectRestLimit" type="number" min="0" step="1" inputmode="decimal" value="200"><span>cm</span></div>
+              </div>
+              <div class="project-rule-note">Projektbezogene Restgrenze für KVH 1302 cm und BSH 1202 cm: Rest &lt; Grenze = Kundenrest, Rest ≥ Grenze = Lagerrest. Andere Rohlängen bleiben Komplettverkauf.</div>
             </div>
             <div class="parts-scroll">
               <table class="project-parts-table">
@@ -3710,7 +3725,7 @@ function sendRequest(ev){
 
 
 /* =========================================================
-   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V32
+   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V34
    ========================================================= */
 window.activePlannerMode="plate";
 let activeLengthMode="single";
@@ -3719,6 +3734,7 @@ const SAVED_PROJECTS_KEY="lowis-laengenzuschnitt-projects-v1";
 let currentProjectId=null;
 let currentLengthResult=null;
 const LENGTH_KERF_CM=0.5;
+const DEFAULT_REST_LIMIT_CM=200;
 const singleRawSelection={};
 const projectRawSelection={};
 function lengthFmt(value){ return Number(value).toLocaleString("de-DE",{maximumFractionDigits:1}); }
@@ -3756,28 +3772,41 @@ function parseDimension(dim){
 function lengthGroupKey(material,dimension){return material+"||"+dimension;}
 function catalogRaws(material,dimension){return ((LENGTH_CATALOG[material]||{})[dimension]||[]).slice();}
 function isPartialSaleRaw(material,raw){return (material==="KVH"&&Number(raw)===1302)||(material==="BSH"&&Number(raw)===1202);}
-function classifyLengthRest(material,raw,rest){
+function normalizeRestLimit(value){
+  if(value===null||value===undefined||String(value).trim()==="") return DEFAULT_REST_LIMIT_CM;
+  const n=Number(value);
+  return Number.isFinite(n)&&n>=0 ? Math.round(n*10)/10 : DEFAULT_REST_LIMIT_CM;
+}
+function getProjectRestLimit(){
+  return normalizeRestLimit($("projectRestLimit")?.value);
+}
+function classifyLengthRest(material,raw,rest,restLimit=DEFAULT_REST_LIMIT_CM){
   rest=Math.max(0,Math.round(Number(rest)*10)/10);
+  restLimit=normalizeRestLimit(restLimit);
   if(rest<=0.0001) return {customer:0,warehouse:0,type:"none",label:"Kein Rest"};
   if(isPartialSaleRaw(material,raw)){
-    if(rest<200) return {customer:rest,warehouse:0,type:"customer",label:`Kundenrest ${lengthFmt(rest)} cm`};
+    if(rest<restLimit) return {customer:rest,warehouse:0,type:"customer",label:`Kundenrest ${lengthFmt(rest)} cm`};
     return {customer:0,warehouse:rest,type:"warehouse",label:`Lagerrest ${lengthFmt(rest)} cm`};
   }
   return {customer:rest,warehouse:0,type:"customer",label:`Kundenrest ${lengthFmt(rest)} cm`};
 }
-function saleRuleText(material,raws){
+function saleRuleText(material,raws,restLimit=DEFAULT_REST_LIMIT_CM){
+  restLimit=normalizeRestLimit(restLimit);
+  const limit=lengthFmt(restLimit);
   const special=raws.some(r=>isPartialSaleRaw(material,r));
   const normal=raws.some(r=>!isPartialSaleRaw(material,r));
-  if(special&&!normal) return "Zuschnittverkauf: Rest < 200 cm zum Kunden, ab 200 cm Lagerrest.";
+  if(special&&!normal) return `Zuschnittverkauf: Rest < ${limit} cm zum Kunden, ab ${limit} cm Lagerrest.`;
   if(!special&&normal) return "Komplette Handelslänge wird verkauft; verbleibender Rest gehört zum Kunden.";
-  return "502-cm-Länge komplett verkauft; bei 1302 cm gilt: Rest < 200 cm Kunde, ab 200 cm Lager.";
+  return `502-cm-Länge komplett verkauft; bei 1302 cm gilt: Rest < ${limit} cm Kunde, ab ${limit} cm Lager.`;
 }
-function combinedSaleRuleText(groups){
+function combinedSaleRuleText(groups,restLimit=DEFAULT_REST_LIMIT_CM){
+  restLimit=normalizeRestLimit(restLimit);
+  const limit=lengthFmt(restLimit);
   let special=false,normal=false;
   (groups||[]).forEach(g=>(g.raws||[]).forEach(r=>{if(isPartialSaleRaw(g.material,r)) special=true; else normal=true;}));
-  if(special&&!normal) return "Zuschnittverkauf: Rest < 200 cm zum Kunden, ab 200 cm Lagerrest.";
+  if(special&&!normal) return `Zuschnittverkauf: Rest < ${limit} cm zum Kunden, ab ${limit} cm Lagerrest.`;
   if(!special&&normal) return "Komplette Handelslänge wird verkauft; verbleibender Rest gehört zum Kunden.";
-  return "Restregel nur KVH 1302 / BSH 1202: < 200 cm Kunde, ab 200 cm Lager; andere Rohlängen = Komplettverkauf.";
+  return `Restregel nur KVH 1302 / BSH 1202: < ${limit} cm Kunde, ab ${limit} cm Lager; andere Rohlängen = Komplettverkauf.`;
 }
 function ensureSelection(store,key,raws){
   const valid=new Set(raws.map(Number));
@@ -3932,49 +3961,50 @@ function greedyPack(items,raws,kerf,variant=0){
     if(!choice)return null;bars.push({raw:choice.raw,used:need,pieces:[item]});
   }return bars;
 }
-function improveBars(bars,raws,kerf,material){
+function improveBars(bars,raws,kerf,material,restLimit=DEFAULT_REST_LIMIT_CM){
   const all=bars.flatMap(b=>b.pieces);let best=bars;
-  const score=bs=>{const totalRaw=bs.reduce((a,b)=>a+b.raw,0);let customerRest=0,warehouseRest=0;bs.forEach(b=>{const c=classifyLengthRest(material,b.raw,b.raw-b.used);customerRest+=c.customer;warehouseRest+=c.warehouse;});return totalRaw*1000000+bs.length*10000+customerRest*10-warehouseRest*0.01;};
+  const score=bs=>{const totalRaw=bs.reduce((a,b)=>a+b.raw,0);let customerRest=0,warehouseRest=0;bs.forEach(b=>{const c=classifyLengthRest(material,b.raw,b.raw-b.used,restLimit);customerRest+=c.customer;warehouseRest+=c.warehouse;});return totalRaw*1000000+bs.length*10000+customerRest*10-warehouseRest*0.01;};
   let bestScore=score(best);for(let v=0;v<30;v++){const cand=greedyPack(all,raws,kerf,v);if(!cand)continue;const sc=score(cand);if(sc<bestScore){best=cand;bestScore=sc;}}return best;
 }
-function optimizeLengths(items,raws,kerf,material){const first=greedyPack(items,raws,kerf,0);return first?improveBars(first,raws,kerf,material):null;}
-function lengthPatternKey(bar,material){const cls=classifyLengthRest(material,bar.raw,bar.raw-bar.used);return bar.raw+"|"+cls.type+"|"+bar.pieces.map(p=>`${p.len}:${p.pos}:${p.name}`).join("|");}
-function groupLengthBars(bars,material){const map=new Map();bars.forEach((bar,i)=>{const k=lengthPatternKey(bar,material);if(!map.has(k))map.set(k,{bar,count:0,numbers:[]});const g=map.get(k);g.count++;g.numbers.push(i+1);});return [...map.values()];}
-function renderLengthBar(bar,index,count,material){
+function optimizeLengths(items,raws,kerf,material,restLimit=DEFAULT_REST_LIMIT_CM){const first=greedyPack(items,raws,kerf,0);return first?improveBars(first,raws,kerf,material,restLimit):null;}
+function lengthPatternKey(bar,material,restLimit=DEFAULT_REST_LIMIT_CM){const cls=classifyLengthRest(material,bar.raw,bar.raw-bar.used,restLimit);return bar.raw+"|"+cls.type+"|"+bar.pieces.map(p=>`${p.len}:${p.pos}:${p.name}`).join("|");}
+function groupLengthBars(bars,material,restLimit=DEFAULT_REST_LIMIT_CM){const map=new Map();bars.forEach((bar,i)=>{const k=lengthPatternKey(bar,material,restLimit);if(!map.has(k))map.set(k,{bar,count:0,numbers:[]});const g=map.get(k);g.count++;g.numbers.push(i+1);});return [...map.values()];}
+function renderLengthBar(bar,index,count,material,restLimit=DEFAULT_REST_LIMIT_CM){
   const raw=bar.raw,kerf=LENGTH_KERF_CM;let offset=0,pieces="";
   bar.pieces.forEach(p=>{const left=100*offset/raw,width=100*p.len/raw,showName=width>13&&p.name;pieces+=`<div class="length-piece" style="left:${left}%;width:${width}%" title="Pos. ${p.pos}: ${lengthFmt(p.len)} cm${p.name?" – "+escapeHtmlText(p.name):""}"><span>${lengthFmt(p.len)} cm${showName?`<small>${escapeHtmlText(p.name)}</small>`:""}</span></div>`;offset+=p.len;const kw=Math.max(.12,100*kerf/raw);pieces+=`<div class="length-kerf" style="left:${100*offset/raw}%;width:${kw}%"></div>`;offset+=kerf;});
-  const rest=Math.max(0,Math.round((raw-offset)*10)/10),cls=classifyLengthRest(material,raw,rest),restLeft=100*offset/raw;
+  const rest=Math.max(0,Math.round((raw-offset)*10)/10),cls=classifyLengthRest(material,raw,rest,restLimit),restLeft=100*offset/raw;
   const restHtml=rest>0?`<div class="length-rest ${cls.type}" style="left:${restLeft}%;width:${100*rest/raw}%"><span class="length-rest-label">${rest>=8?escapeHtmlText(cls.label):""}</span></div>`:"";
   const seq=bar.pieces.map(p=>`${lengthFmt(p.len)} cm${p.name?" "+escapeHtmlText(p.name):""}`).join(" + ");
   const meta=rest>0?cls.label:"kein Rest";
   return `<div class="length-bar-card"><div class="length-bar-head"><div><strong>${count>1?count+"× identisch schneiden":"Rohstück "+index}</strong><div class="length-bar-meta">Rohlänge ${lengthFmt(raw)} cm · ${escapeHtmlText(meta)}</div></div><div class="length-bar-badge">${isPartialSaleRaw(material,raw)?"Zuschnittverkauf":"Komplettlänge"}</div></div><div class="length-track">${pieces}${restHtml}</div><div class="length-ruler"><span>0</span><span>${lengthFmt(raw)} cm</span></div><div class="length-sequence"><strong>Schnittfolge:</strong> ${seq}${rest?` · ${escapeHtmlText(cls.label)}`:""}</div></div>`;
 }
-function summarizeBars(material,bars){let customerRest=0,warehouseRest=0,totalRaw=0;bars.forEach(b=>{totalRaw+=b.raw;const c=classifyLengthRest(material,b.raw,b.raw-b.used);customerRest+=c.customer;warehouseRest+=c.warehouse;});return {customerRest:Math.round(customerRest*10)/10,warehouseRest:Math.round(warehouseRest*10)/10,totalRaw};}
+function summarizeBars(material,bars,restLimit=DEFAULT_REST_LIMIT_CM){let customerRest=0,warehouseRest=0,totalRaw=0;bars.forEach(b=>{totalRaw+=b.raw;const c=classifyLengthRest(material,b.raw,b.raw-b.used,restLimit);customerRest+=c.customer;warehouseRest+=c.warehouse;});return {customerRest:Math.round(customerRest*10)/10,warehouseRest:Math.round(warehouseRest*10)/10,totalRaw};}
 function renderSingleSummary(pos){$("lengthPieceSummary").innerHTML=`<div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>Pos.</th><th>Länge</th><th>Menge</th><th>Bezeichnung</th></tr></thead><tbody>${pos.map(p=>`<tr><td>${p.pos}</td><td>${lengthFmt(p.len)} cm</td><td>${p.q}</td><td>${escapeHtmlText(p.name||"–")}</td></tr>`).join("")}</tbody></table></div>`;}
 function renderProjectSummary(pos){$("lengthPieceSummary").innerHTML=`<div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>Pos.</th><th>Material</th><th>Dimension</th><th>Länge</th><th>Menge</th><th>Bezeichnung</th></tr></thead><tbody>${pos.map(p=>`<tr><td>${p.pos}</td><td>${escapeHtmlText(p.material)}</td><td>${escapeHtmlText(p.dimension)} cm</td><td>${lengthFmt(p.len)} cm</td><td>${p.q}</td><td>${escapeHtmlText(p.name||"–")}</td></tr>`).join("")}</tbody></table></div>`;}
 function setLengthNotice(type,html){$("lengthNotice").className="notice"+(type?" "+type:"");$("lengthNotice").innerHTML=html;}
-function updateLengthStats(groups,totalParts){let bars=0,customer=0,warehouse=0;groups.forEach(g=>{bars+=g.bars.length;const s=summarizeBars(g.material,g.bars);customer+=s.customerRest;warehouse+=s.warehouseRest;});$("lengthSumBars").textContent=bars;$("lengthSumParts").textContent=totalParts;$("lengthSumCustomerRest").textContent=lengthFmt(customer)+" cm";$("lengthSumWarehouseRest").textContent=lengthFmt(warehouse)+" cm";}
+function updateLengthStats(groups,totalParts){let bars=0,customer=0,warehouse=0;groups.forEach(g=>{bars+=g.bars.length;const s=summarizeBars(g.material,g.bars,g.restLimit);customer+=s.customerRest;warehouse+=s.warehouseRest;});$("lengthSumBars").textContent=bars;$("lengthSumParts").textContent=totalParts;$("lengthSumCustomerRest").textContent=lengthFmt(customer)+" cm";$("lengthSumWarehouseRest").textContent=lengthFmt(warehouse)+" cm";}
 function calculateLengths(){
   saveLengthDraft();const cfg=selectedLengthConfig(),raws=cfg.raws,pos=readLengthPositions();
   if(!raws.length){setLengthNotice("error","Bitte mindestens eine Rohlänge aktivieren.");return;}if(!pos.length){setLengthNotice("error","Bitte mindestens eine Fertiglänge eingeben.");return;}if(pos.some(p=>p.len<=0||p.q<=0)){setLengthNotice("error","Länge und Stückzahl müssen größer als 0 sein.");return;}
   const maxRaw=Math.max(...raws),tooLong=pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos} mit ${lengthFmt(tooLong.len)} cm passt inklusive Sägefuge in keine aktivierte Rohlänge.`);return;}
   const items=expandLengthPositions(pos),bars=optimizeLengths(items,raws,LENGTH_KERF_CM,cfg.material);if(!bars){setLengthNotice("error","Für diese Eingaben konnte kein Längenzuschnitt erzeugt werden.");return;}
-  const sum=summarizeBars(cfg.material,bars),group={material:cfg.material,dimension:cfg.dimension,raws,pos,items,bars};currentLengthResult={mode:"single",groups:[group],pos,items};
+  const sum=summarizeBars(cfg.material,bars,DEFAULT_REST_LIMIT_CM),group={material:cfg.material,dimension:cfg.dimension,raws,pos,items,bars,restLimit:DEFAULT_REST_LIMIT_CM};currentLengthResult={mode:"single",restLimit:DEFAULT_REST_LIMIT_CM,groups:[group],pos,items};
   const patterns=groupLengthBars(bars,cfg.material);$("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(saleRuleText(cfg.material,raws))}</div><div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(cfg.material)} · ${escapeHtmlText(cfg.dimension)} cm</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">Rohlängen ${raws.map(lengthFmt).join(" / ")} cm</span><span class="length-mini-stat">Fertigteile ${items.length}</span><span class="length-mini-stat">Rohstück${bars.length===1?"":"e"} ${bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((g,i)=>renderLengthBar(g.bar,i+1,g.count,cfg.material)).join("")}</div>`;
   $("lengthResultTitle").textContent="Optimierter Längenzuschnitt";$("lengthResultMaterial").textContent=`${cfg.material} · ${cfg.dimension} cm · Rohlängen ${raws.map(lengthFmt).join(" / ")} cm`;updateLengthStats([group],items.length);renderSingleSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Berechnung abgeschlossen: <strong>${bars.length} Rohstück${bars.length===1?"":"e"}</strong>. ${escapeHtmlText(saleRuleText(cfg.material,raws))}`);
 }
 function calculateProject(){
   saveLengthDraft();const pos=readProjectPositions();if(!pos.length){setLengthNotice("error","Bitte mindestens eine Projektposition eingeben.");return;}if(pos.some(p=>p.len<=0||p.q<=0)){setLengthNotice("error","Länge und Stückzahl müssen größer als 0 sein.");return;}
+  const restLimit=getProjectRestLimit();
   const by=new Map();for(const p of pos){const key=lengthGroupKey(p.material,p.dimension);if(!by.has(key))by.set(key,{material:p.material,dimension:p.dimension,pos:[]});by.get(key).pos.push(p);}
-  const groups=[];for(const [key,g] of by){const allRaws=catalogRaws(g.material,g.dimension),set=ensureSelection(projectRawSelection,key,allRaws),raws=allRaws.filter(r=>set.has(Number(r)));if(!raws.length){setLengthNotice("error",`${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm: Bitte mindestens eine Rohlänge aktivieren.`);return;}const maxRaw=Math.max(...raws),tooLong=g.pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos}: ${lengthFmt(tooLong.len)} cm passt bei ${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm in keine aktivierte Rohlänge.`);return;}const items=expandLengthPositions(g.pos),bars=optimizeLengths(items,raws,LENGTH_KERF_CM,g.material);if(!bars){setLengthNotice("error",`Für ${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm konnte kein Zuschnitt erzeugt werden.`);return;}groups.push({...g,raws,items,bars});}
-  const projectName=String($("projectName")?.value||"").trim();currentLengthResult={mode:"project",projectName,groups,pos,items:groups.flatMap(g=>g.items)};
-  $("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(combinedSaleRuleText(groups))}</div>`+groups.map(g=>{const sum=summarizeBars(g.material,g.bars),patterns=groupLengthBars(g.bars,g.material);return `<div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(g.material)} · ${escapeHtmlText(g.dimension)} cm</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">Rohlängen ${g.raws.map(lengthFmt).join(" / ")} cm</span><span class="length-mini-stat">Fertigteile ${g.items.length}</span><span class="length-mini-stat">Rohstück${g.bars.length===1?"":"e"} ${g.bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((x,i)=>renderLengthBar(x.bar,i+1,x.count,g.material)).join("")}</div>`;}).join("");
-  $("lengthResultTitle").textContent=projectName?`Projekt: ${projectName}`:"Optimierter Projekt-Zuschnitt";$("lengthResultMaterial").textContent=`${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"} · automatische getrennte Optimierung`;updateLengthStats(groups,currentLengthResult.items.length);renderProjectSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Projekt berechnet: <strong>${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"}</strong> und <strong>${groups.reduce((a,g)=>a+g.bars.length,0)} Rohstücke</strong>. Die 200-cm-Restregel gilt ausschließlich für KVH 1302 cm und BSH 1202 cm.`);
+  const groups=[];for(const [key,g] of by){const allRaws=catalogRaws(g.material,g.dimension),set=ensureSelection(projectRawSelection,key,allRaws),raws=allRaws.filter(r=>set.has(Number(r)));if(!raws.length){setLengthNotice("error",`${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm: Bitte mindestens eine Rohlänge aktivieren.`);return;}const maxRaw=Math.max(...raws),tooLong=g.pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos}: ${lengthFmt(tooLong.len)} cm passt bei ${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm in keine aktivierte Rohlänge.`);return;}const items=expandLengthPositions(g.pos),bars=optimizeLengths(items,raws,LENGTH_KERF_CM,g.material,restLimit);if(!bars){setLengthNotice("error",`Für ${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm konnte kein Zuschnitt erzeugt werden.`);return;}groups.push({...g,raws,items,bars,restLimit});}
+  const projectName=String($("projectName")?.value||"").trim();currentLengthResult={mode:"project",projectName,restLimit,groups,pos,items:groups.flatMap(g=>g.items)};
+  $("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(combinedSaleRuleText(groups,restLimit))}</div>`+groups.map(g=>{const sum=summarizeBars(g.material,g.bars,restLimit),patterns=groupLengthBars(g.bars,g.material,restLimit);return `<div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(g.material)} · ${escapeHtmlText(g.dimension)} cm</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">Rohlängen ${g.raws.map(lengthFmt).join(" / ")} cm</span><span class="length-mini-stat">Fertigteile ${g.items.length}</span><span class="length-mini-stat">Rohstück${g.bars.length===1?"":"e"} ${g.bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((x,i)=>renderLengthBar(x.bar,i+1,x.count,g.material,restLimit)).join("")}</div>`;}).join("");
+  $("lengthResultTitle").textContent=projectName?`Projekt: ${projectName}`:"Optimierter Projekt-Zuschnitt";$("lengthResultMaterial").textContent=`${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"} · Restgrenze ${lengthFmt(restLimit)} cm`;updateLengthStats(groups,currentLengthResult.items.length);renderProjectSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Projekt berechnet: <strong>${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"}</strong> und <strong>${groups.reduce((a,g)=>a+g.bars.length,0)} Rohstücke</strong>. Projekt-Restgrenze: <strong>${lengthFmt(restLimit)} cm</strong> für KVH 1302 cm und BSH 1202 cm.`);
 }
 function lengthCsvText(){
-  if(!currentLengthResult)return "";const r=currentLengthResult,rows=[["Modus",r.mode==="project"?"Projekt / mehrere Dimensionen":"Einzelmaterial"]];if(r.mode==="project"&&r.projectName)rows.push(["Projektname",r.projectName]);rows.push(["Saegefuge","0,5 cm / 5 mm"],["Restregel","Nur KVH 1302 cm und BSH 1202 cm: unter 200 cm Kundenrest, ab 200 cm Lagerrest. Andere Rohlängen werden komplett verkauft."],[]);
+  if(!currentLengthResult)return "";const r=currentLengthResult,restLimit=normalizeRestLimit(r.restLimit),rows=[["Modus",r.mode==="project"?"Projekt / mehrere Dimensionen":"Einzelmaterial"]];if(r.mode==="project"&&r.projectName)rows.push(["Projektname",r.projectName]);rows.push(["Saegefuge","0,5 cm / 5 mm"],["Restgrenze",`${lengthFmt(restLimit)} cm`],["Restregel",`Nur KVH 1302 cm und BSH 1202 cm: unter ${lengthFmt(restLimit)} cm Kundenrest, ab ${lengthFmt(restLimit)} cm Lagerrest. Andere Rohlängen werden komplett verkauft.`],[]);
   if(r.mode==="project")rows.push(["Pos.","Material","Dimension cm","Laenge cm","Menge","Bezeichnung"],...r.pos.map(p=>[p.pos,p.material,p.dimension,p.len,p.q,p.name||""]),[]);else rows.push(["Pos.","Laenge cm","Menge","Bezeichnung"],...r.pos.map(p=>[p.pos,p.len,p.q,p.name||""]),[]);
-  r.groups.forEach(g=>{rows.push([`${g.material} ${g.dimension} cm`],["Rohlaengen",g.raws.join(" / ")+" cm"],["Rohstueck","Rohlaenge cm","Zuschnitte","Restart","Rest cm"]);g.bars.forEach((b,i)=>{const c=classifyLengthRest(g.material,b.raw,b.raw-b.used);rows.push([i+1,b.raw,b.pieces.map(p=>p.len).join(" + "),c.type==="warehouse"?"Lagerrest":c.type==="customer"?"Kundenrest":"kein Rest",c.customer+c.warehouse]);});rows.push([]);});
+  r.groups.forEach(g=>{rows.push([`${g.material} ${g.dimension} cm`],["Rohlaengen",g.raws.join(" / ")+" cm"],["Rohstueck","Rohlaenge cm","Zuschnitte","Restart","Rest cm"]);g.bars.forEach((b,i)=>{const c=classifyLengthRest(g.material,b.raw,b.raw-b.used,g.restLimit??restLimit);rows.push([i+1,b.raw,b.pieces.map(p=>p.len).join(" + "),c.type==="warehouse"?"Lagerrest":c.type==="customer"?"Kundenrest":"kein Rest",c.customer+c.warehouse]);});rows.push([]);});
   return rows.map(row=>row.map(csvCell).join(";")).join("\r\n");
 }
 function downloadLengthCsv(){if(!currentLengthResult)return;const blob=new Blob(["\ufeff"+lengthCsvText()],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=currentLengthResult.mode==="project"?"stueckliste-projekt-laengenzuschnitt.csv":"stueckliste-laengenzuschnitt.csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
@@ -4003,15 +4033,16 @@ function makeLengthPlanPdfBase64(result,customer){
   const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
   const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
   const rc=(x,y,w,h,fill=false)=>`${x} ${y} ${w} ${h} re ${fill?"B":"S"}\n`;
+  const restLimit=normalizeRestLimit(result.restLimit);
   const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
-  const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars).customerRest,0);
-  const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars).warehouseRest,0);
+  const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).customerRest,0);
+  const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).warehouseRest,0);
 
   let c="0 G 0 g 0.7 w\n";
   c+=t(45,800,18,result.mode==="project"?"Projekt-Laengenzuschnitt":"Laengen-Zuschnittplan",true);
   if(result.mode==="project"&&result.projectName)c+=t(45,778,11,`Projekt: ${result.projectName}`,true);
   c+=t(45,result.mode==="project"&&result.projectName?758:778,9,`Saegefuge: 0,5 cm / 5 mm | Rohstuecke: ${totalBars} | Fertigteile: ${result.items.length}`);
-  c+=t(45,result.mode==="project"&&result.projectName?742:762,9,`Kundenrest: ${lengthFmt(totalCustomer)} cm | Lagerrest: ${lengthFmt(totalWarehouse)} cm`);
+  c+=t(45,result.mode==="project"&&result.projectName?742:762,9,`Kundenrest: ${lengthFmt(totalCustomer)} cm | Lagerrest: ${lengthFmt(totalWarehouse)} cm | Restgrenze: ${lengthFmt(restLimit)} cm`);
   let y=result.mode==="project"&&result.projectName?712:730;
   c+=t(45,y,11,"Kunde",true);y-=16;
   c+=t(55,y,9,`${customer.name}${customer.company?" | "+customer.company:""}`);y-=14;
@@ -4033,18 +4064,18 @@ function makeLengthPlanPdfBase64(result,customer){
   pages.push(c);
 
   result.groups.forEach(group=>{
-    const patterns=groupLengthBars(group.bars,group.material);
+    const patterns=groupLengthBars(group.bars,group.material,group.restLimit??restLimit);
     let p="0 G 0 g 0.7 w\n",py=800;
     const startPage=()=>{
       p="0 G 0 g 0.7 w\n";py=800;
       p+=t(45,py,15,`${group.material} ${group.dimension} cm`,true);py-=18;
-      const sum=summarizeBars(group.material,group.bars);
+      const sum=summarizeBars(group.material,group.bars,group.restLimit??restLimit);
       p+=t(45,py,8,`Rohlaengen: ${group.raws.map(lengthFmt).join(" / ")} cm | Fertigteile: ${group.items.length} | Rohstuecke: ${group.bars.length} | Kundenrest: ${lengthFmt(sum.customerRest)} cm | Lagerrest: ${lengthFmt(sum.warehouseRest)} cm`);py-=20;
     };
     startPage();
     patterns.forEach((pat,idx)=>{
       if(py<115){pages.push(p);startPage();}
-      const bar=pat.bar,raw=bar.raw,rest=Math.max(0,Math.round((raw-bar.used)*10)/10),cls=classifyLengthRest(group.material,raw,rest);
+      const bar=pat.bar,raw=bar.raw,rest=Math.max(0,Math.round((raw-bar.used)*10)/10),cls=classifyLengthRest(group.material,raw,rest,group.restLimit??restLimit);
       p+=t(45,py,9,pat.count>1?`${pat.count}x identisch schneiden`:`Rohstueck ${idx+1}`,true);
       p+=t(385,py,7,`Rohlaenge ${lengthFmt(raw)} cm | ${cls.label}`);py-=12;
       const bx=45,bw=505,bh=16,by=py-4;
@@ -4073,14 +4104,15 @@ function makeLengthEml(result,customer){
   const boundary="----=_Lowis_Laengenzuschnitt_"+Date.now();
   const ref="TEST-L-"+new Date().toISOString().replace(/[-:TZ.]/g,"").slice(0,14);
   const subject=`TEST Laengen-Zuschnittanfrage ${ref}${result.mode==="project"&&result.projectName?" - "+result.projectName:""}`;
+  const restLimit=normalizeRestLimit(result.restLimit);
   const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
   const text=[
     "Neue unverbindliche Laengen-Zuschnittanfrage","",`Referenz: ${ref}`,
     result.mode==="project"&&result.projectName?`Projekt: ${result.projectName}`:null,
     `Kunde: ${customer.name}`,customer.company?`Firma: ${customer.company}`:null,`E-Mail: ${customer.email}`,customer.phone?`Telefon: ${customer.phone}`:null,"",
     `Modus: ${result.mode==="project"?"Projekt / mehrere Dimensionen":"Einzelmaterial"}`,
-    "Saegefuge: 0,5 cm / 5 mm fest",`Berechnete Rohstuecke: ${totalBars}`,`Fertigteile gesamt: ${result.items.length}`,"",
-    "Materialgruppen:",...result.groups.map(g=>{const s=summarizeBars(g.material,g.bars);return `${g.material} ${g.dimension} cm | Rohlaengen ${g.raws.map(lengthFmt).join(" / ")} cm | ${g.bars.length} Rohstueck(e) | Kundenrest ${lengthFmt(s.customerRest)} cm | Lagerrest ${lengthFmt(s.warehouseRest)} cm`;}),"",
+    "Saegefuge: 0,5 cm / 5 mm fest",`Restgrenze: ${lengthFmt(restLimit)} cm`,`Berechnete Rohstuecke: ${totalBars}`,`Fertigteile gesamt: ${result.items.length}`,"",
+    "Materialgruppen:",...result.groups.map(g=>{const s=summarizeBars(g.material,g.bars,g.restLimit??restLimit);return `${g.material} ${g.dimension} cm | Rohlaengen ${g.raws.map(lengthFmt).join(" / ")} cm | ${g.bars.length} Rohstueck(e) | Kundenrest ${lengthFmt(s.customerRest)} cm | Lagerrest ${lengthFmt(s.warehouseRest)} cm`;}),"",
     "Stueckliste:",...result.pos.map(p=>result.mode==="project"?`Pos. ${p.pos}: ${p.q} x ${p.material} ${p.dimension} cm | ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`:`Pos. ${p.pos}: ${p.q} x ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`),
     customer.remarks?"":null,customer.remarks?"Bemerkung:":null,customer.remarks||null,"","Laengenzuschnitt-PDF und CSV-Stueckliste sind angehaengt."
   ].filter(v=>v!==null).join("\r\n");
@@ -4112,12 +4144,12 @@ function sendLengthRequest(ev){
 function serializeSelections(store){const out={};Object.entries(store).forEach(([k,v])=>out[k]=[...v]);return out;}
 function restoreSelections(store,data){if(!data||typeof data!=="object")return;Object.entries(data).forEach(([k,v])=>{if(Array.isArray(v))store[k]=new Set(v.map(Number));});}
 function saveLengthDraft(){
-  try{localStorage.setItem(LENGTH_DRAFT_KEY,JSON.stringify({mode:activeLengthMode,material:$("lengthMaterialSelect")?.value||"KVH",dimension:$("lengthDimensionSelect")?.value||"",projectName:$("projectName")?.value||"",currentProjectId:currentProjectId||null,singleRaws:serializeSelections(singleRawSelection),projectRaws:serializeSelections(projectRawSelection),parts:[...($("lengthPartsBody")?.querySelectorAll("tr")||[])].map(tr=>({len:tr.querySelector(".ll")?.value||"",q:tr.querySelector(".lq")?.value||"1",name:tr.querySelector(".lname")?.value||""})),projectParts:[...($("projectPartsBody")?.querySelectorAll("tr")||[])].map(tr=>({material:tr.querySelector(".pmat")?.value||"KVH",dimension:tr.querySelector(".pdim")?.value||"",len:tr.querySelector(".plen")?.value||"",q:tr.querySelector(".pqty")?.value||"1",name:tr.querySelector(".pname2")?.value||""}))}));}catch(_){ }
+  try{localStorage.setItem(LENGTH_DRAFT_KEY,JSON.stringify({mode:activeLengthMode,material:$("lengthMaterialSelect")?.value||"KVH",dimension:$("lengthDimensionSelect")?.value||"",projectName:$("projectName")?.value||"",projectRestLimit:getProjectRestLimit(),currentProjectId:currentProjectId||null,singleRaws:serializeSelections(singleRawSelection),projectRaws:serializeSelections(projectRawSelection),parts:[...($("lengthPartsBody")?.querySelectorAll("tr")||[])].map(tr=>({len:tr.querySelector(".ll")?.value||"",q:tr.querySelector(".lq")?.value||"1",name:tr.querySelector(".lname")?.value||""})),projectParts:[...($("projectPartsBody")?.querySelectorAll("tr")||[])].map(tr=>({material:tr.querySelector(".pmat")?.value||"KVH",dimension:tr.querySelector(".pdim")?.value||"",len:tr.querySelector(".plen")?.value||"",q:tr.querySelector(".pqty")?.value||"1",name:tr.querySelector(".pname2")?.value||""}))}));}catch(_){ }
 }
 function restoreLengthDraft(){
   let d=null;try{d=JSON.parse(localStorage.getItem(LENGTH_DRAFT_KEY)||"null");}catch(_){ }if(!d)return false;restoreSelections(singleRawSelection,d.singleRaws);restoreSelections(projectRawSelection,d.projectRaws);
   if(LENGTH_CATALOG[d.material])$("lengthMaterialSelect").value=d.material;rebuildLengthDimensions(d.dimension||"");$("lengthPartsBody").innerHTML="";(Array.isArray(d.parts)?d.parts:[]).forEach(p=>addLengthPartRow(p.len,Number(p.q)||1,p.name||""));if(!$("lengthPartsBody").children.length)addLengthPartRow();
-  $("projectPartsBody").innerHTML="";(Array.isArray(d.projectParts)?d.projectParts:[]).forEach(p=>addProjectPartRow(p.material,p.dimension,p.len,Number(p.q)||1,p.name||""));if(!$("projectPartsBody").children.length)addProjectPartRow();if($("projectName"))$("projectName").value=d.projectName||"";currentProjectId=d.currentProjectId||null;rebuildProjectRawSettings();setLengthMode(d.mode||"single",false);updateLengthMaterial();renderSavedProjects(currentProjectId);return true;
+  $("projectPartsBody").innerHTML="";(Array.isArray(d.projectParts)?d.projectParts:[]).forEach(p=>addProjectPartRow(p.material,p.dimension,p.len,Number(p.q)||1,p.name||""));if(!$("projectPartsBody").children.length)addProjectPartRow();if($("projectName"))$("projectName").value=d.projectName||"";if($("projectRestLimit"))$("projectRestLimit").value=normalizeRestLimit(d.projectRestLimit);currentProjectId=d.currentProjectId||null;rebuildProjectRawSettings();setLengthMode(d.mode||"single",false);updateLengthMaterial();renderSavedProjects(currentProjectId);return true;
 }
 
 function projectId(){
@@ -4157,6 +4189,7 @@ function collectNamedProject(){
   return {
     id:currentProjectId||projectId(),
     name:String($('projectName')?.value||'').trim(),
+    restLimit:getProjectRestLimit(),
     projectParts:rows,
     projectRaws:relevantProjectSelections(rows)
   };
@@ -4205,7 +4238,7 @@ function applyNamedProject(p){
   const rows=Array.isArray(p.projectParts)?p.projectParts:[];
   rows.forEach(r=>addProjectPartRow(r.material,r.dimension,r.len,Number(r.q)||1,r.name||''));
   if(!$('projectPartsBody').children.length)addProjectPartRow();
-  $('projectName').value=p.name||'';currentProjectId=p.id||null;
+  $('projectName').value=p.name||'';if($('projectRestLimit'))$('projectRestLimit').value=normalizeRestLimit(p.restLimit);currentProjectId=p.id||null;
   rebuildProjectRawSettings();setLengthMode('project',false);
   $('lengthResultArea').classList.add('hidden');currentLengthResult=null;saveLengthDraft();renderSavedProjects(currentProjectId);
   setProjectStorageStatus(`„${p.name}“ geladen.`);
@@ -4218,7 +4251,7 @@ function newNamedProject(){
   const hasData=String($('projectName')?.value||'').trim()||readProjectPositions().length>0;
   if(hasData&&!window.confirm('Aktuelles Projekt schließen und ein neues Projekt beginnen? Nicht gespeicherte Änderungen gehen dabei verloren.'))return;
   currentProjectId=null;Object.keys(projectRawSelection).forEach(k=>delete projectRawSelection[k]);
-  $('projectName').value='';$('projectPartsBody').innerHTML='';addProjectPartRow();rebuildProjectRawSettings();
+  $('projectName').value='';if($('projectRestLimit'))$('projectRestLimit').value=DEFAULT_REST_LIMIT_CM;$('projectPartsBody').innerHTML='';addProjectPartRow();rebuildProjectRawSettings();
   $('lengthResultArea').classList.add('hidden');currentLengthResult=null;setProjectStorageStatus('Neues Projekt.');saveLengthDraft();renderSavedProjects();
   $('projectName')?.focus();
 }
@@ -4253,7 +4286,7 @@ $("lengthModeSingle").addEventListener("click",()=>setLengthMode("single"));$("l
 $("lengthMaterialSelect").addEventListener("change",()=>rebuildLengthDimensions());$("lengthDimensionSelect").addEventListener("change",updateLengthMaterial);$("lengthPartsBody").addEventListener("input",saveLengthDraft);$("projectPartsBody").addEventListener("input",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});$("projectPartsBody").addEventListener("change",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});
 $("lengthAddPart").addEventListener("click",()=>addLengthPartRow("",1,"",true));$("lengthExample").addEventListener("click",loadLengthExample);$("lengthClear").addEventListener("click",clearLengthParts);$("lengthCalculate").addEventListener("click",calculateLengths);
 $("projectAddPart").addEventListener("click",()=>addProjectPartRow("KVH","","",1,"",true));$("projectExample").addEventListener("click",loadProjectExample);$("projectClear").addEventListener("click",clearProjectParts);$("projectCalculate").addEventListener("click",calculateProject);
-$("projectSave").addEventListener("click",saveNamedProject);$("projectSavedToggle").addEventListener("click",toggleSavedProjects);$("projectNew").addEventListener("click",newNamedProject);$("projectLoad").addEventListener("click",loadNamedProject);$("projectRename").addEventListener("click",renameNamedProject);$("projectDelete").addEventListener("click",deleteNamedProject);$("projectName").addEventListener("input",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});
+$("projectSave").addEventListener("click",saveNamedProject);$("projectSavedToggle").addEventListener("click",toggleSavedProjects);$("projectNew").addEventListener("click",newNamedProject);$("projectLoad").addEventListener("click",loadNamedProject);$("projectRename").addEventListener("click",renameNamedProject);$("projectDelete").addEventListener("click",deleteNamedProject);$("projectName").addEventListener("input",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});$("projectRestLimit").addEventListener("input",()=>{if(Number($("projectRestLimit").value)<0)$("projectRestLimit").value=0;saveLengthDraft();$("lengthResultArea").classList.add("hidden");currentLengthResult=null;if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});
 $("lengthDownloadCsv").addEventListener("click",downloadLengthCsv);$("lengthPrint").addEventListener("click",()=>window.print());
 rebuildLengthDimensions();if(!restoreLengthDraft()){addLengthPartRow();addProjectPartRow();setLengthMode("single",false);updateLengthPreview();renderSavedProjects();}
 try{setPlannerMode(localStorage.getItem("lowis-active-planner")||"plate");}catch(_){setPlannerMode("plate");}
