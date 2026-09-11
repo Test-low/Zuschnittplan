@@ -1,4 +1,4 @@
-LOWIS ZUSCHNITTPLANER - V42
+LOWIS ZUSCHNITTPLANER - V43
 
 GitHub Pages:
 1. Alle Dateien aus diesem Ordner/ZIP in das bestehende Repository hochladen.
@@ -9,7 +9,7 @@ Cache-Verhalten:
 - index.html wird online zuerst vom Server geladen; Cache nur als Offline-Fallback.
 - Service Worker wird ohne HTTP-Cache registriert und aktiv auf Updates geprüft.
 
-V42 - PDF-/Papieroptimierung:
+V43 - PDF-/Papieroptimierung:
 - "Stueckliste CSV" wurde bei Platten- und Laengenzuschnitt zu "Stueckliste PDF".
 - "Stueckliste PDF" erzeugt nur die kompakte Stueckliste als PDF.
 - "PDF erstellen" erzeugt Stueckliste + Zuschnittplan in einer gemeinsamen PDF.
@@ -19,3 +19,5 @@ V42 - PDF-/Papieroptimierung:
 - Plattenzuschnitte werden dynamisch in den verbleibenden Seitenplatz skaliert und kombiniert.
 - PDF bleibt immer hell und druckfreundlich, unabhaengig vom Darkmode.
 - CSV-Erzeugung bleibt intern fuer die E-Mail-Anhaenge erhalten.
+
+V43: Sondermaß-Eingabe ergänzt. Platten: Bezeichnung, Höhe cm, Breite cm, Stärke mm. Längenzuschnitt: Höhe cm, Breite cm, Länge cm; auch im Projektmodus und in gespeicherten Projekten.

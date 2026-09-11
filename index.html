@@ -1015,6 +1015,18 @@ html[data-theme="dark"] .length-rest{color:#526057}
 .raw-choice:hover{border-color:#9eaea2}
 .raw-choice.active{background:#1e5631;border-color:#1e5631;color:#fff}
 .raw-choice:focus-visible{outline:2px solid #1e5631;outline-offset:2px}
+
+.special-measure-box{margin-top:10px;padding:11px 12px;border:1px solid #dfe6e0;border-radius:12px;background:#fafcf9}
+.special-measure-box .special-title{font-size:11px;font-weight:800;margin-bottom:8px;color:var(--text)}
+.special-measure-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.special-measure-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.special-measure-box label{margin-top:0}
+.project-custom-dims{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.project-custom-field{min-width:0}
+.project-custom-field small{display:block;font-size:8px;font-weight:800;color:var(--muted);margin:0 0 2px;text-transform:uppercase}
+.project-custom-field input{width:100%;min-width:0}
+html[data-theme="dark"] .special-measure-box{background:#171d19;border-color:#303a33}
+@media(max-width:760px){.special-measure-grid,.special-measure-grid.three{grid-template-columns:1fr 1fr}.project-custom-dims{grid-template-columns:1fr 1fr}}
 .raw-choice-note{font-size:10px;color:var(--muted);line-height:1.45;margin-top:6px}
 .project-parts-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .project-parts-table th,.project-parts-table td{padding:5px 3px;border-bottom:1px solid #edf0ed;vertical-align:top}
@@ -1105,7 +1117,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
   .project-parts-table td{display:block;width:auto!important;padding:0;border:0!important}
   .project-parts-table td:nth-child(1){grid-area:mat}.project-parts-table td:nth-child(2){grid-area:dim}.project-parts-table td:nth-child(3){grid-area:raw}.project-parts-table td:nth-child(4){grid-area:len}.project-parts-table td:nth-child(5){grid-area:qty}.project-parts-table td:nth-child(6){grid-area:name}.project-parts-table td:nth-child(7){grid-area:del;align-self:start}
   .project-parts-table td:nth-child(-n+6)::before{display:block;font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
-  .project-parts-table td:nth-child(1)::before{content:"Material"}.project-parts-table td:nth-child(2)::before{content:"Dimension"}.project-parts-table td:nth-child(3)::before{content:"Rohlängen cm"}.project-parts-table td:nth-child(4)::before{content:"Länge cm"}.project-parts-table td:nth-child(5)::before{content:"Stk."}.project-parts-table td:nth-child(6)::before{content:"Bezeichnung"}
+  .project-parts-table td:nth-child(1)::before{content:"Material"}.project-parts-table td:nth-child(2)::before{content:"Dimension / Sondermaß"}.project-parts-table td:nth-child(3)::before{content:"Rohlängen / Länge cm"}.project-parts-table td:nth-child(4)::before{content:"Fertiglänge cm"}.project-parts-table td:nth-child(5)::before{content:"Stk."}.project-parts-table td:nth-child(6)::before{content:"Bezeichnung"}
   .project-row-raws{min-width:0}
   .project-row-raws .raw-choice{padding:8px 10px;font-size:12px}
   .project-parts-table input,.project-parts-table select{min-height:42px;font-size:15px}
@@ -1331,7 +1343,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
               <select id="edgeSelect"></select>
             </div>
 
-            <div class="inline-grid">
+            <div class="inline-grid" id="plateCatalogSizeFields">
               <div>
                 <label>Plattenformat</label>
                 <select id="formatSelect"></select>
@@ -1340,6 +1352,17 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
                 <label>Stärke</label>
                 <select id="thicknessSelect"></select>
               </div>
+            </div>
+
+            <div id="plateSpecialFields" class="special-measure-box hidden">
+              <div class="special-title">Sondermaß</div>
+              <label for="plateSpecialName">Bezeichnung</label>
+              <input id="plateSpecialName" type="text" maxlength="80" placeholder="z. B. Restplatte Multiplex">
+              <div class="special-measure-grid" style="margin-top:8px">
+                <div><label for="plateSpecialHeight">Höhe (cm)</label><input id="plateSpecialHeight" type="number" min="0.1" step="0.1" inputmode="decimal"></div>
+                <div><label for="plateSpecialWidth">Breite (cm)</label><input id="plateSpecialWidth" type="number" min="0.1" step="0.1" inputmode="decimal"></div>
+              </div>
+              <div style="margin-top:8px"><label for="plateSpecialThickness">Stärke (mm)</label><input id="plateSpecialThickness" type="number" min="0.1" step="0.1" inputmode="decimal"></div>
             </div>
 
             <div class="material-preview" id="materialPreview"></div>
@@ -1481,13 +1504,24 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
               <option value="Rahmen 60x60 mm gehobelt">Rahmen 60x60 mm gehobelt</option>
               <option value="Latten 24x48 mm">Latten 24x48 mm</option>
               <option value="Latten 31x52mm S10">Latten 31x52mm S10</option>
+              <option value="Sondermaß">Sondermaß</option>
             </select>
-            <label>Dimension in cm</label>
-            <select id="lengthDimensionSelect"></select>
-            <label>Rohlängen in cm</label>
-            <div id="lengthRawChoices" class="raw-choice-wrap"></div>
-            <div class="raw-choice-note" id="lengthRawChoiceNote"></div>
-            <div class="help length-stock-disclaimer">Hinweis: Die angezeigten Rohlängen dienen ausschließlich der Zuschnittplanung. Sie stellen keine Bestandsauskunft, Reservierung oder Liefer-/Verfügbarkeitszusage dar. Die tatsächliche Verfügbarkeit ist vor Bestellung bzw. Abholung gesondert zu prüfen.</div>
+            <div id="lengthCatalogFields">
+              <label>Dimension in cm</label>
+              <select id="lengthDimensionSelect"></select>
+              <label>Rohlängen in cm</label>
+              <div id="lengthRawChoices" class="raw-choice-wrap"></div>
+              <div class="raw-choice-note" id="lengthRawChoiceNote"></div>
+            </div>
+            <div id="lengthSpecialFields" class="special-measure-box hidden">
+              <div class="special-title">Sondermaß</div>
+              <div class="special-measure-grid three">
+                <div><label for="lengthSpecialHeight">Höhe (cm)</label><input id="lengthSpecialHeight" type="number" min="0.1" step="0.1" inputmode="decimal"></div>
+                <div><label for="lengthSpecialWidth">Breite (cm)</label><input id="lengthSpecialWidth" type="number" min="0.1" step="0.1" inputmode="decimal"></div>
+                <div><label for="lengthSpecialLength">Länge (cm)</label><input id="lengthSpecialLength" type="number" min="0.1" step="0.1" inputmode="decimal"></div>
+              </div>
+            </div>
+            <div class="help length-stock-disclaimer" id="lengthStockDisclaimer">Hinweis: Die angezeigten Rohlängen dienen ausschließlich der Zuschnittplanung. Sie stellen keine Bestandsauskunft, Reservierung oder Liefer-/Verfügbarkeitszusage dar. Die tatsächliche Verfügbarkeit ist vor Bestellung bzw. Abholung gesondert zu prüfen.</div>
             <div class="material-preview" id="lengthMaterialPreview"></div>
             <div class="locked-row"><span>Sägefuge</span><span><strong>0,5 cm (5 mm)</strong> <span class="locked">fest</span></span></div>
           </div>
@@ -1499,7 +1533,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
             <h3>Fertiglängen eingeben</h3>
             <div class="parts-scroll">
               <table class="length-parts-table">
-                <thead><tr><th>Länge cm</th><th>Stk.</th><th>Bezeichnung</th><th></th></tr></thead>
+                <thead><tr><th>Fertiglänge cm</th><th>Stk.</th><th>Bezeichnung</th><th></th></tr></thead>
                 <tbody id="lengthPartsBody"></tbody>
               </table>
             </div>
@@ -1547,7 +1581,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
             </div>
             <div class="parts-scroll">
               <table class="project-parts-table">
-                <thead><tr><th>Materialart</th><th>Dimension</th><th>Rohlängen cm</th><th>Länge cm</th><th>Stk.</th><th>Bezeichnung</th><th></th></tr></thead>
+                <thead><tr><th>Materialart</th><th>Dimension / Sondermaß</th><th>Rohlängen / Länge cm</th><th>Fertiglänge cm</th><th>Stk.</th><th>Bezeichnung</th><th></th></tr></thead>
                 <tbody id="projectPartsBody"></tbody>
               </table>
             </div>
@@ -2262,15 +2296,24 @@ const $ = id => document.getElementById(id);
 
 function uniq(arr){ return [...new Set(arr)]; }
 
+const SPECIAL_PLATE_GROUP="Sondermaß";
 function initGroups(){
   const groups=uniq(MATERIALS.map(m=>m.group));
-  $("groupSelect").innerHTML=groups.map(g=>`<option value="${g}">${g}</option>`).join("");
+  $("groupSelect").innerHTML=[...groups,SPECIAL_PLATE_GROUP].map(g=>`<option value="${g}">${g}</option>`).join("");
   if(groups.includes("OSB")) $("groupSelect").value="OSB";
   rebuildMaterialSelectors();
 }
 
 function rebuildMaterialSelectors(){
   const group = $("groupSelect").value;
+  const special=group===SPECIAL_PLATE_GROUP;
+  $("plateSpecialFields")?.classList.toggle("hidden",!special);
+  $("plateCatalogSizeFields")?.classList.toggle("hidden",special);
+  if(special){
+    $("edgeField")?.classList.add("hidden");
+    updateMaterialPreview();
+    return;
+  }
   const edges = uniq(MATERIALS.filter(m=>m.group===group).map(m=>m.edge));
   const oldEdge = $("edgeSelect").value;
   $("edgeSelect").innerHTML = edges.map(v=>`<option>${v}</option>`).join("");
@@ -2306,16 +2349,37 @@ function rebuildThicknesses(){
 }
 
 function currentMaterial(){
-  const group=$("groupSelect").value, edge=$("edgeSelect").value, format=$("formatSelect").value, th=Number($("thicknessSelect").value);
+  const group=$("groupSelect").value;
+  if(group===SPECIAL_PLATE_GROUP){
+    const name=String($("plateSpecialName")?.value||"").trim();
+    const heightCm=Number($("plateSpecialHeight")?.value)||0;
+    const widthCm=Number($("plateSpecialWidth")?.value)||0;
+    const thickness=Number($("plateSpecialThickness")?.value)||0;
+    return {group:name?`Sondermaß – ${name}`:"Sondermaß",edge:"Standard",width:Math.round(widthCm*10*10)/10,height:Math.round(heightCm*10*10)/10,thickness,isSpecial:true,specialName:name,heightCm,widthCm};
+  }
+  const edge=$("edgeSelect").value, format=$("formatSelect").value, th=Number($("thicknessSelect").value);
   return MATERIALS.find(m=>m.group===group && m.edge===edge && `${m.width}x${m.height}`===format && m.thickness===th) || MATERIALS[0];
 }
 
 function updateMaterialPreview(){
   const m=currentMaterial();
+  if(m.isSpecial){
+    $("materialPreview").innerHTML=`<div class="tag">Sondermaß</div><strong>${escapeHtmlText(m.specialName||"Sondermaß")}</strong><small>Höhe ${lengthFmt(m.heightCm||0)} cm · Breite ${lengthFmt(m.widthCm||0)} cm · Stärke ${String(m.thickness||0).replace(".",",")} mm</small>`;
+    return;
+  }
   $("materialPreview").innerHTML=
     `<div class="tag">Ausgewählte Lagerplatte</div>
      <strong>${m.group} ${String(m.thickness).replace(".",",")} mm · ${m.width} × ${m.height} mm</strong>
      <small>${m.edge==="Standard" ? "Lagerformat" : m.edge}</small>`;
+}
+
+function validatePlateSpecialMaterial(m){
+  if(!m?.isSpecial)return "";
+  if(!(m.heightCm>0)&&!(m.widthCm>0)&&!(m.thickness>0))return "Bitte Höhe, Breite und Stärke für das Sondermaß eingeben.";
+  if(!(m.heightCm>0))return "Bitte die Höhe des Sondermaßes in cm eingeben.";
+  if(!(m.widthCm>0))return "Bitte die Breite des Sondermaßes in cm eingeben.";
+  if(!(m.thickness>0))return "Bitte die Stärke des Sondermaßes in mm eingeben.";
+  return "";
 }
 
 function escapeHtmlText(value){
@@ -3228,7 +3292,8 @@ function calculate(){
   saveDraft();
   const m=currentMaterial();
   const pos=readPositions();
-  const err=validate(pos,m);
+  const specialErr=validatePlateSpecialMaterial(m);
+  const err=specialErr||validate(pos,m);
   if(err){
     setNotice("error",err);
     $("resultArea").classList.add("hidden");
@@ -3315,6 +3380,7 @@ function draftData(){
     edge:$("edgeSelect").value,
     format:$("formatSelect").value,
     thickness:$("thicknessSelect").value,
+    specialPlate:{name:$("plateSpecialName")?.value||"",height:$("plateSpecialHeight")?.value||"",width:$("plateSpecialWidth")?.value||"",thickness:$("plateSpecialThickness")?.value||""},
     parts:[...$("partsBody").querySelectorAll("tr")].map(tr=>({
       w:tr.querySelector(".pw")?.value||"",
       h:tr.querySelector(".ph")?.value||"",
@@ -3334,20 +3400,26 @@ function restoreDraft(){
   let d=null;
   try{ d=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null"); }catch(_){}
   if(!d || !Array.isArray(d.parts)) return false;
+  if(d.specialPlate){
+    if($("plateSpecialName"))$("plateSpecialName").value=d.specialPlate.name||"";
+    if($("plateSpecialHeight"))$("plateSpecialHeight").value=d.specialPlate.height||"";
+    if($("plateSpecialWidth"))$("plateSpecialWidth").value=d.specialPlate.width||"";
+    if($("plateSpecialThickness"))$("plateSpecialThickness").value=d.specialPlate.thickness||"";
+  }
 
   if(d.group && [...$("groupSelect").options].some(o=>o.value===d.group)){
     $("groupSelect").value=d.group;
     rebuildMaterialSelectors();
 
-    if(d.edge && [...$("edgeSelect").options].some(o=>o.value===d.edge)){
+    if(d.group!==SPECIAL_PLATE_GROUP && d.edge && [...$("edgeSelect").options].some(o=>o.value===d.edge)){
       $("edgeSelect").value=d.edge;
       rebuildFormats();
     }
-    if(d.format && [...$("formatSelect").options].some(o=>o.value===d.format)){
+    if(d.group!==SPECIAL_PLATE_GROUP && d.format && [...$("formatSelect").options].some(o=>o.value===d.format)){
       $("formatSelect").value=d.format;
       rebuildThicknesses();
     }
-    if(d.thickness && [...$("thicknessSelect").options].some(o=>o.value===String(d.thickness))){
+    if(d.group!==SPECIAL_PLATE_GROUP && d.thickness && [...$("thicknessSelect").options].some(o=>o.value===String(d.thickness))){
       $("thicknessSelect").value=String(d.thickness);
     }
     updateMaterialPreview();
@@ -3370,6 +3442,7 @@ $("groupSelect").addEventListener("change",()=>{rebuildMaterialSelectors();});
 $("edgeSelect").addEventListener("change",()=>{rebuildFormats();});
 $("formatSelect").addEventListener("change",()=>{rebuildThicknesses();});
 $("thicknessSelect").addEventListener("change",()=>{updateMaterialPreview();});
+["plateSpecialName","plateSpecialHeight","plateSpecialWidth","plateSpecialThickness"].forEach(id=>$(id)?.addEventListener("input",()=>{updateMaterialPreview();saveDraft();}));
 
 $("addPart").addEventListener("click",()=>{addPartRow("","",1,"",true);setTimeout(saveDraft,0);});
 $("loadExample").addEventListener("click",()=>{loadExample();setTimeout(saveDraft,0);});
@@ -3949,7 +4022,8 @@ const LENGTH_CATALOG={
   "Latten 24x48 mm":{"2,4x4,8":[200,300,400,500]},
   "Latten 31x52mm S10":{"3,1x5,2":[500]}
 };
-const LENGTH_MATERIALS=Object.keys(LENGTH_CATALOG);
+const SPECIAL_LENGTH_MATERIAL="Sondermaß";
+const LENGTH_MATERIALS=[...Object.keys(LENGTH_CATALOG),SPECIAL_LENGTH_MATERIAL];
 
 function lengthMaterialOrder(material){
   const i=LENGTH_MATERIALS.indexOf(material);
@@ -3975,6 +4049,19 @@ function sortedLengthPositionsForPdf(pos){
 function parseDimension(dim){
   const parts=String(dim).split("x").map(v=>Number(v.replace(",",".")));
   return {w:parts[0]||0,h:parts[1]||0};
+}
+function customDimensionKey(height,width){return `${Math.round(Number(height)*10)/10}x${Math.round(Number(width)*10)/10}`;}
+function lengthDimensionText(material,dimension,obj=null){
+  if(material===SPECIAL_LENGTH_MATERIAL){
+    const d=parseDimension(dimension),h=Number(obj?.customHeight)||d.w,w=Number(obj?.customWidth)||d.h;
+    return `Höhe ${lengthFmt(h)} cm · Breite ${lengthFmt(w)} cm`;
+  }
+  return `${dimension} cm`;
+}
+function lengthStockText(material,raws){return material===SPECIAL_LENGTH_MATERIAL?`Länge ${(raws||[]).map(v=>lengthFmt(v)).join(" / ")} cm`:`Rohlängen ${(raws||[]).map(v=>lengthFmt(v)).join(" / ")} cm`;}
+function lengthPositionMaterialText(p){
+  if(p.material===SPECIAL_LENGTH_MATERIAL)return `Sondermaß H ${lengthFmt(p.customHeight)} × B ${lengthFmt(p.customWidth)} cm · L ${lengthFmt(p.customStockLength)} cm`;
+  return `${p.material} ${p.dimension} cm`;
 }
 function lengthGroupKey(material,dimension){return material+"||"+dimension;}
 function catalogRaws(material,dimension){return ((LENGTH_CATALOG[material]||{})[dimension]||[]).slice();}
@@ -4023,6 +4110,13 @@ function ensureSelection(store,key,raws){
 }
 function selectedLengthConfig(){
   const material=$("lengthMaterialSelect").value;
+  if(material===SPECIAL_LENGTH_MATERIAL){
+    const customHeight=Math.round((Number($("lengthSpecialHeight")?.value)||0)*10)/10;
+    const customWidth=Math.round((Number($("lengthSpecialWidth")?.value)||0)*10)/10;
+    const customLength=Math.round((Number($("lengthSpecialLength")?.value)||0)*10)/10;
+    const dimension=customDimensionKey(customHeight,customWidth),allRaws=customLength>0?[customLength]:[];
+    return {material,dimension,allRaws,raws:allRaws.slice(),w:customWidth,h:customHeight,key:`${material}||${dimension}||${customLength}`,customHeight,customWidth,customLength,isSpecial:true};
+  }
   const dimension=$("lengthDimensionSelect").value;
   const allRaws=catalogRaws(material,dimension);
   const key=lengthGroupKey(material,dimension);
@@ -4065,7 +4159,11 @@ function setLengthMode(mode,save=true){
 }
 
 function rebuildLengthDimensions(preferred=""){
-  const material=$("lengthMaterialSelect").value;
+  const material=$("lengthMaterialSelect").value,special=material===SPECIAL_LENGTH_MATERIAL;
+  $("lengthCatalogFields")?.classList.toggle("hidden",special);
+  $("lengthSpecialFields")?.classList.toggle("hidden",!special);
+  $("lengthStockDisclaimer")?.classList.toggle("hidden",special);
+  if(special){updateLengthMaterial();return;}
   const dims=Object.keys(LENGTH_CATALOG[material]||{});
   $("lengthDimensionSelect").innerHTML=dims.map(d=>`<option value="${escapeAttr(d)}">${escapeHtmlText(d)}</option>`).join("");
   if(preferred&&dims.includes(preferred)) $("lengthDimensionSelect").value=preferred;
@@ -4087,13 +4185,19 @@ function renderRawButtons(targetId,material,dimension,store,onChange){
 }
 function updateLengthMaterial(){
   const cfg=selectedLengthConfig();
-  renderRawButtons("lengthRawChoices",cfg.material,cfg.dimension,singleRawSelection,()=>{updateLengthPreview();});
-  $("lengthRawChoiceNote").textContent=cfg.allRaws.length>1?"Anklicken zum Ein-/Ausschalten. Nur markierte Rohlängen fließen in die Optimierung ein.":"Für diese Dimension ist eine feste Rohlänge hinterlegt.";
+  if(!cfg.isSpecial){
+    renderRawButtons("lengthRawChoices",cfg.material,cfg.dimension,singleRawSelection,()=>{updateLengthPreview();});
+    $("lengthRawChoiceNote").textContent=cfg.allRaws.length>1?"Anklicken zum Ein-/Ausschalten. Nur markierte Rohlängen fließen in die Optimierung ein.":"Für diese Dimension ist eine feste Rohlänge hinterlegt.";
+  }
   updateLengthPreview();saveLengthDraft();
 }
 function updateLengthPreview(){
   const cfg=selectedLengthConfig();
   const raws=cfg.raws;
+  if(cfg.isSpecial){
+    $("lengthMaterialPreview").innerHTML=`<span class="tag">Sondermaß</span><strong>Höhe ${lengthFmt(cfg.customHeight)} cm · Breite ${lengthFmt(cfg.customWidth)} cm · Länge ${lengthFmt(cfg.customLength)} cm</strong><small>Sägefuge 0,5 cm · verbleibender Rest gehört zum Kunden.</small>`;
+    return;
+  }
   $("lengthMaterialPreview").innerHTML=`<span class="tag">Aktuelle Auswahl</span><strong>${escapeHtmlText(cfg.material)} · ${escapeHtmlText(cfg.dimension)} cm</strong><small>Berücksichtigte Rohlängen: ${raws.length?raws.map(lengthFmt).join(" / "):"keine"} cm · ${escapeHtmlText(saleRuleText(cfg.material,raws.length?raws:cfg.allRaws))}</small>`;
 }
 
@@ -4111,13 +4215,27 @@ function expandLengthPositions(pos){const out=[];pos.forEach(p=>{for(let i=0;i<p
 
 function projectMaterialOptions(selected){return LENGTH_MATERIALS.map(m=>`<option value="${escapeAttr(m)}" ${m===selected?"selected":""}>${escapeHtmlText(m)}</option>`).join("");}
 function projectDimensionOptions(material,selected){return Object.keys(LENGTH_CATALOG[material]||{}).map(d=>`<option value="${escapeAttr(d)}" ${d===selected?"selected":""}>${escapeHtmlText(d)}</option>`).join("");}
-function addProjectPartRow(material="KVH",dimension="",len="",q=1,name="",focus=false){
-  if(!LENGTH_CATALOG[material])material="KVH";const dims=Object.keys(LENGTH_CATALOG[material]);if(!dims.includes(dimension))dimension=dims[0]||"";
+function markProjectChanged(){saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");}
+function renderProjectRowFields(tr,material,dimension="",customHeight="",customWidth="",customLength=""){
+  const dimCell=tr.querySelector(".project-row-dim"),rawCell=tr.querySelector(".project-row-raws");
+  if(material===SPECIAL_LENGTH_MATERIAL){
+    dimCell.innerHTML=`<div class="project-custom-dims"><div class="project-custom-field"><small>Höhe cm</small><input class="pcustom-h" type="number" min="0.1" step="0.1" inputmode="decimal" value="${escapeAttr(customHeight)}"></div><div class="project-custom-field"><small>Breite cm</small><input class="pcustom-w" type="number" min="0.1" step="0.1" inputmode="decimal" value="${escapeAttr(customWidth)}"></div></div>`;
+    rawCell.innerHTML=`<div class="project-custom-field"><small>Länge cm</small><input class="pcustom-l" type="number" min="0.1" step="0.1" inputmode="decimal" value="${escapeAttr(customLength)}"></div>`;
+    tr.querySelectorAll(".pcustom-h,.pcustom-w,.pcustom-l").forEach(el=>el.addEventListener("input",markProjectChanged));
+    return;
+  }
+  const dims=Object.keys(LENGTH_CATALOG[material]||{});if(!dims.includes(dimension))dimension=dims[0]||"";
+  dimCell.innerHTML=`<select class="pdim">${projectDimensionOptions(material,dimension)}</select>`;
+  dimCell.querySelector(".pdim")?.addEventListener("change",()=>{rebuildProjectRawSettings();markProjectChanged();});
+  rebuildProjectRawSettings();
+}
+function addProjectPartRow(material="KVH",dimension="",len="",q=1,name="",focus=false,customHeight="",customWidth="",customLength=""){
+  if(material!==SPECIAL_LENGTH_MATERIAL&&!LENGTH_CATALOG[material])material="KVH";
   const tr=document.createElement("tr");
-  tr.innerHTML=`<td><select class="pmat">${projectMaterialOptions(material)}</select></td><td><select class="pdim">${projectDimensionOptions(material,dimension)}</select></td><td class="project-row-raws"></td><td><input class="plen" type="number" min="0.1" step="0.1" inputmode="decimal" value="${escapeAttr(len)}"></td><td><input class="pqty" type="number" min="1" step="1" inputmode="numeric" value="${escapeAttr(q)}"></td><td><input class="pname2" type="text" value="${escapeAttr(name)}" placeholder="z. B. Sparren"></td><td><button class="icon-btn project-row-delete" type="button" aria-label="Position entfernen">×</button></td>`;
+  tr.innerHTML=`<td><select class="pmat">${projectMaterialOptions(material)}</select></td><td class="project-row-dim"></td><td class="project-row-raws"></td><td><input class="plen" type="number" min="0.1" step="0.1" inputmode="decimal" value="${escapeAttr(len)}"></td><td><input class="pqty" type="number" min="1" step="1" inputmode="numeric" value="${escapeAttr(q)}"></td><td><input class="pname2" type="text" value="${escapeAttr(name)}" placeholder="z. B. Sparren"></td><td><button class="icon-btn project-row-delete" type="button" aria-label="Position entfernen">×</button></td>`;
   $("projectPartsBody").appendChild(tr);
-  tr.querySelector(".pmat").addEventListener("change",()=>{const m=tr.querySelector(".pmat").value;tr.querySelector(".pdim").innerHTML=projectDimensionOptions(m,Object.keys(LENGTH_CATALOG[m]||{})[0]);rebuildProjectRawSettings();saveLengthDraft();});
-  tr.querySelector(".pdim").addEventListener("change",()=>{rebuildProjectRawSettings();saveLengthDraft();});
+  renderProjectRowFields(tr,material,dimension,customHeight,customWidth,customLength);
+  tr.querySelector(".pmat").addEventListener("change",()=>{const m=tr.querySelector(".pmat").value;renderProjectRowFields(tr,m,"","","","");rebuildProjectRawSettings();markProjectChanged();});
   tr.querySelector(".project-row-delete").addEventListener("click",()=>removeProjectPartRow(tr,true));
   if(focus)setTimeout(()=>tr.querySelector(".plen")?.focus(),0);rebuildProjectRawSettings();saveLengthDraft();
 }
@@ -4128,11 +4246,22 @@ function loadProjectExample(){
   [["KVH","8x16",486,8,"Sparren"],["KVH","8x16",312,4,"Wechsel"],["KVH","10x20",620,2,"Pfette"],["KVH","12x24",780,1,"Firstpfette"],["BSH","12x24",940,2,"Träger"]].forEach(x=>addProjectPartRow(...x));
   rebuildProjectRawSettings();calculateProject();
 }
-function readProjectPositions(){return [...$("projectPartsBody").querySelectorAll("tr")].map((tr,i)=>({pos:i+1,material:tr.querySelector(".pmat")?.value||"",dimension:tr.querySelector(".pdim")?.value||"",len:Math.round((Number(tr.querySelector(".plen")?.value)||0)*10)/10,q:Math.round(Number(tr.querySelector(".pqty")?.value)||0),name:String(tr.querySelector(".pname2")?.value||"").trim()})).filter(p=>p.len>0||p.name);}
+function readProjectPositions(){
+  return [...$("projectPartsBody").querySelectorAll("tr")].map((tr,i)=>{
+    const material=tr.querySelector(".pmat")?.value||"";
+    const base={pos:i+1,material,len:Math.round((Number(tr.querySelector(".plen")?.value)||0)*10)/10,q:Math.round(Number(tr.querySelector(".pqty")?.value)||0),name:String(tr.querySelector(".pname2")?.value||"").trim()};
+    if(material===SPECIAL_LENGTH_MATERIAL){
+      const customHeight=Math.round((Number(tr.querySelector(".pcustom-h")?.value)||0)*10)/10,customWidth=Math.round((Number(tr.querySelector(".pcustom-w")?.value)||0)*10)/10,customStockLength=Math.round((Number(tr.querySelector(".pcustom-l")?.value)||0)*10)/10;
+      return {...base,dimension:customDimensionKey(customHeight,customWidth),customHeight,customWidth,customStockLength,isSpecial:true};
+    }
+    return {...base,dimension:tr.querySelector(".pdim")?.value||""};
+  }).filter(p=>p.len>0||p.name||p.isSpecial&&(p.customHeight||p.customWidth||p.customStockLength));
+}
 function rebuildProjectRawSettings(){
   const rows=[...$("projectPartsBody").querySelectorAll("tr")];
   rows.forEach(tr=>{
     const material=tr.querySelector(".pmat")?.value||"";
+    if(material===SPECIAL_LENGTH_MATERIAL)return;
     const dimension=tr.querySelector(".pdim")?.value||"";
     const cell=tr.querySelector(".project-row-raws");
     if(!cell)return;
@@ -4147,9 +4276,7 @@ function rebuildProjectRawSettings(){
         if(set.size===1){setLengthNotice("error","Mindestens eine Rohlänge je Material/Dimension muss berücksichtigt werden.");return;}
         set.delete(raw);
       }else set.add(raw);
-      rebuildProjectRawSettings();
-      saveLengthDraft();
-      if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");
+      rebuildProjectRawSettings();markProjectChanged();
     }));
   });
 }
@@ -4184,35 +4311,47 @@ function renderLengthBar(bar,index,count,material,restLimit=DEFAULT_REST_LIMIT_C
   const restHtml=rest>0?`<div class="length-rest ${cls.type}" style="left:${restLeft}%;width:${100*rest/raw}%"><span class="length-rest-label">${rest>=8?restLabelHtml:""}</span></div>`:"";
   const seq=bar.pieces.map(p=>`${lengthFmt(p.len)} cm${p.name?" "+escapeHtmlText(p.name):""}`).join(" + ");
   const metaHtml=rest>0?restLabelHtml:"kein Rest";
-  return `<div class="length-bar-card"><div class="length-bar-head"><div><strong>${count>1?count+"× identisch schneiden":"Rohstück "+index}</strong><div class="length-bar-meta">Rohlänge ${lengthFmt(raw)} cm · ${metaHtml}</div></div><div class="length-bar-badge">${isPartialSaleRaw(material,raw)?"Zuschnittverkauf":"Komplettlänge"}</div></div><div class="length-track">${pieces}${restHtml}</div><div class="length-ruler"><span>0</span><span>${lengthFmt(raw)} cm</span></div><div class="length-sequence"><strong>Schnittfolge:</strong> ${seq}${rest?` · ${restLabelHtml}`:""}</div></div>`;
+  const stockLabel=material===SPECIAL_LENGTH_MATERIAL?"Länge":"Rohlänge";
+  return `<div class="length-bar-card"><div class="length-bar-head"><div><strong>${count>1?count+"× identisch schneiden":"Rohstück "+index}</strong><div class="length-bar-meta">${stockLabel} ${lengthFmt(raw)} cm · ${metaHtml}</div></div><div class="length-bar-badge">${isPartialSaleRaw(material,raw)?"Zuschnittverkauf":"Komplettlänge"}</div></div><div class="length-track">${pieces}${restHtml}</div><div class="length-ruler"><span>0</span><span>${lengthFmt(raw)} cm</span></div><div class="length-sequence"><strong>Schnittfolge:</strong> ${seq}${rest?` · ${restLabelHtml}`:""}</div></div>`;
 }
 function summarizeBars(material,bars,restLimit=DEFAULT_REST_LIMIT_CM){let customerRest=0,warehouseRest=0,totalRaw=0;bars.forEach(b=>{totalRaw+=b.raw;const c=classifyLengthRest(material,b.raw,b.raw-b.used,restLimit);customerRest+=c.customer;warehouseRest+=c.warehouse;});return {customerRest:Math.round(customerRest*10)/10,warehouseRest:Math.round(warehouseRest*10)/10,totalRaw};}
 function renderSingleSummary(pos){$("lengthPieceSummary").innerHTML=`<div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>Pos.</th><th>Länge</th><th>Menge</th><th>Bezeichnung</th></tr></thead><tbody>${pos.map(p=>`<tr><td>${p.pos}</td><td>${lengthFmt(p.len)} cm</td><td>${p.q}</td><td>${escapeHtmlText(p.name||"–")}</td></tr>`).join("")}</tbody></table></div>`;}
-function renderProjectSummary(pos){$("lengthPieceSummary").innerHTML=`<div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>Pos.</th><th>Material</th><th>Dimension</th><th>Länge</th><th>Menge</th><th>Bezeichnung</th></tr></thead><tbody>${pos.map(p=>`<tr><td>${p.pos}</td><td>${escapeHtmlText(p.material)}</td><td>${escapeHtmlText(p.dimension)} cm</td><td>${lengthFmt(p.len)} cm</td><td>${p.q}</td><td>${escapeHtmlText(p.name||"–")}</td></tr>`).join("")}</tbody></table></div>`;}
+function renderProjectSummary(pos){$("lengthPieceSummary").innerHTML=`<div class="summary-table-wrap"><table class="summary-table"><thead><tr><th>Pos.</th><th>Material</th><th>Dimension / Sondermaß</th><th>Fertiglänge</th><th>Menge</th><th>Bezeichnung</th></tr></thead><tbody>${pos.map(p=>`<tr><td>${p.pos}</td><td>${escapeHtmlText(p.material)}</td><td>${escapeHtmlText(p.material===SPECIAL_LENGTH_MATERIAL?`H ${lengthFmt(p.customHeight)} × B ${lengthFmt(p.customWidth)} cm · L ${lengthFmt(p.customStockLength)} cm`:`${p.dimension} cm`)}</td><td>${lengthFmt(p.len)} cm</td><td>${p.q}</td><td>${escapeHtmlText(p.name||"–")}</td></tr>`).join("")}</tbody></table></div>`;}
 function setLengthNotice(type,html){$("lengthNotice").className="notice"+(type?" "+type:"");$("lengthNotice").innerHTML=html;}
 function updateLengthStats(groups,totalParts){let bars=0,customer=0,warehouse=0;groups.forEach(g=>{bars+=g.bars.length;const s=summarizeBars(g.material,g.bars,g.restLimit);customer+=s.customerRest;warehouse+=s.warehouseRest;});$("lengthSumBars").textContent=bars;$("lengthSumParts").textContent=totalParts;$("lengthSumCustomerRest").textContent=lengthFmt(customer)+" cm";$("lengthSumWarehouseRest").textContent=lengthFmt(warehouse)+" cm";}
 function calculateLengths(){
   saveLengthDraft();const cfg=selectedLengthConfig(),raws=cfg.raws,pos=readLengthPositions();
-  if(!raws.length){setLengthNotice("error","Bitte mindestens eine Rohlänge aktivieren.");return;}if(!pos.length){setLengthNotice("error","Bitte mindestens eine Fertiglänge eingeben.");return;}if(pos.some(p=>p.len<=0||p.q<=0)){setLengthNotice("error","Länge und Stückzahl müssen größer als 0 sein.");return;}
-  const maxRaw=Math.max(...raws),tooLong=pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos} mit ${lengthFmt(tooLong.len)} cm passt inklusive Sägefuge in keine aktivierte Rohlänge.`);return;}
+  if(cfg.isSpecial&&(!(cfg.customHeight>0)||!(cfg.customWidth>0)||!(cfg.customLength>0))){setLengthNotice("error","Bitte beim Sondermaß Höhe, Breite und Länge in cm vollständig eingeben.");return;}
+  if(!raws.length){setLengthNotice("error",cfg.isSpecial?"Bitte die Länge des Sondermaßes eingeben.":"Bitte mindestens eine Rohlänge aktivieren.");return;}if(!pos.length){setLengthNotice("error","Bitte mindestens eine Fertiglänge eingeben.");return;}if(pos.some(p=>p.len<=0||p.q<=0)){setLengthNotice("error","Länge und Stückzahl müssen größer als 0 sein.");return;}
+  const maxRaw=Math.max(...raws),tooLong=pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos} mit ${lengthFmt(tooLong.len)} cm passt inklusive Sägefuge nicht in die Länge ${lengthFmt(maxRaw)} cm.`);return;}
   const items=expandLengthPositions(pos),bars=optimizeLengths(items,raws,LENGTH_KERF_CM,cfg.material);if(!bars){setLengthNotice("error","Für diese Eingaben konnte kein Längenzuschnitt erzeugt werden.");return;}
-  const sum=summarizeBars(cfg.material,bars,DEFAULT_REST_LIMIT_CM),group={material:cfg.material,dimension:cfg.dimension,raws,pos,items,bars,restLimit:DEFAULT_REST_LIMIT_CM};currentLengthResult={mode:"single",restLimit:DEFAULT_REST_LIMIT_CM,groups:[group],pos,items};
-  const patterns=groupLengthBars(bars,cfg.material);$("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(saleRuleText(cfg.material,raws))}</div><div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(cfg.material)} · ${escapeHtmlText(cfg.dimension)} cm</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">Rohlängen ${raws.map(lengthFmt).join(" / ")} cm</span><span class="length-mini-stat">Fertigteile ${items.length}</span><span class="length-mini-stat">Rohstück${bars.length===1?"":"e"} ${bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((g,i)=>renderLengthBar(g.bar,i+1,g.count,cfg.material)).join("")}</div>`;
-  $("lengthResultTitle").textContent="Optimierter Längenzuschnitt";$("lengthResultMaterial").textContent=`${cfg.material} · ${cfg.dimension} cm · Rohlängen ${raws.map(lengthFmt).join(" / ")} cm`;updateLengthStats([group],items.length);renderSingleSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Berechnung abgeschlossen: <strong>${bars.length} Rohstück${bars.length===1?"":"e"}</strong>. ${escapeHtmlText(saleRuleText(cfg.material,raws))}`);
+  const sum=summarizeBars(cfg.material,bars,DEFAULT_REST_LIMIT_CM),group={material:cfg.material,dimension:cfg.dimension,raws,pos,items,bars,restLimit:DEFAULT_REST_LIMIT_CM,customHeight:cfg.customHeight,customWidth:cfg.customWidth,customStockLength:cfg.customLength};currentLengthResult={mode:"single",restLimit:DEFAULT_REST_LIMIT_CM,groups:[group],pos,items};
+  const patterns=groupLengthBars(bars,cfg.material);const title=cfg.isSpecial?`Sondermaß · ${lengthDimensionText(cfg.material,cfg.dimension,cfg)}`:`${cfg.material} · ${cfg.dimension} cm`;
+  const stockSummary=cfg.isSpecial?`Länge ${raws.map(lengthFmt).join(" / ")} cm`:`Rohlängen ${raws.map(lengthFmt).join(" / ")} cm`;
+  $("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(saleRuleText(cfg.material,raws))}</div><div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(title)}</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">${stockSummary}</span><span class="length-mini-stat">Fertigteile ${items.length}</span><span class="length-mini-stat">Rohstück${bars.length===1?"":"e"} ${bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((g,i)=>renderLengthBar(g.bar,i+1,g.count,cfg.material)).join("")}</div>`;
+  $("lengthResultTitle").textContent="Optimierter Längenzuschnitt";$("lengthResultMaterial").textContent=cfg.isSpecial?`Sondermaß · Höhe ${lengthFmt(cfg.customHeight)} cm · Breite ${lengthFmt(cfg.customWidth)} cm · Länge ${lengthFmt(cfg.customLength)} cm`:`${cfg.material} · ${cfg.dimension} cm · Rohlängen ${raws.map(lengthFmt).join(" / ")} cm`;updateLengthStats([group],items.length);renderSingleSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Berechnung abgeschlossen: <strong>${bars.length} Rohstück${bars.length===1?"":"e"}</strong>. ${escapeHtmlText(saleRuleText(cfg.material,raws))}`);
 }
 function calculateProject(){
-  saveLengthDraft();const pos=readProjectPositions();if(!pos.length){setLengthNotice("error","Bitte mindestens eine Projektposition eingeben.");return;}if(pos.some(p=>p.len<=0||p.q<=0)){setLengthNotice("error","Länge und Stückzahl müssen größer als 0 sein.");return;}
+  saveLengthDraft();const pos=readProjectPositions();if(!pos.length){setLengthNotice("error","Bitte mindestens eine Projektposition eingeben.");return;}if(pos.some(p=>p.len<=0||p.q<=0)){setLengthNotice("error","Fertiglänge und Stückzahl müssen größer als 0 sein.");return;}
+  const badSpecial=pos.find(p=>p.material===SPECIAL_LENGTH_MATERIAL&&(!(p.customHeight>0)||!(p.customWidth>0)||!(p.customStockLength>0)));if(badSpecial){setLengthNotice("error",`Pos. ${badSpecial.pos}: Beim Sondermaß bitte Höhe, Breite und Länge in cm vollständig eingeben.`);return;}
   const restLimit=getProjectRestLimit();
-  const by=new Map();for(const p of pos){const key=lengthGroupKey(p.material,p.dimension);if(!by.has(key))by.set(key,{material:p.material,dimension:p.dimension,pos:[]});by.get(key).pos.push(p);}
-  const groups=[];for(const [key,g] of by){const allRaws=catalogRaws(g.material,g.dimension),set=ensureSelection(projectRawSelection,key,allRaws),raws=allRaws.filter(r=>set.has(Number(r)));if(!raws.length){setLengthNotice("error",`${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm: Bitte mindestens eine Rohlänge aktivieren.`);return;}const maxRaw=Math.max(...raws),tooLong=g.pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos}: ${lengthFmt(tooLong.len)} cm passt bei ${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm in keine aktivierte Rohlänge.`);return;}const items=expandLengthPositions(g.pos),bars=optimizeLengths(items,raws,LENGTH_KERF_CM,g.material,restLimit);if(!bars){setLengthNotice("error",`Für ${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm konnte kein Zuschnitt erzeugt werden.`);return;}groups.push({...g,raws,items,bars,restLimit});}
+  const by=new Map();for(const p of pos){const key=p.material===SPECIAL_LENGTH_MATERIAL?`${SPECIAL_LENGTH_MATERIAL}||${p.customHeight}||${p.customWidth}||${p.customStockLength}`:lengthGroupKey(p.material,p.dimension);if(!by.has(key))by.set(key,{material:p.material,dimension:p.dimension,pos:[],customHeight:p.customHeight,customWidth:p.customWidth,customStockLength:p.customStockLength});by.get(key).pos.push(p);}
+  const groups=[];for(const [key,g] of by){
+    let raws;
+    if(g.material===SPECIAL_LENGTH_MATERIAL)raws=[g.customStockLength];
+    else{const allRaws=catalogRaws(g.material,g.dimension),set=ensureSelection(projectRawSelection,key,allRaws);raws=allRaws.filter(r=>set.has(Number(r)));}
+    if(!raws.length){setLengthNotice("error",`${escapeHtmlText(g.material)} ${escapeHtmlText(g.dimension)} cm: Bitte mindestens eine Länge aktivieren.`);return;}
+    const maxRaw=Math.max(...raws),tooLong=g.pos.find(p=>p.len+LENGTH_KERF_CM>maxRaw+1e-9);if(tooLong){setLengthNotice("error",`Pos. ${tooLong.pos}: ${lengthFmt(tooLong.len)} cm passt inklusive Sägefuge nicht in ${lengthFmt(maxRaw)} cm.`);return;}
+    const items=expandLengthPositions(g.pos),bars=optimizeLengths(items,raws,LENGTH_KERF_CM,g.material,restLimit);if(!bars){setLengthNotice("error",`Für ${escapeHtmlText(g.material)} konnte kein Zuschnitt erzeugt werden.`);return;}groups.push({...g,raws,items,bars,restLimit});
+  }
   const projectName=String($("projectName")?.value||"").trim();currentLengthResult={mode:"project",projectName,restLimit,groups,pos,items:groups.flatMap(g=>g.items)};
-  $("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(combinedSaleRuleText(groups,restLimit))}</div>`+groups.map(g=>{const sum=summarizeBars(g.material,g.bars,restLimit),patterns=groupLengthBars(g.bars,g.material,restLimit);return `<div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(g.material)} · ${escapeHtmlText(g.dimension)} cm</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">Rohlängen ${g.raws.map(lengthFmt).join(" / ")} cm</span><span class="length-mini-stat">Fertigteile ${g.items.length}</span><span class="length-mini-stat">Rohstück${g.bars.length===1?"":"e"} ${g.bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((x,i)=>renderLengthBar(x.bar,i+1,x.count,g.material,restLimit)).join("")}</div>`;}).join("");
-  $("lengthResultTitle").textContent=projectName?`Projekt: ${projectName}`:"Optimierter Projekt-Zuschnitt";$("lengthResultMaterial").textContent=`${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"} · Restgrenze ${lengthFmt(restLimit)} cm`;updateLengthStats(groups,currentLengthResult.items.length);renderProjectSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Projekt berechnet: <strong>${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"}</strong> und <strong>${groups.reduce((a,g)=>a+g.bars.length,0)} Rohstücke</strong>. Projekt-Restgrenze: <strong>${lengthFmt(restLimit)} cm</strong> für KVH 1302 cm und BSH 1202 cm.`);
+  $("lengthBars").innerHTML=`<div class="length-global-sale-rule">${escapeHtmlText(combinedSaleRuleText(groups,restLimit))}</div>`+groups.map(g=>{const sum=summarizeBars(g.material,g.bars,restLimit),patterns=groupLengthBars(g.bars,g.material,restLimit),title=g.material===SPECIAL_LENGTH_MATERIAL?`Sondermaß · ${lengthDimensionText(g.material,g.dimension,g)}`:`${g.material} · ${g.dimension} cm`,stock=g.material===SPECIAL_LENGTH_MATERIAL?`Länge ${g.raws.map(lengthFmt).join(" / ")} cm`:`Rohlängen ${g.raws.map(lengthFmt).join(" / ")} cm`;return `<div class="length-group"><div class="length-group-title"><div><h3>${escapeHtmlText(title)}</h3></div></div><div class="length-group-summary"><span class="length-mini-stat">${stock}</span><span class="length-mini-stat">Fertigteile ${g.items.length}</span><span class="length-mini-stat">Rohstück${g.bars.length===1?"":"e"} ${g.bars.length}</span><span class="length-mini-stat">Kundenrest ${lengthFmt(sum.customerRest)} cm</span><span class="length-mini-stat">Lagerrest ${lengthFmt(sum.warehouseRest)} cm</span></div>${patterns.map((x,i)=>renderLengthBar(x.bar,i+1,x.count,g.material,restLimit)).join("")}</div>`;}).join("");
+  $("lengthResultTitle").textContent=projectName?`Projekt: ${projectName}`:"Optimierter Projekt-Zuschnitt";$("lengthResultMaterial").textContent=`${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"} · Restgrenze ${lengthFmt(restLimit)} cm`;updateLengthStats(groups,currentLengthResult.items.length);renderProjectSummary(pos);$("lengthResultArea").classList.remove("hidden");setLengthNotice("success",`Projekt berechnet: <strong>${groups.length} Material-/Dimensionsgruppe${groups.length===1?"":"n"}</strong> und <strong>${groups.reduce((a,g)=>a+g.bars.length,0)} Rohstücke</strong>.`);
 }
 function lengthCsvText(){
   if(!currentLengthResult)return "";const r=currentLengthResult,restLimit=normalizeRestLimit(r.restLimit),rows=[["Modus",r.mode==="project"?"Projekt / mehrere Dimensionen":"Einzelmaterial"]];if(r.mode==="project"&&r.projectName)rows.push(["Projektname",r.projectName]);rows.push(["Saegefuge","0,5 cm / 5 mm"],["Restgrenze",`${lengthFmt(restLimit)} cm`],["Restregel",`Nur KVH 1302 cm und BSH 1202 cm: unter ${lengthFmt(restLimit)} cm Kundenrest, ab ${lengthFmt(restLimit)} cm Lagerrest. Andere Rohlängen werden komplett verkauft.`],[]);
-  if(r.mode==="project")rows.push(["Pos.","Material","Dimension cm","Laenge cm","Menge","Bezeichnung"],...r.pos.map(p=>[p.pos,p.material,p.dimension,p.len,p.q,p.name||""]),[]);else rows.push(["Pos.","Laenge cm","Menge","Bezeichnung"],...r.pos.map(p=>[p.pos,p.len,p.q,p.name||""]),[]);
-  r.groups.forEach(g=>{rows.push([`${g.material} ${g.dimension} cm`],["Rohlaengen",g.raws.join(" / ")+" cm"],["Rohstueck","Rohlaenge cm","Zuschnitte","Restart","Rest cm"]);g.bars.forEach((b,i)=>{const c=classifyLengthRest(g.material,b.raw,b.raw-b.used,g.restLimit??restLimit);rows.push([i+1,b.raw,b.pieces.map(p=>p.len).join(" + "),c.type==="warehouse"?"Lagerrest":c.type==="customer"?"Kundenrest":"kein Rest",c.customer+c.warehouse]);});rows.push([]);});
+  if(r.mode==="project")rows.push(["Pos.","Material","Dimension / Sondermass","Fertiglaenge cm","Menge","Bezeichnung"],...r.pos.map(p=>[p.pos,p.material,p.material===SPECIAL_LENGTH_MATERIAL?`H ${lengthFmt(p.customHeight)} x B ${lengthFmt(p.customWidth)} cm | L ${lengthFmt(p.customStockLength)} cm`:p.dimension,p.len,p.q,p.name||""]),[]);else rows.push(["Pos.","Laenge cm","Menge","Bezeichnung"],...r.pos.map(p=>[p.pos,p.len,p.q,p.name||""]),[]);
+  r.groups.forEach(g=>{rows.push([g.material===SPECIAL_LENGTH_MATERIAL?`Sondermass H ${lengthFmt(g.customHeight)} x B ${lengthFmt(g.customWidth)} cm`:`${g.material} ${g.dimension} cm`],[g.material===SPECIAL_LENGTH_MATERIAL?"Laenge":"Rohlaengen",g.raws.join(" / ")+" cm"],["Rohstueck","Rohlaenge cm","Zuschnitte","Restart","Rest cm"]);g.bars.forEach((b,i)=>{const c=classifyLengthRest(g.material,b.raw,b.raw-b.used,g.restLimit??restLimit);rows.push([i+1,b.raw,b.pieces.map(p=>p.len).join(" + "),c.type==="warehouse"?"Lagerrest":c.type==="customer"?"Kundenrest":"kein Rest",c.customer+c.warehouse]);});rows.push([]);});
   return rows.map(row=>row.map(csvCell).join(";")).join("\r\n");
 }
 function downloadLengthCsv(){if(!currentLengthResult)return;const blob=new Blob(["\ufeff"+lengthCsvText()],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=currentLengthResult.mode==="project"?"stueckliste-projekt-laengenzuschnitt.csv":"stueckliste-laengenzuschnitt.csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
@@ -4264,7 +4403,7 @@ function makeLengthPieceListPdfBase64(result,customer){
     const chunk=listPositions.slice(idx,idx+rowsCap*2),split=Math.ceil(chunk.length/2);
     chunk.forEach((pos,i)=>{
       const col=i>=split?1:0,row=col?i-split:i;
-      let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${pos.material} ${pos.dimension} cm | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
+      let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${lengthPositionMaterialText(pos)} | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
       if(line.length>47)line=line.slice(0,44)+"...";
       c+=t(colX[col],y-row*rowStep,9.3,line);
     });
@@ -4352,9 +4491,10 @@ function makeLengthPlanPdfBase64(result,customer){
 
   const groupHeader=(group,continued=false)=>{
     const sum=summarizeBars(group.material,group.bars,group.restLimit??restLimit);
-    page+=t(35,y,11,`${group.material} ${group.dimension} cm${continued?" - Fortsetzung":""}`,true);y-=15;
+    const heading=group.material===SPECIAL_LENGTH_MATERIAL?`Sondermass | Hoehe ${lengthFmt(group.customHeight)} cm | Breite ${lengthFmt(group.customWidth)} cm`:`${group.material} ${group.dimension} cm`;
+    page+=t(35,y,11,`${heading}${continued?" - Fortsetzung":""}`,true);y-=15;
     const rawText=group.raws.map(v=>`${lengthFmt(v)} cm`).join(" / ");
-    const meta=`Rohlaengen ${rawText} | Teile ${group.items.length} | Rohstuecke ${group.bars.length} | Kundenrest ${lengthFmt(sum.customerRest)} cm | Lagerrest ${lengthFmt(sum.warehouseRest)} cm`;
+    const meta=`${group.material===SPECIAL_LENGTH_MATERIAL?"Laenge":"Rohlaengen"} ${rawText} | Teile ${group.items.length} | Rohstuecke ${group.bars.length} | Kundenrest ${lengthFmt(sum.customerRest)} cm | Lagerrest ${lengthFmt(sum.warehouseRest)} cm`;
     const metaLines=wrapWords(meta,102).slice(0,2);
     metaLines.forEach(line=>{page+=t(35,y,8.2,line);y-=11;});
     y-=2;
@@ -4390,7 +4530,7 @@ function makeLengthPlanPdfBase64(result,customer){
 
       const label=pat.count>1?`${pat.count}x identisch`:`Rohstueck ${idx+1}`;
       page+=t(35,y,9.2,label,true);
-      page+=tWarehouse(318,y,7.8,`Rohlaenge ${lengthFmt(raw)} cm | ${rest?`${restLabel} ${lengthFmt(rest)} cm`:"kein Rest"}`);
+      page+=tWarehouse(318,y,7.8,`${group.material===SPECIAL_LENGTH_MATERIAL?"Laenge":"Rohlaenge"} ${lengthFmt(raw)} cm | ${rest?`${restLabel} ${lengthFmt(rest)} cm`:"kein Rest"}`);
       y-=15;
 
       const bx=35,bw=525,bh=15,by=y-bh;
@@ -4429,8 +4569,8 @@ function makeLengthEml(result,customer){
     `Kunde: ${customer.name}`,customer.company?`Firma: ${customer.company}`:null,`E-Mail: ${customer.email}`,customer.phone?`Telefon: ${customer.phone}`:null,"",
     `Modus: ${result.mode==="project"?"Projekt / mehrere Dimensionen":"Einzelmaterial"}`,
     "Saegefuge: 0,5 cm / 5 mm fest",`Restgrenze: ${lengthFmt(restLimit)} cm`,`Berechnete Rohstuecke: ${totalBars}`,`Fertigteile gesamt: ${result.items.length}`,"",
-    "Materialgruppen:",...result.groups.map(g=>{const s=summarizeBars(g.material,g.bars,g.restLimit??restLimit);return `${g.material} ${g.dimension} cm | Rohlaengen ${g.raws.map(lengthFmt).join(" / ")} cm | ${g.bars.length} Rohstueck(e) | Kundenrest ${lengthFmt(s.customerRest)} cm | Lagerrest ${lengthFmt(s.warehouseRest)} cm`;}),"",
-    "Stueckliste:",...result.pos.map(p=>result.mode==="project"?`Pos. ${p.pos}: ${p.q} x ${p.material} ${p.dimension} cm | ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`:`Pos. ${p.pos}: ${p.q} x ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`),
+    "Materialgruppen:",...result.groups.map(g=>{const s=summarizeBars(g.material,g.bars,g.restLimit??restLimit);const label=g.material===SPECIAL_LENGTH_MATERIAL?`Sondermass Hoehe ${lengthFmt(g.customHeight)} cm | Breite ${lengthFmt(g.customWidth)} cm | Laenge ${g.raws.map(lengthFmt).join(" / ")} cm`:`${g.material} ${g.dimension} cm | Rohlaengen ${g.raws.map(lengthFmt).join(" / ")} cm`;return `${label} | ${g.bars.length} Rohstueck(e) | Kundenrest ${lengthFmt(s.customerRest)} cm | Lagerrest ${lengthFmt(s.warehouseRest)} cm`;}),"",
+    "Stueckliste:",...result.pos.map(p=>result.mode==="project"?`Pos. ${p.pos}: ${p.q} x ${lengthPositionMaterialText(p)} | ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`:`Pos. ${p.pos}: ${p.q} x ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`),
     customer.remarks?"":null,customer.remarks?"Bemerkung:":null,customer.remarks||null,"","Laengenzuschnitt-PDF und CSV-Stueckliste sind angehaengt."
   ].filter(v=>v!==null).join("\r\n");
   const pdfB64=makeLengthPlanPdfBase64(result,customer);
@@ -4461,12 +4601,14 @@ function sendLengthRequest(ev){
 function serializeSelections(store){const out={};Object.entries(store).forEach(([k,v])=>out[k]=[...v]);return out;}
 function restoreSelections(store,data){if(!data||typeof data!=="object")return;Object.entries(data).forEach(([k,v])=>{if(Array.isArray(v))store[k]=new Set(v.map(Number));});}
 function saveLengthDraft(){
-  try{localStorage.setItem(LENGTH_DRAFT_KEY,JSON.stringify({mode:activeLengthMode,material:$("lengthMaterialSelect")?.value||"KVH",dimension:$("lengthDimensionSelect")?.value||"",projectName:$("projectName")?.value||"",projectRestLimit:getProjectRestLimit(),currentProjectId:currentProjectId||null,singleRaws:serializeSelections(singleRawSelection),projectRaws:serializeSelections(projectRawSelection),parts:[...($("lengthPartsBody")?.querySelectorAll("tr")||[])].map(tr=>({len:tr.querySelector(".ll")?.value||"",q:tr.querySelector(".lq")?.value||"1",name:tr.querySelector(".lname")?.value||""})),projectParts:[...($("projectPartsBody")?.querySelectorAll("tr")||[])].map(tr=>({material:tr.querySelector(".pmat")?.value||"KVH",dimension:tr.querySelector(".pdim")?.value||"",len:tr.querySelector(".plen")?.value||"",q:tr.querySelector(".pqty")?.value||"1",name:tr.querySelector(".pname2")?.value||""}))}));}catch(_){ }
+  try{localStorage.setItem(LENGTH_DRAFT_KEY,JSON.stringify({mode:activeLengthMode,material:$("lengthMaterialSelect")?.value||"KVH",dimension:$("lengthDimensionSelect")?.value||"",singleSpecial:{height:$("lengthSpecialHeight")?.value||"",width:$("lengthSpecialWidth")?.value||"",length:$("lengthSpecialLength")?.value||""},projectName:$("projectName")?.value||"",projectRestLimit:getProjectRestLimit(),currentProjectId:currentProjectId||null,singleRaws:serializeSelections(singleRawSelection),projectRaws:serializeSelections(projectRawSelection),parts:[...($("lengthPartsBody")?.querySelectorAll("tr")||[])].map(tr=>({len:tr.querySelector(".ll")?.value||"",q:tr.querySelector(".lq")?.value||"1",name:tr.querySelector(".lname")?.value||""})),projectParts:[...($("projectPartsBody")?.querySelectorAll("tr")||[])].map(tr=>({material:tr.querySelector(".pmat")?.value||"KVH",dimension:tr.querySelector(".pdim")?.value||"",customHeight:tr.querySelector(".pcustom-h")?.value||"",customWidth:tr.querySelector(".pcustom-w")?.value||"",customLength:tr.querySelector(".pcustom-l")?.value||"",len:tr.querySelector(".plen")?.value||"",q:tr.querySelector(".pqty")?.value||"1",name:tr.querySelector(".pname2")?.value||""}))}));}catch(_){ }
 }
 function restoreLengthDraft(){
   let d=null;try{d=JSON.parse(localStorage.getItem(LENGTH_DRAFT_KEY)||"null");}catch(_){ }if(!d)return false;restoreSelections(singleRawSelection,d.singleRaws);restoreSelections(projectRawSelection,d.projectRaws);
-  if(LENGTH_CATALOG[d.material])$("lengthMaterialSelect").value=d.material;rebuildLengthDimensions(d.dimension||"");$("lengthPartsBody").innerHTML="";(Array.isArray(d.parts)?d.parts:[]).forEach(p=>addLengthPartRow(p.len,Number(p.q)||1,p.name||""));if(!$("lengthPartsBody").children.length)addLengthPartRow();
-  $("projectPartsBody").innerHTML="";(Array.isArray(d.projectParts)?d.projectParts:[]).forEach(p=>addProjectPartRow(p.material,p.dimension,p.len,Number(p.q)||1,p.name||""));if(!$("projectPartsBody").children.length)addProjectPartRow();if($("projectName"))$("projectName").value=d.projectName||"";if($("projectRestLimit"))$("projectRestLimit").value=normalizeRestLimit(d.projectRestLimit);currentProjectId=d.currentProjectId||null;rebuildProjectRawSettings();setLengthMode(d.mode||"single",false);updateLengthMaterial();renderSavedProjects(currentProjectId);return true;
+  if(d.material===SPECIAL_LENGTH_MATERIAL||LENGTH_CATALOG[d.material])$("lengthMaterialSelect").value=d.material;
+  if(d.singleSpecial){if($("lengthSpecialHeight"))$("lengthSpecialHeight").value=d.singleSpecial.height||"";if($("lengthSpecialWidth"))$("lengthSpecialWidth").value=d.singleSpecial.width||"";if($("lengthSpecialLength"))$("lengthSpecialLength").value=d.singleSpecial.length||"";}
+  rebuildLengthDimensions(d.dimension||"");$("lengthPartsBody").innerHTML="";(Array.isArray(d.parts)?d.parts:[]).forEach(p=>addLengthPartRow(p.len,Number(p.q)||1,p.name||""));if(!$("lengthPartsBody").children.length)addLengthPartRow();
+  $("projectPartsBody").innerHTML="";(Array.isArray(d.projectParts)?d.projectParts:[]).forEach(p=>addProjectPartRow(p.material,p.dimension,p.len,Number(p.q)||1,p.name||"",false,p.customHeight||"",p.customWidth||"",p.customLength||""));if(!$("projectPartsBody").children.length)addProjectPartRow();if($("projectName"))$("projectName").value=d.projectName||"";if($("projectRestLimit"))$("projectRestLimit").value=normalizeRestLimit(d.projectRestLimit);currentProjectId=d.currentProjectId||null;rebuildProjectRawSettings();setLengthMode(d.mode||"single",false);updateLengthMaterial();renderSavedProjects(currentProjectId);return true;
 }
 
 function projectId(){
@@ -4488,6 +4630,9 @@ function currentProjectRows(){
   return [...($('projectPartsBody')?.querySelectorAll('tr')||[])].map(tr=>({
     material:tr.querySelector('.pmat')?.value||'KVH',
     dimension:tr.querySelector('.pdim')?.value||'',
+    customHeight:tr.querySelector('.pcustom-h')?.value||'',
+    customWidth:tr.querySelector('.pcustom-w')?.value||'',
+    customLength:tr.querySelector('.pcustom-l')?.value||'',
     len:tr.querySelector('.plen')?.value||'',
     q:tr.querySelector('.pqty')?.value||'1',
     name:tr.querySelector('.pname2')?.value||''
@@ -4496,6 +4641,7 @@ function currentProjectRows(){
 function relevantProjectSelections(rows){
   const out={};
   (rows||[]).forEach(r=>{
+    if(r.material===SPECIAL_LENGTH_MATERIAL)return;
     const key=lengthGroupKey(r.material,r.dimension);
     if(projectRawSelection[key])out[key]=[...projectRawSelection[key]];
   });
@@ -4553,7 +4699,7 @@ function applyNamedProject(p){
   restoreSelections(projectRawSelection,p.projectRaws||{});
   $('projectPartsBody').innerHTML='';
   const rows=Array.isArray(p.projectParts)?p.projectParts:[];
-  rows.forEach(r=>addProjectPartRow(r.material,r.dimension,r.len,Number(r.q)||1,r.name||''));
+  rows.forEach(r=>addProjectPartRow(r.material,r.dimension,r.len,Number(r.q)||1,r.name||'',false,r.customHeight||'',r.customWidth||'',r.customLength||''));
   if(!$('projectPartsBody').children.length)addProjectPartRow();
   $('projectName').value=p.name||'';if($('projectRestLimit'))$('projectRestLimit').value=normalizeRestLimit(p.restLimit);currentProjectId=p.id||null;
   rebuildProjectRawSettings();setLengthMode('project',false);
@@ -4600,7 +4746,7 @@ document.addEventListener("keydown",ev=>{if(window.activePlannerMode!=="length"|
 
 $("plannerTabPlate").addEventListener("click",()=>setPlannerMode("plate"));$("plannerTabLength").addEventListener("click",()=>setPlannerMode("length"));
 $("lengthModeSingle").addEventListener("click",()=>setLengthMode("single"));$("lengthModeProject").addEventListener("click",()=>setLengthMode("project"));
-$("lengthMaterialSelect").addEventListener("change",()=>rebuildLengthDimensions());$("lengthDimensionSelect").addEventListener("change",updateLengthMaterial);$("lengthPartsBody").addEventListener("input",saveLengthDraft);$("projectPartsBody").addEventListener("input",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});$("projectPartsBody").addEventListener("change",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});
+$("lengthMaterialSelect").addEventListener("change",()=>rebuildLengthDimensions());$("lengthDimensionSelect").addEventListener("change",updateLengthMaterial);["lengthSpecialHeight","lengthSpecialWidth","lengthSpecialLength"].forEach(id=>$(id)?.addEventListener("input",()=>{updateLengthMaterial();}));$("lengthPartsBody").addEventListener("input",saveLengthDraft);$("projectPartsBody").addEventListener("input",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});$("projectPartsBody").addEventListener("change",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});
 $("lengthAddPart").addEventListener("click",()=>addLengthPartRow("",1,"",true));$("lengthExample").addEventListener("click",loadLengthExample);$("lengthClear").addEventListener("click",clearLengthParts);$("lengthCalculate").addEventListener("click",calculateLengths);
 $("projectAddPart").addEventListener("click",()=>addProjectPartRow("KVH","","",1,"",true));$("projectExample").addEventListener("click",loadProjectExample);$("projectClear").addEventListener("click",clearProjectParts);$("projectCalculate").addEventListener("click",calculateProject);
 $("projectSave").addEventListener("click",saveNamedProject);$("projectSavedToggle").addEventListener("click",toggleSavedProjects);$("projectNew").addEventListener("click",newNamedProject);$("projectLoad").addEventListener("click",loadNamedProject);$("projectRename").addEventListener("click",renameNamedProject);$("projectDelete").addEventListener("click",deleteNamedProject);$("projectName").addEventListener("input",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});$("projectRestLimit").addEventListener("input",()=>{if(Number($("projectRestLimit").value)<0)$("projectRestLimit").value=0;saveLengthDraft();$("lengthResultArea").classList.add("hidden");currentLengthResult=null;if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});
