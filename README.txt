@@ -1,4 +1,4 @@
-LOWIS ZUSCHNITTPLANER - V39
+LOWIS ZUSCHNITTPLANER - V40
 
 GitHub Pages:
 1. Alle Dateien aus diesem Ordner/ZIP in das bestehende Repository hochladen.
@@ -9,7 +9,7 @@ Cache-Verhalten:
 - index.html wird online zuerst vom Server geladen; Cache nur als Offline-Fallback.
 - Service Worker wird ohne HTTP-Cache registriert und aktiv auf Updates geprüft.
 
-V39 - PDF-/Papieroptimierung:
+V40 - PDF-/Papieroptimierung:
 - "Stueckliste CSV" wurde bei Platten- und Laengenzuschnitt zu "Stueckliste PDF".
 - "Stueckliste PDF" erzeugt nur die kompakte Stueckliste als PDF.
 - "PDF erstellen" erzeugt Stueckliste + Zuschnittplan in einer gemeinsamen PDF.

@@ -4223,26 +4223,26 @@ function makeLengthPieceListPdfBase64(result,customer){
   const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
   const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).customerRest,0);
   const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).warehouseRest,0);
-  const colX=[35,305],rowStep=12,bottom=44;
+  const colX=[35,305],rowStep=13.5,bottom=44;
   let idx=0,pageNo=0;
   do{
     pageNo++;let c="0 G 0 g 0.55 w\n";
-    c+=t(35,812,17,pageNo===1?"Laengen-Zuschnitt - Stueckliste":"Laengen-Zuschnitt - Stueckliste Fortsetzung",true);
-    let y=792;
+    c+=t(35,812,18,pageNo===1?"Laengen-Zuschnitt - Stueckliste":"Laengen-Zuschnitt - Stueckliste Fortsetzung",true);
+    let y=790;
     if(pageNo===1){
-      if(result.mode==="project"&&result.projectName){c+=t(35,y,9.7,`Projekt: ${result.projectName}`,true);y-=14;}
-      c+=t(35,y,8.3,`Saegefuge 5 mm | Rohstuecke ${totalBars} | Fertigteile ${result.items.length} | Kundenrest ${lengthFmt(totalCustomer)} cm | Lagerrest ${lengthFmt(totalWarehouse)} cm | Restgrenze ${lengthFmt(restLimit)} cm`);y-=14;
-      if(hasCustomer){c+=t(35,y,8,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=13;}
-      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();c+=t(35,y,7.7,`Bemerkung: ${r.slice(0,140)}${r.length>140?" ...":""}`);y-=13;}
+      if(result.mode==="project"&&result.projectName){c+=t(35,y,10.7,`Projekt: ${result.projectName}`,true);y-=16;}
+      c+=t(35,y,9.3,`Saegefuge 0,5 cm | Rohstuecke ${totalBars} | Fertigteile ${result.items.length} | Kundenrest ${lengthFmt(totalCustomer)} cm | Lagerrest ${lengthFmt(totalWarehouse)} cm | Restgrenze ${lengthFmt(restLimit)} cm`);y-=16;
+      if(hasCustomer){c+=t(35,y,9,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=15;}
+      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();c+=t(35,y,8.7,`Bemerkung: ${r.slice(0,128)}${r.length>128?" ...":""}`);y-=15;}
     }
-    c+="0.86 G 0.35 w\n"+ln(35,y+2,560,y+2)+"0 G\n";y-=10;
+    c+="0.86 G 0.35 w\n"+ln(35,y+2,560,y+2)+"0 G\n";y-=12;
     const rowsCap=Math.max(1,Math.floor((y-bottom)/rowStep));
     const chunk=result.pos.slice(idx,idx+rowsCap*2),split=Math.ceil(chunk.length/2);
     chunk.forEach((pos,i)=>{
       const col=i>=split?1:0,row=col?i-split:i;
-      let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${pos.material} ${pos.dimension} | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
-      if(line.length>57)line=line.slice(0,54)+"...";
-      c+=t(colX[col],y-row*rowStep,8.3,line);
+      let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${pos.material} ${pos.dimension} cm | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
+      if(line.length>47)line=line.slice(0,44)+"...";
+      c+=t(colX[col],y-row*rowStep,9.3,line);
     });
     idx+=chunk.length;pages.push(c);if(!chunk.length)break;
   }while(idx<result.pos.length);
@@ -4256,81 +4256,106 @@ function makeLengthPlanPdfBase64(result,customer){
   const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
   const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
   const rc=(x,y,w,h,fill=false)=>`${x} ${y} ${w} ${h} re ${fill?"B":"S"}\n`;
+  const wrapWords=(text,maxChars)=>{
+    const words=pdfAscii(text).split(/\s+/).filter(Boolean),lines=[];let line="";
+    words.forEach(word=>{
+      const next=line?line+" "+word:word;
+      if(next.length>maxChars&&line){lines.push(line);line=word;}else line=next;
+    });
+    if(line)lines.push(line);
+    return lines.length?lines:[""];
+  };
   const restLimit=normalizeRestLimit(result.restLimit);
   const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
   const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).customerRest,0);
   const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).warehouseRest,0);
-  const bottom=42,rowStep=11.8,colX=[35,305];
+  const bottom=42,rowStep=13.5,colX=[35,305];
   let page="",y=0,pageNo=0;
   const pushPage=()=>{if(page){pages.push(page);page="";}};
   const startPage=(kind="detail")=>{
     pushPage();pageNo++;page="0 G 0 g 0.5 w\n";
     if(kind==="main"){
-      page+=t(35,812,17,result.mode==="project"?"Projekt-Laengenzuschnitt":"Laengen-Zuschnittplan",true);y=791;
-      if(result.mode==="project"&&result.projectName){page+=t(35,y,10,`Projekt: ${result.projectName}`,true);y-=14;}
-      page+=t(35,y,8.2,`Saegefuge 5 mm | Rohstuecke ${totalBars} | Fertigteile ${result.items.length} | Kundenrest ${lengthFmt(totalCustomer)} cm | Lagerrest ${lengthFmt(totalWarehouse)} cm | Restgrenze ${lengthFmt(restLimit)} cm`);y-=14;
-      if(hasCustomer){page+=t(35,y,8,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=13;}
-      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();page+=t(35,y,7.7,`Bemerkung: ${r.slice(0,140)}${r.length>140?" ...":""}`);y-=13;}
+      page+=t(35,812,18,result.mode==="project"?"Projekt-Laengenzuschnitt":"Laengen-Zuschnittplan",true);y=789;
+      if(result.mode==="project"&&result.projectName){page+=t(35,y,11,`Projekt: ${result.projectName}`,true);y-=16;}
+      page+=t(35,y,9.2,`Saegefuge 0,5 cm | Rohstuecke ${totalBars} | Fertigteile ${result.items.length} | Kundenrest ${lengthFmt(totalCustomer)} cm | Lagerrest ${lengthFmt(totalWarehouse)} cm | Restgrenze ${lengthFmt(restLimit)} cm`);y-=16;
+      if(hasCustomer){page+=t(35,y,9,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=15;}
+      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();page+=t(35,y,8.7,`Bemerkung: ${r.slice(0,128)}${r.length>128?" ...":""}`);y-=15;}
     }else{
-      page+=t(35,814,11,result.mode==="project"?(result.projectName?`Projekt ${result.projectName} - Fortsetzung`:"Projekt-Laengenzuschnitt - Fortsetzung"):"Laengen-Zuschnittplan - Fortsetzung",true);
-      page+=t(510,814,7.2,`Seite ${pageNo}`);page+="0.86 G 0.35 w\n"+ln(35,804,560,804)+"0 G\n";y=790;
+      page+=t(35,814,12,result.mode==="project"?(result.projectName?`Projekt ${result.projectName} - Fortsetzung`:"Projekt-Laengenzuschnitt - Fortsetzung"):"Laengen-Zuschnittplan - Fortsetzung",true);
+      page+=t(510,814,8.2,`Seite ${pageNo}`);page+="0.86 G 0.35 w\n"+ln(35,802,560,802)+"0 G\n";y=786;
     }
   };
   const renderListChunk=(chunk)=>{
-    page+=t(35,y,10,"Stueckliste",true);y-=13;
+    page+=t(35,y,11,"Stueckliste",true);y-=15;
     const split=Math.ceil(chunk.length/2);
     chunk.forEach((pos,i)=>{
       const col=i>=split?1:0,row=col?i-split:i;
-      let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${pos.material} ${pos.dimension} | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
-      if(line.length>57)line=line.slice(0,54)+"...";
-      page+=t(colX[col],y-row*rowStep,8.2,line);
+      let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${pos.material} ${pos.dimension} cm | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
+      if(line.length>47)line=line.slice(0,44)+"...";
+      page+=t(colX[col],y-row*rowStep,9.2,line);
     });
-    y-=Math.ceil(chunk.length/2)*rowStep+8;
+    y-=Math.ceil(chunk.length/2)*rowStep+10;
   };
 
   startPage("main");
   let posIndex=0;
   while(posIndex<result.pos.length){
     const left=result.pos.length-posIndex,rowsNeeded=Math.ceil(left/2);
-    // Wenn die komplette Restliste passt und noch ca. 120 pt fuer Zuschnittbalken bleiben, direkt weiterfliessen.
-    const rowsWithDetail=Math.max(0,Math.floor((y-(bottom+120))/rowStep));
-    if(rowsWithDetail>0 && rowsNeeded<=rowsWithDetail){renderListChunk(result.pos.slice(posIndex));posIndex=result.pos.length;break;}
-    const rowsFull=Math.max(1,Math.floor((y-bottom-10)/rowStep)),take=Math.min(left,rowsFull*2);
+    const rowsWithDetail=Math.max(0,Math.floor((y-(bottom+145))/rowStep));
+    if(rowsWithDetail>0&&rowsNeeded<=rowsWithDetail){renderListChunk(result.pos.slice(posIndex));posIndex=result.pos.length;break;}
+    const rowsFull=Math.max(1,Math.floor((y-bottom-12)/rowStep)),take=Math.min(left,rowsFull*2);
     renderListChunk(result.pos.slice(posIndex,posIndex+take));posIndex+=take;
     if(posIndex<result.pos.length)startPage("detail");
   }
-  if(!result.pos.length){page+=t(35,y,10,"Stueckliste: keine Positionen",true);y-=18;}
+  if(!result.pos.length){page+=t(35,y,11,"Stueckliste: keine Positionen",true);y-=20;}
 
   const groupHeader=(group,continued=false)=>{
     const sum=summarizeBars(group.material,group.bars,group.restLimit??restLimit);
-    page+=t(35,y,10,`${group.material} ${group.dimension} cm${continued?" - Fortsetzung":""}`,true);y-=12;
-    let meta=`Rohlaengen ${group.raws.map(lengthFmt).join("/")} cm | Teile ${group.items.length} | Rohstuecke ${group.bars.length} | Kundenrest ${lengthFmt(sum.customerRest)} | Lagerrest ${lengthFmt(sum.warehouseRest)} cm`;
-    if(meta.length>120)meta=meta.slice(0,117)+"...";
-    page+=t(35,y,7.2,meta);y-=10;
+    page+=t(35,y,11,`${group.material} ${group.dimension} cm${continued?" - Fortsetzung":""}`,true);y-=15;
+    const rawText=group.raws.map(v=>`${lengthFmt(v)} cm`).join(" / ");
+    const meta=`Rohlaengen ${rawText} | Teile ${group.items.length} | Rohstuecke ${group.bars.length} | Kundenrest ${lengthFmt(sum.customerRest)} cm | Lagerrest ${lengthFmt(sum.warehouseRest)} cm`;
+    const metaLines=wrapWords(meta,102).slice(0,2);
+    metaLines.forEach(line=>{page+=t(35,y,8.2,line);y-=11;});
+    y-=2;
   };
 
   result.groups.forEach((group,gidx)=>{
     const patterns=groupLengthBars(group.bars,group.material,group.restLimit??restLimit);
-    if(y-bottom<60)startPage("detail");
-    if(gidx>0){page+="0.90 G 0.3 w\n"+ln(35,y+4,560,y+4)+"0 G\n";y-=3;}
+    if(y-bottom<72)startPage("detail");
+    if(gidx>0){page+="0.90 G 0.3 w\n"+ln(35,y+5,560,y+5)+"0 G\n";y-=5;}
     groupHeader(group,false);
     patterns.forEach((pat,idx)=>{
       const bar=pat.bar,raw=bar.raw,rest=Math.max(0,Math.round((raw-bar.used)*10)/10),cls=classifyLengthRest(group.material,raw,rest,group.restLimit??restLimit);
-      const seq=bar.pieces.map(x=>`${lengthFmt(x.len)}${x.name?" "+x.name:""}`).join(" + ");
-      const seqText=`${seq}${rest?` | ${cls.label} ${lengthFmt(rest)} cm`:" | kein Rest"}`;
-      const seqLines=pdfAscii(`Schnittfolge: ${seqText}`).match(/.{1,112}/g)||[];
-      const needed=34+Math.min(2,seqLines.length)*8;
+      const seq=bar.pieces.map(x=>`${lengthFmt(x.len)} cm${x.name?" "+x.name:""}`).join(" + ");
+      const restLabel=cls.type==="warehouse"?"Lagerrest":cls.type==="customer"?"Kundenrest":"Kein Rest";
+      const seqText=`${seq}${rest?` | ${restLabel} ${lengthFmt(rest)} cm`:" | kein Rest"}`;
+      const seqLines=wrapWords(`Schnittfolge: ${seqText}`,94).slice(0,3);
+      const needed=14+15+10+seqLines.length*10.5+8;
       if(y-bottom<needed+8){startPage("detail");groupHeader(group,true);}
+
       const label=pat.count>1?`${pat.count}x identisch`:`Rohstueck ${idx+1}`;
-      page+=t(35,y,8.2,label,true)+t(330,y,6.8,`Rohlaenge ${lengthFmt(raw)} cm | ${cls.label}${rest?` ${lengthFmt(rest)} cm`:""}`);y-=10;
-      const bx=35,bw=525,bh=12,by=y-1;
+      page+=t(35,y,9.2,label,true);
+      page+=t(318,y,7.8,`Rohlaenge ${lengthFmt(raw)} cm | ${rest?`${restLabel} ${lengthFmt(rest)} cm`:"kein Rest"}`);
+      y-=15;
+
+      const bx=35,bw=525,bh=15,by=y-bh;
       page+="1 g\n"+rc(bx,by,bw,bh,true)+"0 g\n"+rc(bx,by,bw,bh,false);
       let off=0;
-      bar.pieces.forEach(piece=>{const x=bx+bw*(off/raw),w=Math.max(.55,bw*(piece.len/raw));page+=rc(x,by,w,bh,false);if(w>24)page+=t(x+2,by+3.3,5.8,`${lengthFmt(piece.len)}`,true);off+=piece.len+LENGTH_KERF_CM;});
-      const restW=bw*(rest/raw);if(restW>0){const rx=bx+bw*((raw-rest)/raw);page+="0.93 g\n"+rc(rx,by,restW,bh,true)+"0 g\n"+rc(rx,by,restW,bh,false);}y-=10;
-      seqLines.slice(0,2).forEach(line=>{page+=t(39,y,6.2,line);y-=8;});y-=3;
+      bar.pieces.forEach(piece=>{
+        const x=bx+bw*(off/raw),w=Math.max(.55,bw*(piece.len/raw));
+        page+=rc(x,by,w,bh,false);
+        const labelText=`${lengthFmt(piece.len)} cm`;
+        if(w>30)page+=t(x+2.5,by+4.2,6.8,labelText,true);
+        off+=piece.len+LENGTH_KERF_CM;
+      });
+      const restW=bw*(rest/raw);
+      if(restW>0){const rx=bx+bw*((raw-rest)/raw);page+="0.93 g\n"+rc(rx,by,restW,bh,true)+"0 g\n"+rc(rx,by,restW,bh,false);}
+      y=by-10;
+
+      seqLines.forEach(line=>{page+=t(39,y,7.2,line);y-=10.5;});
+      y-=6;
     });
-    y-=2;
+    y-=3;
   });
   pushPage();
   return buildSimplePdfBase64(pages);
