@@ -1218,7 +1218,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
 }
 
 
-/* V35: Druckausgabe ist immer hell – unabhängig vom Webseiten-Darkmode. */
+/* V36: PDF-Ausgabe kompakt und immer hell – unabhängig vom Webseiten-Darkmode. */
 @media print{
   html,html[data-theme="dark"],body,html[data-theme="dark"] body{
     background:#fff!important;
@@ -3512,127 +3512,117 @@ function makePlanPdfBase64(result, customer){
   const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
   const rc=(x,y,w,h,fill=false)=>`${x} ${y} ${w} ${h} re ${fill?"B":"S"}\n`;
 
-  let c="0 G 0 g 0.7 w\n";
-  c+=t(45,800,18,"Platten-Zuschnittplan",true);
-  c+=t(45,779,10,`${result.m.group} ${result.m.thickness} mm - ${result.m.edge}`);
-  c+=t(45,763,10,`Rohplatte: ${result.m.width} x ${result.m.height} mm | Saegefuge: 3 mm | Drehen: automatisch aktiv`);
-  c+=t(45,741,11,`Plattenbedarf: ${result.sheets.length}`,true);
-  let y;
-  if(hasCustomer){
-    c+=t(45,717,11,"Kunde",true);
-    c+=t(45,701,9,`${customer.name}${customer.company ? " | "+customer.company : ""}`);
-    c+=t(45,686,9,`${customer.email}${customer.phone ? " | "+customer.phone : ""}`);
-    c+=t(45,661,11,"Stueckliste",true);
-    y=643;
-  }else{
-    c+=t(45,712,11,"Stueckliste",true);
-    y=694;
-  }
-  result.pos.forEach(p=>{ c+=t(55,y,9,`Pos. ${p.pos}: ${p.q} x ${p.w} x ${p.h} mm${p.name ? " - "+p.name : ""}`); y-=15; });
-  if(customer.remarks){
-    y-=8;c+=t(45,y,10,"Bemerkung:",true);y-=15;
-    const chunks=pdfAscii(customer.remarks).match(/.{1,75}/g)||[];
-    chunks.slice(0,6).forEach(line=>{c+=t(55,y,8,line);y-=12;});
+  // Kompakte Zusammenfassung: zwei Spalten statt einer langen Liste.
+  const summaryHead=(continued=false)=>{
+    let c="0 G 0 g 0.55 w\n";
+    c+=t(35,812,continued?13:16,continued?"Platten-Zuschnittplan - Stueckliste Fortsetzung":"Platten-Zuschnittplan",true);
+    if(!continued){
+      c+=t(35,794,8.5,`${result.m.group} ${result.m.thickness} mm - ${result.m.edge} | Rohplatte ${result.m.width} x ${result.m.height} mm | 3 mm Saegefuge | ${result.sheets.length} Platte${result.sheets.length===1?"":"n"}`);
+      if(hasCustomer){
+        c+=t(35,779,7.5,`Kunde: ${customer.name}${customer.company ? " | "+customer.company : ""}${customer.email ? " | "+customer.email : ""}${customer.phone ? " | "+customer.phone : ""}`);
+      }
+      if(customer.remarks){
+        const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();
+        c+=t(35,hasCustomer?764:779,7,`Bemerkung: ${r.slice(0,135)}${r.length>135?" ...":""}`);
+      }
+    }
+    return c;
+  };
+
+  let c=summaryHead(false);
+  let y=hasCustomer||customer.remarks?742:764;
+  c+=t(35,y,9,"Stueckliste",true);y-=13;
+  const colX=[35,305], colW=250, rowStep=10.5, bottom=42;
+  let col=0;
+  for(const p of result.pos){
+    if(y<bottom){
+      if(col===0){col=1;y=hasCustomer||customer.remarks?742:764;}
+      else{pages.push(c);c=summaryHead(true);c+=t(35,786,9,"Stueckliste",true);col=0;y=770;}
+    }
+    let line=`P${p.pos}  ${p.q}x  ${p.w} x ${p.h} mm${p.name ? "  "+p.name : ""}`;
+    if(line.length>54)line=line.slice(0,51)+"...";
+    c+=t(colX[col],y,7.1,line);y-=rowStep;
   }
   pages.push(c);
 
+  // Zwei unterschiedliche Schnittbilder pro A4-Seite. Identische Platten bleiben gruppiert.
   const pdfGroups=groupIdenticalSheets(result.sheets);
+  for(let pageStart=0;pageStart<pdfGroups.length;pageStart+=2){
+    let p="0 G 0 g 0.55 w\n";
+    const batch=pdfGroups.slice(pageStart,pageStart+2);
+    batch.forEach((group,slot)=>{
+      const sh=group.sheet;
+      const top=slot===0?812:414;
+      const blockBottom=slot===0?425:28;
+      const heading=group.count>1?`${group.count}x identisch schneiden`:`Platte ${group.sheetNumbers[0]}`;
+      p+=t(35,top,11.5,heading,true);
+      const plateInfo=`${result.m.width} x ${result.m.height} mm | ${result.m.group} ${result.m.thickness} mm | 3 mm Saegefuge${group.count>1?` | Platten ${group.sheetNumbers.join(", ")}`:""}`;
+      p+=t(35,top-14,6.8,plateInfo);
 
-  pdfGroups.forEach((group,idx)=>{
-    const sh=group.sheet;
-    let p="0 G 0 g 0.7 w\n";
-    const heading=group.count>1
-      ? `${group.count}x identisch schneiden`
-      : `Schnittplan - Platte ${group.sheetNumbers[0]}`;
-    p+=t(45,800,16,heading,true);
-    p+=t(45,781,9,`${result.m.width} x ${result.m.height} mm | ${result.m.group} ${result.m.thickness} mm | 3 mm Saegefuge`);
-    if(group.count>1){
-      p+=t(45,766,8,`Gilt fuer Platten: ${group.sheetNumbers.join(", ")}`);
-    }
+      const bx=38,maxW=519,maxH=248;
+      const drawTop=top-27;
+      const sc=Math.min(maxW/result.m.width,maxH/result.m.height);
+      const bw=result.m.width*sc,bh=result.m.height*sc;
+      const by=drawTop-bh;
 
-    const bx=50,by=430,maxW=495,maxH=305;
-    const sc=Math.min(maxW/result.m.width,maxH/result.m.height);
-    const bw=result.m.width*sc,bh=result.m.height*sc;
+      p+="0.96 g\n"+rc(bx,by,bw,bh,true)+"0 g\n";
+      p+="0.80 G 0.32 w\n";
+      for(let d=-bh;d<bw;d+=10){p+=ln(bx+d,by,bx+d+bh,by+bh);}
+      p+="0 G 0.62 w\n"+rc(bx,by,bw,bh,false);
 
-    p+="0.95 g\n"+rc(bx,by,bw,bh,true)+"0 g\n";
-    p+="0.78 G 0.4 w\n";
-    for(let d=-bh;d<bw;d+=12){ p+=ln(bx+d,by,bx+d+bh,by+bh); }
-    p+="0 G 0.8 w\n"+rc(bx,by,bw,bh,false);
+      const pdfInfoPositions=[];
+      const pdfInfoSet=new Set();
+      sh.placements.forEach(pl=>{
+        const drawW=pl.w*sc,drawH=pl.h*sc;
+        const mode=pieceLayoutMode(pl,drawW,drawH);
+        if(mode==="measure" && needsPieceCallout(pl,drawW,drawH) && !pdfInfoSet.has(pl.item.pos)){
+          pdfInfoSet.add(pl.item.pos);pdfInfoPositions.push(pl.item.pos);
+        }
+      });
 
-    const pdfInfoPositions=[];
-    const pdfInfoSet=new Set();
-    sh.placements.forEach(pl=>{
-      const drawW=pl.w*sc,drawH=pl.h*sc;
-      const mode=pieceLayoutMode(pl,drawW,drawH);
-      if(mode==="measure" && needsPieceCallout(pl,drawW,drawH) && !pdfInfoSet.has(pl.item.pos)){
-        pdfInfoSet.add(pl.item.pos);
-        pdfInfoPositions.push(pl.item.pos);
-      }
-    });
-
-    sh.placements.forEach(pl=>{
-      const x=bx+pl.x*sc;
-      const y0=by+(result.m.height-(pl.y+pl.h))*sc;
-      const w=pl.w*sc,h=pl.h*sc;
-      const mode=pieceLayoutMode(pl,w,h);
-      p+="1 g\n"+rc(x,y0,w,h,true)+"0 g\n";
-
-      if(mode==="full"){
-        const ident=`Pos. ${pl.item.pos}${pl.item.name ? " - "+pl.item.name : ""}${pl.rotated ? " gedreht" : ""}`;
-        p+=t(x+4,y0+h-10,7,ident,true);
-        p+=t(x+4,y0+4,7,`${pl.w} mm`);
-        p+=tv(x+w-4,y0+4,7,`${pl.h} mm`);
-      }else if(mode==="compact"){
-        p+=t(x+4,y0+h-10,6,`Pos. ${pl.item.pos}`,true);
-        p+=t(x+4,y0+4,6,`${pl.w} mm`);
-        p+=tv(x+w-4,y0+4,6,`${pl.h} mm`);
-      }else{
-        const spec=tinyMeasureSpec(pl,w,h);
-        if(spec.readable){
-          const fs=Math.max(5,Math.min(7,spec.font));
-          if(spec.vertical){
-            p+=tv(x+w/2,y0+Math.max(3,h/2-textApprox(spec.text,fs)/2),fs,spec.text,true);
-          }else{
-            p+=t(x+Math.max(2,w/2-textApprox(spec.text,fs)/2),y0+h/2-2,fs,spec.text,true);
+      sh.placements.forEach(pl=>{
+        const x=bx+pl.x*sc;
+        const y0=by+(result.m.height-(pl.y+pl.h))*sc;
+        const w=pl.w*sc,h=pl.h*sc;
+        const mode=pieceLayoutMode(pl,w,h);
+        p+="1 g\n"+rc(x,y0,w,h,true)+"0 g\n";
+        if(mode==="full"){
+          const ident=`P${pl.item.pos}${pl.item.name ? " "+pl.item.name : ""}${pl.rotated ? " gedr." : ""}`;
+          p+=t(x+2.5,y0+h-7.5,5.2,ident,true);
+          p+=t(x+2.5,y0+2.5,5.1,`${pl.w}`);
+          p+=tv(x+w-2.2,y0+2.5,5.1,`${pl.h}`);
+        }else if(mode==="compact"){
+          p+=t(x+2,y0+h-6.5,4.7,`P${pl.item.pos}`,true);
+          p+=t(x+2,y0+2.2,4.6,`${pl.w}`);
+          p+=tv(x+w-2,y0+2.2,4.6,`${pl.h}`);
+        }else{
+          const spec=tinyMeasureSpec(pl,w,h);
+          if(spec.readable){
+            const fs=Math.max(4.2,Math.min(5.3,spec.font));
+            if(spec.vertical)p+=tv(x+w/2,y0+Math.max(2,h/2-textApprox(spec.text,fs)/2),fs,spec.text,true);
+            else p+=t(x+Math.max(1,w/2-textApprox(spec.text,fs)/2),y0+h/2-1.5,fs,spec.text,true);
           }
         }
-      }
-    });
-
-    let infoY=405;
-    if(pdfInfoPositions.length){
-      p+=t(45,infoY,8,"Zusatzinfo zu kleinen Zuschnitten:",true);
-      infoY-=13;
-      pdfInfoPositions.forEach((pos)=>{
-        const pl=sh.placements.find(x=>x.item.pos===pos);
-        const desc=`Pos. ${pl.item.pos} | Fertigmass ${pl.item.w} x ${pl.item.h} mm${pl.item.name ? " | "+pl.item.name : ""}${pl.rotated ? " | im Plan gedreht" : ""}`;
-        p+=t(45,infoY,7,desc);
-        infoY-=12;
       });
-      infoY-=3;
-    }
-    p+=t(45,Math.max(70,infoY),8,"Restmaterial ist schraffiert. 3-mm-Saegefuge wurde in der Berechnung beruecksichtigt.");
+
+      let noteY=Math.max(blockBottom+8,by-9);
+      if(pdfInfoPositions.length){
+        const details=pdfInfoPositions.map(pos=>{
+          const pl=sh.placements.find(x=>x.item.pos===pos);
+          return `P${pl.item.pos} ${pl.item.w}x${pl.item.h}${pl.item.name?" "+pl.item.name:""}${pl.rotated?" gedr.":""}`;
+        });
+        const chunks=[];let line="Kleine Teile: ";
+        details.forEach(d=>{if((line+d).length>100){chunks.push(line.trim());line="";}line+=(line?" | ":"")+d;});
+        if(line)chunks.push(line.trim());
+        chunks.slice(0,3).forEach(x=>{p+=t(38,noteY,5.5,x);noteY-=7;});
+      }
+      p+=t(38,Math.max(blockBottom+1,noteY),5.4,"Rest schraffiert | Saegefuge 3 mm beruecksichtigt");
+      if(slot===0)p+="0.86 G 0.35 w\n"+ln(35,421,560,421)+"0 G\n";
+    });
     pages.push(p);
-  });
+  }
 
-  const objects=[null];
-  const add=o=>{objects.push(o);return objects.length-1;};
-  const f1=add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
-  const f2=add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
-  const contentIds=pages.map(pg=>add(`<< /Length ${pg.length} >>\nstream\n${pg}endstream`));
-  const pagesId=add("");
-  const pageIds=contentIds.map(cid=>add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${cid} 0 R >>`));
-  objects[pagesId]=`<< /Type /Pages /Kids [${pageIds.map(id=>`${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
-  const catalog=add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
-
-  let pdf="%PDF-1.4\n", offsets=[0];
-  for(let i=1;i<objects.length;i++){offsets[i]=pdf.length;pdf+=`${i} 0 obj\n${objects[i]}\nendobj\n`;}
-  const xref=pdf.length;
-  pdf+=`xref\n0 ${objects.length}\n0000000000 65535 f \n`;
-  for(let i=1;i<objects.length;i++) pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";
-  pdf+=`trailer\n<< /Size ${objects.length} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF`;
-
-  return btoa(unescape(encodeURIComponent(pdf)));
+  return buildSimplePdfBase64(pages);
 }
 
 function safePdfFilePart(value){
@@ -3817,7 +3807,7 @@ function sendRequest(ev){
 
 
 /* =========================================================
-   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V35
+   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V36
    ========================================================= */
 window.activePlannerMode="plate";
 let activeLengthMode="single";
@@ -4132,67 +4122,97 @@ function makeLengthPlanPdfBase64(result,customer){
   const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).customerRest,0);
   const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).warehouseRest,0);
 
-  let c="0 G 0 g 0.7 w\n";
-  c+=t(45,800,18,result.mode==="project"?"Projekt-Laengenzuschnitt":"Laengen-Zuschnittplan",true);
-  if(result.mode==="project"&&result.projectName)c+=t(45,778,11,`Projekt: ${result.projectName}`,true);
-  c+=t(45,result.mode==="project"&&result.projectName?758:778,9,`Saegefuge: 0,5 cm / 5 mm | Rohstuecke: ${totalBars} | Fertigteile: ${result.items.length}`);
-  c+=t(45,result.mode==="project"&&result.projectName?742:762,9,`Kundenrest: ${lengthFmt(totalCustomer)} cm | Lagerrest: ${lengthFmt(totalWarehouse)} cm | Restgrenze: ${lengthFmt(restLimit)} cm`);
-  let y=result.mode==="project"&&result.projectName?712:730;
-  if(hasCustomer){
-    c+=t(45,y,11,"Kunde",true);y-=16;
-    c+=t(55,y,9,`${customer.name}${customer.company?" | "+customer.company:""}`);y-=14;
-    c+=t(55,y,9,`${customer.email}${customer.phone?" | "+customer.phone:""}`);y-=24;
-  }
-  c+=t(45,y,11,"Stueckliste",true);y-=16;
+  // Kompakte Zusammenfassung mit zweispaltiger Stueckliste.
+  const summaryHead=(continued=false)=>{
+    let c="0 G 0 g 0.55 w\n";
+    c+=t(35,812,continued?13:16,continued?"Laengen-Zuschnittplan - Stueckliste Fortsetzung":(result.mode==="project"?"Projekt-Laengenzuschnitt":"Laengen-Zuschnittplan"),true);
+    if(!continued){
+      let y=794;
+      if(result.mode==="project"&&result.projectName){c+=t(35,y,9,`Projekt: ${result.projectName}`,true);y-=14;}
+      c+=t(35,y,7.5,`Saegefuge 0,5 cm / 5 mm | Rohstuecke ${totalBars} | Fertigteile ${result.items.length} | Kundenrest ${lengthFmt(totalCustomer)} cm | Lagerrest ${lengthFmt(totalWarehouse)} cm | Restgrenze ${lengthFmt(restLimit)} cm`);y-=13;
+      if(hasCustomer){c+=t(35,y,7,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=12;}
+      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();c+=t(35,y,6.7,`Bemerkung: ${r.slice(0,140)}${r.length>140?" ...":""}`);}
+    }
+    return c;
+  };
+
+  let c=summaryHead(false);
+  let y=result.mode==="project"&&result.projectName?744:757;
+  if(hasCustomer)y-=12;if(customer.remarks)y-=10;
+  c+=t(35,y,9,"Stueckliste",true);y-=13;
+  const colX=[35,305],rowStep=10.2,bottom=42;
+  let col=0;
   for(const p of result.pos){
-    const line=result.mode==="project"
-      ? `Pos. ${p.pos}: ${p.q} x ${p.material} ${p.dimension} cm | ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`
-      : `Pos. ${p.pos}: ${p.q} x ${lengthFmt(p.len)} cm${p.name?" | "+p.name:""}`;
-    if(y<90){pages.push(c);c="0 G 0 g 0.7 w\n";c+=t(45,800,14,"Stueckliste - Fortsetzung",true);y=775;}
-    c+=t(55,y,8,line);y-=13;
-  }
-  if(customer.remarks){
-    y-=5;if(y<130){pages.push(c);c="0 G 0 g 0.7 w\n";y=795;}
-    c+=t(45,y,10,"Bemerkung:",true);y-=14;
-    const chunks=pdfAscii(customer.remarks).match(/.{1,82}/g)||[];
-    chunks.slice(0,10).forEach(line=>{if(y<70)return;c+=t(55,y,8,line);y-=12;});
+    if(y<bottom){
+      if(col===0){col=1;y=result.mode==="project"&&result.projectName?744:757;if(hasCustomer)y-=12;if(customer.remarks)y-=10;}
+      else{pages.push(c);c=summaryHead(true);c+=t(35,786,9,"Stueckliste",true);col=0;y=770;}
+    }
+    let line=result.mode==="project"
+      ? `P${p.pos} ${p.q}x ${p.material} ${p.dimension} | ${lengthFmt(p.len)} cm${p.name?" "+p.name:""}`
+      : `P${p.pos} ${p.q}x ${lengthFmt(p.len)} cm${p.name?" "+p.name:""}`;
+    if(line.length>55)line=line.slice(0,52)+"...";
+    c+=t(colX[col],y,7,line);y-=rowStep;
   }
   pages.push(c);
 
-  result.groups.forEach(group=>{
+  // Detailseiten: Gruppen laufen platzsparend hintereinander; kein Seitenwechsel pro Materialgruppe.
+  let p="",py=0,pageNo=0;
+  const newDetailPage=()=>{
+    if(p)pages.push(p);
+    pageNo++;
+    p="0 G 0 g 0.5 w\n";
+    p+=t(35,814,9.5,result.mode==="project"?(result.projectName?`Projekt ${result.projectName} - Zuschnittdetails`:`Projekt-Zuschnittdetails`):"Laengen-Zuschnittdetails",true);
+    p+=t(485,814,6.3,`Seite ${pageNo}`);
+    p+="0.86 G 0.35 w\n"+ln(35,804,560,804)+"0 G\n";
+    py=790;
+  };
+  newDetailPage();
+
+  const groupHeader=(group,continued=false)=>{
+    const sum=summarizeBars(group.material,group.bars,group.restLimit??restLimit);
+    p+=t(35,py,9,`${group.material} ${group.dimension} cm${continued?" - Fortsetzung":""}`,true);py-=11;
+    let meta=`Rohlaengen ${group.raws.map(lengthFmt).join("/")} cm | Teile ${group.items.length} | Rohstuecke ${group.bars.length} | Kundenrest ${lengthFmt(sum.customerRest)} | Lagerrest ${lengthFmt(sum.warehouseRest)} cm`;
+    if(meta.length>120)meta=meta.slice(0,117)+"...";
+    p+=t(35,py,6.2,meta);py-=10;
+  };
+
+  result.groups.forEach((group,gidx)=>{
     const patterns=groupLengthBars(group.bars,group.material,group.restLimit??restLimit);
-    let p="0 G 0 g 0.7 w\n",py=800;
-    const startPage=()=>{
-      p="0 G 0 g 0.7 w\n";py=800;
-      p+=t(45,py,15,`${group.material} ${group.dimension} cm`,true);py-=18;
-      const sum=summarizeBars(group.material,group.bars,group.restLimit??restLimit);
-      p+=t(45,py,8,`Rohlaengen: ${group.raws.map(lengthFmt).join(" / ")} cm | Fertigteile: ${group.items.length} | Rohstuecke: ${group.bars.length} | Kundenrest: ${lengthFmt(sum.customerRest)} cm | Lagerrest: ${lengthFmt(sum.warehouseRest)} cm`);py-=20;
-    };
-    startPage();
+    if(py<90)newDetailPage();
+    if(gidx>0){p+="0.90 G 0.3 w\n"+ln(35,py+5,560,py+5)+"0 G\n";py-=3;}
+    groupHeader(group,false);
+
     patterns.forEach((pat,idx)=>{
-      if(py<115){pages.push(p);startPage();}
       const bar=pat.bar,raw=bar.raw,rest=Math.max(0,Math.round((raw-bar.used)*10)/10),cls=classifyLengthRest(group.material,raw,rest,group.restLimit??restLimit);
-      p+=t(45,py,9,pat.count>1?`${pat.count}x identisch schneiden`:`Rohstueck ${idx+1}`,true);
-      p+=t(385,py,7,`Rohlaenge ${lengthFmt(raw)} cm | ${cls.label}`);py-=12;
-      const bx=45,bw=505,bh=16,by=py-4;
+      const seq=bar.pieces.map(x=>`${lengthFmt(x.len)}${x.name?" "+x.name:""}`).join(" + ");
+      const seqText=`${seq}${rest?` | ${cls.label} ${lengthFmt(rest)} cm`:" | kein Rest"}`;
+      const needed=seqText.length>112?38:31;
+      if(py<needed+38){newDetailPage();groupHeader(group,true);}
+
+      const label=pat.count>1?`${pat.count}x identisch`:`Rohstueck ${idx+1}`;
+      p+=t(35,py,7.1,label,true);
+      p+=t(330,py,5.9,`Rohlaenge ${lengthFmt(raw)} cm | ${cls.label}${rest?` ${lengthFmt(rest)} cm`:""}`);py-=9;
+
+      const bx=35,bw=525,bh=10,by=py-1;
       p+="1 g\n"+rc(bx,by,bw,bh,true)+"0 g\n"+rc(bx,by,bw,bh,false);
       let off=0;
       bar.pieces.forEach(piece=>{
-        const x=bx+bw*(off/raw),w=Math.max(.8,bw*(piece.len/raw));
+        const x=bx+bw*(off/raw),w=Math.max(.55,bw*(piece.len/raw));
         p+=rc(x,by,w,bh,false);
-        if(w>28)p+=t(x+3,by+5,6,`${lengthFmt(piece.len)} cm`,true);
+        if(w>21)p+=t(x+2,by+2.7,4.8,`${lengthFmt(piece.len)}`,true);
         off+=piece.len+LENGTH_KERF_CM;
       });
       const restW=bw*(rest/raw);
       if(restW>0){const rx=bx+bw*((raw-rest)/raw);p+="0.93 g\n"+rc(rx,by,restW,bh,true)+"0 g\n"+rc(rx,by,restW,bh,false);}
-      py-=14;
-      const seq=bar.pieces.map(x=>`${lengthFmt(x.len)}${x.name?" "+x.name:""}`).join(" + ");
-      const seqLines=pdfAscii(`Schnittfolge: ${seq}${rest?" | "+cls.label:""}`).match(/.{1,105}/g)||[];
-      seqLines.slice(0,2).forEach(line=>{p+=t(50,py,6.5,line);py-=10;});
-      py-=5;
+      py-=10;
+
+      const seqLines=pdfAscii(`Schnittfolge: ${seqText}`).match(/.{1,112}/g)||[];
+      seqLines.slice(0,2).forEach(line=>{p+=t(39,py,5.2,line);py-=7;});
+      py-=4;
     });
-    pages.push(p);
+    py-=3;
   });
+  if(p)pages.push(p);
   return buildSimplePdfBase64(pages);
 }
 
