@@ -3950,6 +3950,27 @@ const LENGTH_CATALOG={
 };
 const LENGTH_MATERIALS=Object.keys(LENGTH_CATALOG);
 
+function lengthMaterialOrder(material){
+  const i=LENGTH_MATERIALS.indexOf(material);
+  return i>=0?i:999;
+}
+function lengthDimensionOrder(dimension){
+  const d=parseDimension(dimension);
+  return [d.w,d.h,String(dimension)];
+}
+function compareLengthMaterialDimension(a,b){
+  const mr=lengthMaterialOrder(a.material)-lengthMaterialOrder(b.material);
+  if(mr) return mr;
+  const ad=lengthDimensionOrder(a.dimension),bd=lengthDimensionOrder(b.dimension);
+  return (ad[0]-bd[0])||(ad[1]-bd[1])||String(ad[2]).localeCompare(String(bd[2]),"de");
+}
+function sortedLengthGroupsForPdf(groups){
+  return (groups||[]).slice().sort(compareLengthMaterialDimension);
+}
+function sortedLengthPositionsForPdf(pos){
+  return (pos||[]).slice().sort((a,b)=>compareLengthMaterialDimension(a,b)||(a.pos-b.pos));
+}
+
 function parseDimension(dim){
   const parts=String(dim).split("x").map(v=>Number(v.replace(",",".")));
   return {w:parts[0]||0,h:parts[1]||0};
@@ -4217,6 +4238,7 @@ function makeLengthPieceListPdfBase64(result,customer){
   customer=Object.assign({name:"",company:"",email:"",phone:"",remarks:""},customer||{});
   const hasCustomer=Boolean(customer.name||customer.company||customer.email||customer.phone||customer.remarks);
   const pages=[];
+  const listPositions=result.mode==="project"?sortedLengthPositionsForPdf(result.pos):result.pos;
   const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
   const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
   const restLimit=normalizeRestLimit(result.restLimit);
@@ -4237,7 +4259,7 @@ function makeLengthPieceListPdfBase64(result,customer){
     }
     c+="0.86 G 0.35 w\n"+ln(35,y+2,560,y+2)+"0 G\n";y-=12;
     const rowsCap=Math.max(1,Math.floor((y-bottom)/rowStep));
-    const chunk=result.pos.slice(idx,idx+rowsCap*2),split=Math.ceil(chunk.length/2);
+    const chunk=listPositions.slice(idx,idx+rowsCap*2),split=Math.ceil(chunk.length/2);
     chunk.forEach((pos,i)=>{
       const col=i>=split?1:0,row=col?i-split:i;
       let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${pos.material} ${pos.dimension} cm | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
@@ -4245,7 +4267,7 @@ function makeLengthPieceListPdfBase64(result,customer){
       c+=t(colX[col],y-row*rowStep,9.3,line);
     });
     idx+=chunk.length;pages.push(c);if(!chunk.length)break;
-  }while(idx<result.pos.length);
+  }while(idx<listPositions.length);
   return buildSimplePdfBase64(pages);
 }
 
@@ -4266,6 +4288,8 @@ function makeLengthPlanPdfBase64(result,customer){
     return lines.length?lines:[""];
   };
   const restLimit=normalizeRestLimit(result.restLimit);
+  const pdfGroups=result.mode==="project"?sortedLengthGroupsForPdf(result.groups):result.groups;
+  const pdfPositions=result.mode==="project"?sortedLengthPositionsForPdf(result.pos):result.pos;
   const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
   const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).customerRest,0);
   const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).warehouseRest,0);
@@ -4299,15 +4323,15 @@ function makeLengthPlanPdfBase64(result,customer){
 
   startPage("main");
   let posIndex=0;
-  while(posIndex<result.pos.length){
-    const left=result.pos.length-posIndex,rowsNeeded=Math.ceil(left/2);
+  while(posIndex<pdfPositions.length){
+    const left=pdfPositions.length-posIndex,rowsNeeded=Math.ceil(left/2);
     const rowsWithDetail=Math.max(0,Math.floor((y-(bottom+145))/rowStep));
-    if(rowsWithDetail>0&&rowsNeeded<=rowsWithDetail){renderListChunk(result.pos.slice(posIndex));posIndex=result.pos.length;break;}
+    if(rowsWithDetail>0&&rowsNeeded<=rowsWithDetail){renderListChunk(pdfPositions.slice(posIndex));posIndex=pdfPositions.length;break;}
     const rowsFull=Math.max(1,Math.floor((y-bottom-12)/rowStep)),take=Math.min(left,rowsFull*2);
-    renderListChunk(result.pos.slice(posIndex,posIndex+take));posIndex+=take;
-    if(posIndex<result.pos.length)startPage("detail");
+    renderListChunk(pdfPositions.slice(posIndex,posIndex+take));posIndex+=take;
+    if(posIndex<pdfPositions.length)startPage("detail");
   }
-  if(!result.pos.length){page+=t(35,y,11,"Stueckliste: keine Positionen",true);y-=20;}
+  if(!pdfPositions.length){page+=t(35,y,11,"Stueckliste: keine Positionen",true);y-=20;}
 
   const groupHeader=(group,continued=false)=>{
     const sum=summarizeBars(group.material,group.bars,group.restLimit??restLimit);
@@ -4319,10 +4343,24 @@ function makeLengthPlanPdfBase64(result,customer){
     y-=2;
   };
 
-  result.groups.forEach((group,gidx)=>{
+  let previousPdfMaterial=null;
+  pdfGroups.forEach((group,gidx)=>{
     const patterns=groupLengthBars(group.bars,group.material,group.restLimit??restLimit);
-    if(y-bottom<72)startPage("detail");
-    if(gidx>0){page+="0.90 G 0.3 w\n"+ln(35,y+5,560,y+5)+"0 G\n";y-=5;}
+    const materialChanged=previousPdfMaterial!==null && previousPdfMaterial!==group.material;
+    const requiredTopSpace=materialChanged?88:72;
+    if(y-bottom<requiredTopSpace)startPage("detail");
+    if(gidx>0){
+      if(materialChanged){
+        // Materialwechsel klarer trennen: mehr Weissraum und staerkere Linie.
+        y-=6;
+        page+="0.55 G 0.75 w\n"+ln(35,y+5,560,y+5)+"0 G 0.5 w\n";
+        y-=9;
+      }else{
+        // Neue Dimension desselben Materials nur dezent trennen.
+        page+="0.88 G 0.3 w\n"+ln(35,y+4,560,y+4)+"0 G 0.5 w\n";
+        y-=5;
+      }
+    }
     groupHeader(group,false);
     patterns.forEach((pat,idx)=>{
       const bar=pat.bar,raw=bar.raw,rest=Math.max(0,Math.round((raw-bar.used)*10)/10),cls=classifyLengthRest(group.material,raw,rest,group.restLimit??restLimit);
@@ -4355,6 +4393,7 @@ function makeLengthPlanPdfBase64(result,customer){
       seqLines.forEach(line=>{page+=t(39,y,7.2,line);y-=10.5;});
       y-=6;
     });
+    previousPdfMaterial=group.material;
     y-=3;
   });
   pushPage();
