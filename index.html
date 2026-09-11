@@ -1398,8 +1398,8 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
               <span><i class="swatch kerf"></i> Sägefuge</span>
             </div>
             <div class="button-row" style="margin:0">
-              <button class="btn btn-soft" id="downloadCsv" type="button">Stückliste CSV</button>
-              <button class="btn btn-dark" id="printPlan" type="button">PDF erstellen</button>
+              <button class="btn btn-soft" id="downloadCsv" type="button">Stückliste PDF</button>
+              <button class="btn btn-dark" id="printPlan" type="button" title="Stückliste inklusive Zuschnittplänen">PDF erstellen</button>
             </div>
           </div>
 
@@ -1590,8 +1590,8 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
               <span><i class="swatch kerf"></i> Sägefuge</span>
             </div>
             <div class="button-row" style="margin:0">
-              <button class="btn btn-soft" id="lengthDownloadCsv" type="button">Stückliste CSV</button>
-              <button class="btn btn-dark" id="lengthPrint" type="button">PDF erstellen</button>
+              <button class="btn btn-soft" id="lengthDownloadCsv" type="button">Stückliste PDF</button>
+              <button class="btn btn-dark" id="lengthPrint" type="button" title="Stückliste inklusive Zuschnitten">PDF erstellen</button>
             </div>
           </div>
           <div id="lengthBars"></div>
@@ -1653,7 +1653,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
       <h3>E-Mail-Anfrage wurde erstellt</h3>
       <p id="modalText"></p>
       <div class="button-row">
-        <button class="btn btn-soft" id="modalCsv" type="button">Stückliste laden</button>
+        <button class="btn btn-soft" id="modalCsv" type="button">Stückliste PDF</button>
         <button class="btn btn-dark" id="modalPrint" type="button">PDF erstellen</button>
         <button class="btn btn-primary" id="modalClose" type="button">Schließen</button>
       </div>
@@ -3493,7 +3493,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 
 $("calculate").addEventListener("click",calculate);
 $("printPlan").addEventListener("click",createPlatePdf);
-$("downloadCsv").addEventListener("click",downloadCsv);
+$("downloadCsv").addEventListener("click",createPlatePieceListPdf);
 
 
 function pdfAscii(s){
@@ -3503,6 +3503,41 @@ function pdfAscii(s){
 }
 function pdfEsc(s){return pdfAscii(s).replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)");}
 
+function makePlatePieceListPdfBase64(result, customer){
+  customer=Object.assign({name:"",company:"",email:"",phone:"",remarks:""},customer||{});
+  const hasCustomer=Boolean(customer.name||customer.company||customer.email||customer.phone||customer.remarks);
+  const pages=[];
+  const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
+  const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
+  const colX=[35,305],rowStep=10.2,bottom=44;
+  let idx=0,pageNo=0;
+  do{
+    pageNo++;
+    let c="0 G 0 g 0.55 w\n";
+    c+=t(35,812,15,pageNo===1?"Platten-Zuschnitt - Stueckliste":"Platten-Zuschnitt - Stueckliste Fortsetzung",true);
+    let y=792;
+    if(pageNo===1){
+      c+=t(35,y,8.2,`${result.m.group} ${result.m.thickness} mm - ${result.m.edge} | Rohplatte ${result.m.width} x ${result.m.height} mm | 3 mm Saegefuge | ${result.sheets.length} Platte${result.sheets.length===1?"":"n"}`);y-=13;
+      if(hasCustomer){c+=t(35,y,7.1,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=12;}
+      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();c+=t(35,y,6.8,`Bemerkung: ${r.slice(0,140)}${r.length>140?" ...":""}`);y-=12;}
+    }
+    c+="0.86 G 0.35 w\n"+ln(35,y+2,560,y+2)+"0 G\n";y-=10;
+    const rowsCap=Math.max(1,Math.floor((y-bottom)/rowStep));
+    const chunk=result.pos.slice(idx,idx+rowsCap*2);
+    const split=Math.ceil(chunk.length/2);
+    chunk.forEach((pos,i)=>{
+      const col=i>=split?1:0,row=col?i-split:i;
+      let line=`P${pos.pos}  ${pos.q}x  ${pos.w} x ${pos.h} mm${pos.name?"  "+pos.name:""}`;
+      if(line.length>56)line=line.slice(0,53)+"...";
+      c+=t(colX[col],y-row*rowStep,7.2,line);
+    });
+    idx+=chunk.length;
+    pages.push(c);
+    if(!chunk.length)break;
+  }while(idx<result.pos.length);
+  return buildSimplePdfBase64(pages);
+}
+
 function makePlanPdfBase64(result, customer){
   customer=Object.assign({name:"",company:"",email:"",phone:"",remarks:""},customer||{});
   const hasCustomer=Boolean(customer.name||customer.company||customer.email||customer.phone||customer.remarks);
@@ -3511,117 +3546,117 @@ function makePlanPdfBase64(result, customer){
   const tv=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf 0 1 -1 0 ${x} ${y} Tm (${pdfEsc(str)}) Tj ET\n`;
   const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
   const rc=(x,y,w,h,fill=false)=>`${x} ${y} ${w} ${h} re ${fill?"B":"S"}\n`;
+  const bottom=42,rowStep=10.2,colX=[35,305];
+  let page="",y=0,pageNo=0;
 
-  // Kompakte Zusammenfassung: zwei Spalten statt einer langen Liste.
-  const summaryHead=(continued=false)=>{
-    let c="0 G 0 g 0.55 w\n";
-    c+=t(35,812,continued?13:16,continued?"Platten-Zuschnittplan - Stueckliste Fortsetzung":"Platten-Zuschnittplan",true);
-    if(!continued){
-      c+=t(35,794,8.5,`${result.m.group} ${result.m.thickness} mm - ${result.m.edge} | Rohplatte ${result.m.width} x ${result.m.height} mm | 3 mm Saegefuge | ${result.sheets.length} Platte${result.sheets.length===1?"":"n"}`);
-      if(hasCustomer){
-        c+=t(35,779,7.5,`Kunde: ${customer.name}${customer.company ? " | "+customer.company : ""}${customer.email ? " | "+customer.email : ""}${customer.phone ? " | "+customer.phone : ""}`);
-      }
-      if(customer.remarks){
-        const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();
-        c+=t(35,hasCustomer?764:779,7,`Bemerkung: ${r.slice(0,135)}${r.length>135?" ...":""}`);
-      }
+  const pushPage=()=>{if(page){pages.push(page);page="";}};
+  const startPage=(kind="detail")=>{
+    pushPage();pageNo++;
+    page="0 G 0 g 0.55 w\n";
+    if(kind==="main"){
+      page+=t(35,812,15,"Platten-Zuschnittplan",true);
+      y=793;
+      page+=t(35,y,8.1,`${result.m.group} ${result.m.thickness} mm - ${result.m.edge} | Rohplatte ${result.m.width} x ${result.m.height} mm | 3 mm Saegefuge | ${result.sheets.length} Platte${result.sheets.length===1?"":"n"}`);y-=13;
+      if(hasCustomer){page+=t(35,y,7.1,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=12;}
+      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();page+=t(35,y,6.8,`Bemerkung: ${r.slice(0,140)}${r.length>140?" ...":""}`);y-=12;}
+    }else{
+      page+=t(35,814,10,"Platten-Zuschnittplan - Fortsetzung",true);
+      page+=t(510,814,6.2,`Seite ${pageNo}`);
+      page+="0.86 G 0.35 w\n"+ln(35,804,560,804)+"0 G\n";
+      y=790;
     }
-    return c;
   };
 
-  let c=summaryHead(false);
-  let y=hasCustomer||customer.remarks?742:764;
-  c+=t(35,y,9,"Stueckliste",true);y-=13;
-  const colX=[35,305], colW=250, rowStep=10.5, bottom=42;
-  let col=0;
-  for(const p of result.pos){
-    if(y<bottom){
-      if(col===0){col=1;y=hasCustomer||customer.remarks?742:764;}
-      else{pages.push(c);c=summaryHead(true);c+=t(35,786,9,"Stueckliste",true);col=0;y=770;}
-    }
-    let line=`P${p.pos}  ${p.q}x  ${p.w} x ${p.h} mm${p.name ? "  "+p.name : ""}`;
-    if(line.length>54)line=line.slice(0,51)+"...";
-    c+=t(colX[col],y,7.1,line);y-=rowStep;
-  }
-  pages.push(c);
-
-  // Zwei unterschiedliche Schnittbilder pro A4-Seite. Identische Platten bleiben gruppiert.
-  const pdfGroups=groupIdenticalSheets(result.sheets);
-  for(let pageStart=0;pageStart<pdfGroups.length;pageStart+=2){
-    let p="0 G 0 g 0.55 w\n";
-    const batch=pdfGroups.slice(pageStart,pageStart+2);
-    batch.forEach((group,slot)=>{
-      const sh=group.sheet;
-      const top=slot===0?812:414;
-      const blockBottom=slot===0?425:28;
-      const heading=group.count>1?`${group.count}x identisch schneiden`:`Platte ${group.sheetNumbers[0]}`;
-      p+=t(35,top,11.5,heading,true);
-      const plateInfo=`${result.m.width} x ${result.m.height} mm | ${result.m.group} ${result.m.thickness} mm | 3 mm Saegefuge${group.count>1?` | Platten ${group.sheetNumbers.join(", ")}`:""}`;
-      p+=t(35,top-14,6.8,plateInfo);
-
-      const bx=38,maxW=519,maxH=248;
-      const drawTop=top-27;
-      const sc=Math.min(maxW/result.m.width,maxH/result.m.height);
-      const bw=result.m.width*sc,bh=result.m.height*sc;
-      const by=drawTop-bh;
-
-      p+="0.96 g\n"+rc(bx,by,bw,bh,true)+"0 g\n";
-      p+="0.80 G 0.32 w\n";
-      for(let d=-bh;d<bw;d+=10){p+=ln(bx+d,by,bx+d+bh,by+bh);}
-      p+="0 G 0.62 w\n"+rc(bx,by,bw,bh,false);
-
-      const pdfInfoPositions=[];
-      const pdfInfoSet=new Set();
-      sh.placements.forEach(pl=>{
-        const drawW=pl.w*sc,drawH=pl.h*sc;
-        const mode=pieceLayoutMode(pl,drawW,drawH);
-        if(mode==="measure" && needsPieceCallout(pl,drawW,drawH) && !pdfInfoSet.has(pl.item.pos)){
-          pdfInfoSet.add(pl.item.pos);pdfInfoPositions.push(pl.item.pos);
-        }
-      });
-
-      sh.placements.forEach(pl=>{
-        const x=bx+pl.x*sc;
-        const y0=by+(result.m.height-(pl.y+pl.h))*sc;
-        const w=pl.w*sc,h=pl.h*sc;
-        const mode=pieceLayoutMode(pl,w,h);
-        p+="1 g\n"+rc(x,y0,w,h,true)+"0 g\n";
-        if(mode==="full"){
-          const ident=`P${pl.item.pos}${pl.item.name ? " "+pl.item.name : ""}${pl.rotated ? " gedr." : ""}`;
-          p+=t(x+2.5,y0+h-7.5,5.2,ident,true);
-          p+=t(x+2.5,y0+2.5,5.1,`${pl.w}`);
-          p+=tv(x+w-2.2,y0+2.5,5.1,`${pl.h}`);
-        }else if(mode==="compact"){
-          p+=t(x+2,y0+h-6.5,4.7,`P${pl.item.pos}`,true);
-          p+=t(x+2,y0+2.2,4.6,`${pl.w}`);
-          p+=tv(x+w-2,y0+2.2,4.6,`${pl.h}`);
-        }else{
-          const spec=tinyMeasureSpec(pl,w,h);
-          if(spec.readable){
-            const fs=Math.max(4.2,Math.min(5.3,spec.font));
-            if(spec.vertical)p+=tv(x+w/2,y0+Math.max(2,h/2-textApprox(spec.text,fs)/2),fs,spec.text,true);
-            else p+=t(x+Math.max(1,w/2-textApprox(spec.text,fs)/2),y0+h/2-1.5,fs,spec.text,true);
-          }
-        }
-      });
-
-      let noteY=Math.max(blockBottom+8,by-9);
-      if(pdfInfoPositions.length){
-        const details=pdfInfoPositions.map(pos=>{
-          const pl=sh.placements.find(x=>x.item.pos===pos);
-          return `P${pl.item.pos} ${pl.item.w}x${pl.item.h}${pl.item.name?" "+pl.item.name:""}${pl.rotated?" gedr.":""}`;
-        });
-        const chunks=[];let line="Kleine Teile: ";
-        details.forEach(d=>{if((line+d).length>100){chunks.push(line.trim());line="";}line+=(line?" | ":"")+d;});
-        if(line)chunks.push(line.trim());
-        chunks.slice(0,3).forEach(x=>{p+=t(38,noteY,5.5,x);noteY-=7;});
-      }
-      p+=t(38,Math.max(blockBottom+1,noteY),5.4,"Rest schraffiert | Saegefuge 3 mm beruecksichtigt");
-      if(slot===0)p+="0.86 G 0.35 w\n"+ln(35,421,560,421)+"0 G\n";
+  const renderListChunk=(chunk,title=true)=>{
+    if(title){page+=t(35,y,8.8,"Stueckliste",true);y-=12;}
+    const split=Math.ceil(chunk.length/2);
+    chunk.forEach((pos,i)=>{
+      const col=i>=split?1:0,row=col?i-split:i;
+      let line=`P${pos.pos}  ${pos.q}x  ${pos.w} x ${pos.h} mm${pos.name?"  "+pos.name:""}`;
+      if(line.length>56)line=line.slice(0,53)+"...";
+      page+=t(colX[col],y-row*rowStep,7.05,line);
     });
-    pages.push(p);
-  }
+    y-=Math.ceil(chunk.length/2)*rowStep+8;
+  };
 
+  startPage("main");
+  let posIndex=0;
+  while(posIndex<result.pos.length){
+    const left=result.pos.length-posIndex;
+    const rowsNeeded=Math.ceil(left/2);
+    const rowsWithDetail=Math.max(0,Math.floor((y-(bottom+225+12))/rowStep));
+    if(rowsWithDetail>0 && rowsNeeded<=rowsWithDetail){
+      const chunk=result.pos.slice(posIndex);
+      renderListChunk(chunk,true);posIndex=result.pos.length;break;
+    }
+    const rowsFull=Math.max(1,Math.floor((y-bottom-10)/rowStep));
+    const take=Math.min(left,rowsFull*2);
+    renderListChunk(result.pos.slice(posIndex,posIndex+take),true);posIndex+=take;
+    if(posIndex<result.pos.length)startPage("detail");
+  }
+  if(!result.pos.length){page+=t(35,y,8.8,"Stueckliste: keine Positionen",true);y-=18;}
+
+  const pdfGroups=groupIdenticalSheets(result.sheets);
+  const plateNotes=(sh,sc)=>{
+    const set=new Set(),items=[];
+    sh.placements.forEach(pl=>{const mode=pieceLayoutMode(pl,pl.w*sc,pl.h*sc);if(mode==="measure"&&needsPieceCallout(pl,pl.w*sc,pl.h*sc)&&!set.has(pl.item.pos)){set.add(pl.item.pos);items.push(pl.item.pos);}});
+    return items;
+  };
+
+  const drawGroup=(group,top,maxBlockH)=>{
+    const sh=group.sheet;
+    const heading=group.count>1?`${group.count}x identisch schneiden`:`Platte ${group.sheetNumbers[0]}`;
+    const headH=28;
+    const maxW=519;
+    // zuerst grob skalieren, danach den Platz fuer kleine-Teile-Hinweise beruecksichtigen
+    let sc=Math.min(maxW/result.m.width,Math.max(90,maxBlockH-48)/result.m.height);
+    let info=plateNotes(sh,sc);
+    const infoRows=Math.min(3,Math.max(0,Math.ceil(info.length/4)));
+    const noteH=12+infoRows*7;
+    sc=Math.min(maxW/result.m.width,Math.max(80,maxBlockH-headH-noteH)/result.m.height);
+    info=plateNotes(sh,sc);
+    const bw=result.m.width*sc,bh=result.m.height*sc;
+    const bx=38,drawTop=top-headH,by=drawTop-bh;
+    let out="";
+    out+=t(35,top,10.3,heading,true);
+    out+=t(35,top-12,6.3,`${result.m.width} x ${result.m.height} mm | ${result.m.group} ${result.m.thickness} mm | 3 mm Saegefuge${group.count>1?` | Platten ${group.sheetNumbers.join(", ")}`:""}`);
+    out+="0.96 g\n"+rc(bx,by,bw,bh,true)+"0 g\n";
+    out+="0.80 G 0.32 w\n";
+    for(let d=-bh;d<bw;d+=10)out+=ln(bx+d,by,bx+d+bh,by+bh);
+    out+="0 G 0.62 w\n"+rc(bx,by,bw,bh,false);
+    sh.placements.forEach(pl=>{
+      const x=bx+pl.x*sc,y0=by+(result.m.height-(pl.y+pl.h))*sc,w=pl.w*sc,h=pl.h*sc,mode=pieceLayoutMode(pl,w,h);
+      out+="1 g\n"+rc(x,y0,w,h,true)+"0 g\n";
+      if(mode==="full"){
+        const ident=`P${pl.item.pos}${pl.item.name?" "+pl.item.name:""}${pl.rotated?" gedr.":""}`;
+        out+=t(x+2.5,y0+h-7.5,5.2,ident,true)+t(x+2.5,y0+2.5,5.1,`${pl.w}`)+tv(x+w-2.2,y0+2.5,5.1,`${pl.h}`);
+      }else if(mode==="compact"){
+        out+=t(x+2,y0+h-6.5,4.7,`P${pl.item.pos}`,true)+t(x+2,y0+2.2,4.6,`${pl.w}`)+tv(x+w-2,y0+2.2,4.6,`${pl.h}`);
+      }else{
+        const spec=tinyMeasureSpec(pl,w,h);if(spec.readable){const fs=Math.max(4.2,Math.min(5.3,spec.font));if(spec.vertical)out+=tv(x+w/2,y0+Math.max(2,h/2-textApprox(spec.text,fs)/2),fs,spec.text,true);else out+=t(x+Math.max(1,w/2-textApprox(spec.text,fs)/2),y0+h/2-1.5,fs,spec.text,true);}
+      }
+    });
+    let noteY=by-8;
+    if(info.length){
+      const details=info.map(pos=>{const pl=sh.placements.find(x=>x.item.pos===pos);return `P${pl.item.pos} ${pl.item.w}x${pl.item.h}${pl.item.name?" "+pl.item.name:""}${pl.rotated?" gedr.":""}`;});
+      const chunks=[];let line="Kleine Teile: ";details.forEach(d=>{if((line+d).length>100){chunks.push(line.trim());line="";}line+=(line?" | ":"")+d;});if(line)chunks.push(line.trim());
+      chunks.slice(0,3).forEach(x=>{out+=t(38,noteY,5.4,x);noteY-=7;});
+    }
+    out+=t(38,noteY,5.3,"Rest schraffiert | Saegefuge 3 mm beruecksichtigt");noteY-=7;
+    return {content:out,usedHeight:Math.min(maxBlockH,top-noteY+3)};
+  };
+
+  for(let gi=0;gi<pdfGroups.length;gi++){
+    let remaining=y-bottom;
+    const groupsLeft=pdfGroups.length-gi;
+    if(remaining<215){startPage("detail");remaining=y-bottom;}
+    let maxBlockH=remaining;
+    if(groupsLeft>=2 && remaining>=445)maxBlockH=Math.min(320,(remaining-8)/2);
+    const block=drawGroup(pdfGroups[gi],y,maxBlockH);
+    page+=block.content;y-=block.usedHeight+8;
+    if(gi<pdfGroups.length-1 && y-bottom<205)startPage("detail");
+  }
+  pushPage();
   return buildSimplePdfBase64(pages);
 }
 
@@ -3661,6 +3696,12 @@ function createPlatePdf(){
   openPdfBase64(makePlanPdfBase64(currentResult,null),filename);
 }
 
+function createPlatePieceListPdf(){
+  if(!currentResult){setNotice("error","Bitte zuerst einen Plattenzuschnitt berechnen.");return;}
+  const filename=`Lowis-Stueckliste-Plattenzuschnitt-${pdfTimestamp()}.pdf`;
+  openPdfBase64(makePlatePieceListPdfBase64(currentResult,null),filename);
+}
+
 function createLengthPdf(){
   if(!currentLengthResult){setLengthNotice("error","Bitte zuerst einen Längenzuschnitt berechnen.");return;}
   const project=currentLengthResult.mode==="project"?safePdfFilePart(currentLengthResult.projectName):"";
@@ -3668,9 +3709,21 @@ function createLengthPdf(){
   openPdfBase64(makeLengthPlanPdfBase64(currentLengthResult,null),filename);
 }
 
+function createLengthPieceListPdf(){
+  if(!currentLengthResult){setLengthNotice("error","Bitte zuerst einen Längenzuschnitt berechnen.");return;}
+  const project=currentLengthResult.mode==="project"?safePdfFilePart(currentLengthResult.projectName):"";
+  const filename=`Lowis-Stueckliste-Laengenzuschnitt${project?"-"+project:""}-${pdfTimestamp()}.pdf`;
+  openPdfBase64(makeLengthPieceListPdfBase64(currentLengthResult,null),filename);
+}
+
 function createCurrentPdf(){
   if(window.activePlannerMode==="length")createLengthPdf();
   else createPlatePdf();
+}
+
+function createCurrentPieceListPdf(){
+  if(window.activePlannerMode==="length")createLengthPieceListPdf();
+  else createPlatePieceListPdf();
 }
 
 function utf8Base64(str){
@@ -4110,6 +4163,42 @@ function buildSimplePdfBase64(pages){
   return btoa(unescape(encodeURIComponent(pdf)));
 }
 
+function makeLengthPieceListPdfBase64(result,customer){
+  customer=Object.assign({name:"",company:"",email:"",phone:"",remarks:""},customer||{});
+  const hasCustomer=Boolean(customer.name||customer.company||customer.email||customer.phone||customer.remarks);
+  const pages=[];
+  const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
+  const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
+  const restLimit=normalizeRestLimit(result.restLimit);
+  const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
+  const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).customerRest,0);
+  const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).warehouseRest,0);
+  const colX=[35,305],rowStep=10.2,bottom=44;
+  let idx=0,pageNo=0;
+  do{
+    pageNo++;let c="0 G 0 g 0.55 w\n";
+    c+=t(35,812,15,pageNo===1?"Laengen-Zuschnitt - Stueckliste":"Laengen-Zuschnitt - Stueckliste Fortsetzung",true);
+    let y=792;
+    if(pageNo===1){
+      if(result.mode==="project"&&result.projectName){c+=t(35,y,8.5,`Projekt: ${result.projectName}`,true);y-=13;}
+      c+=t(35,y,7.4,`Saegefuge 5 mm | Rohstuecke ${totalBars} | Fertigteile ${result.items.length} | Kundenrest ${lengthFmt(totalCustomer)} cm | Lagerrest ${lengthFmt(totalWarehouse)} cm | Restgrenze ${lengthFmt(restLimit)} cm`);y-=13;
+      if(hasCustomer){c+=t(35,y,7,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=12;}
+      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();c+=t(35,y,6.7,`Bemerkung: ${r.slice(0,140)}${r.length>140?" ...":""}`);y-=12;}
+    }
+    c+="0.86 G 0.35 w\n"+ln(35,y+2,560,y+2)+"0 G\n";y-=10;
+    const rowsCap=Math.max(1,Math.floor((y-bottom)/rowStep));
+    const chunk=result.pos.slice(idx,idx+rowsCap*2),split=Math.ceil(chunk.length/2);
+    chunk.forEach((pos,i)=>{
+      const col=i>=split?1:0,row=col?i-split:i;
+      let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${pos.material} ${pos.dimension} | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
+      if(line.length>57)line=line.slice(0,54)+"...";
+      c+=t(colX[col],y-row*rowStep,7.1,line);
+    });
+    idx+=chunk.length;pages.push(c);if(!chunk.length)break;
+  }while(idx<result.pos.length);
+  return buildSimplePdfBase64(pages);
+}
+
 function makeLengthPlanPdfBase64(result,customer){
   customer=Object.assign({name:"",company:"",email:"",phone:"",remarks:""},customer||{});
   const hasCustomer=Boolean(customer.name||customer.company||customer.email||customer.phone||customer.remarks);
@@ -4121,98 +4210,79 @@ function makeLengthPlanPdfBase64(result,customer){
   const totalBars=result.groups.reduce((a,g)=>a+g.bars.length,0);
   const totalCustomer=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).customerRest,0);
   const totalWarehouse=result.groups.reduce((a,g)=>a+summarizeBars(g.material,g.bars,g.restLimit??restLimit).warehouseRest,0);
-
-  // Kompakte Zusammenfassung mit zweispaltiger Stueckliste.
-  const summaryHead=(continued=false)=>{
-    let c="0 G 0 g 0.55 w\n";
-    c+=t(35,812,continued?13:16,continued?"Laengen-Zuschnittplan - Stueckliste Fortsetzung":(result.mode==="project"?"Projekt-Laengenzuschnitt":"Laengen-Zuschnittplan"),true);
-    if(!continued){
-      let y=794;
-      if(result.mode==="project"&&result.projectName){c+=t(35,y,9,`Projekt: ${result.projectName}`,true);y-=14;}
-      c+=t(35,y,7.5,`Saegefuge 0,5 cm / 5 mm | Rohstuecke ${totalBars} | Fertigteile ${result.items.length} | Kundenrest ${lengthFmt(totalCustomer)} cm | Lagerrest ${lengthFmt(totalWarehouse)} cm | Restgrenze ${lengthFmt(restLimit)} cm`);y-=13;
-      if(hasCustomer){c+=t(35,y,7,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=12;}
-      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();c+=t(35,y,6.7,`Bemerkung: ${r.slice(0,140)}${r.length>140?" ...":""}`);}
+  const bottom=42,rowStep=10.2,colX=[35,305];
+  let page="",y=0,pageNo=0;
+  const pushPage=()=>{if(page){pages.push(page);page="";}};
+  const startPage=(kind="detail")=>{
+    pushPage();pageNo++;page="0 G 0 g 0.5 w\n";
+    if(kind==="main"){
+      page+=t(35,812,15,result.mode==="project"?"Projekt-Laengenzuschnitt":"Laengen-Zuschnittplan",true);y=792;
+      if(result.mode==="project"&&result.projectName){page+=t(35,y,8.8,`Projekt: ${result.projectName}`,true);y-=13;}
+      page+=t(35,y,7.3,`Saegefuge 5 mm | Rohstuecke ${totalBars} | Fertigteile ${result.items.length} | Kundenrest ${lengthFmt(totalCustomer)} cm | Lagerrest ${lengthFmt(totalWarehouse)} cm | Restgrenze ${lengthFmt(restLimit)} cm`);y-=13;
+      if(hasCustomer){page+=t(35,y,7,`Kunde: ${customer.name}${customer.company?" | "+customer.company:""}${customer.email?" | "+customer.email:""}${customer.phone?" | "+customer.phone:""}`);y-=12;}
+      if(customer.remarks){const r=pdfAscii(customer.remarks).replace(/\s+/g," ").trim();page+=t(35,y,6.7,`Bemerkung: ${r.slice(0,140)}${r.length>140?" ...":""}`);y-=12;}
+    }else{
+      page+=t(35,814,9.8,result.mode==="project"?(result.projectName?`Projekt ${result.projectName} - Fortsetzung`:"Projekt-Laengenzuschnitt - Fortsetzung"):"Laengen-Zuschnittplan - Fortsetzung",true);
+      page+=t(510,814,6.2,`Seite ${pageNo}`);page+="0.86 G 0.35 w\n"+ln(35,804,560,804)+"0 G\n";y=790;
     }
-    return c;
+  };
+  const renderListChunk=(chunk)=>{
+    page+=t(35,y,8.8,"Stueckliste",true);y-=12;
+    const split=Math.ceil(chunk.length/2);
+    chunk.forEach((pos,i)=>{
+      const col=i>=split?1:0,row=col?i-split:i;
+      let line=result.mode==="project"?`P${pos.pos} ${pos.q}x ${pos.material} ${pos.dimension} | ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`:`P${pos.pos} ${pos.q}x ${lengthFmt(pos.len)} cm${pos.name?" "+pos.name:""}`;
+      if(line.length>57)line=line.slice(0,54)+"...";
+      page+=t(colX[col],y-row*rowStep,7,line);
+    });
+    y-=Math.ceil(chunk.length/2)*rowStep+8;
   };
 
-  let c=summaryHead(false);
-  let y=result.mode==="project"&&result.projectName?744:757;
-  if(hasCustomer)y-=12;if(customer.remarks)y-=10;
-  c+=t(35,y,9,"Stueckliste",true);y-=13;
-  const colX=[35,305],rowStep=10.2,bottom=42;
-  let col=0;
-  for(const p of result.pos){
-    if(y<bottom){
-      if(col===0){col=1;y=result.mode==="project"&&result.projectName?744:757;if(hasCustomer)y-=12;if(customer.remarks)y-=10;}
-      else{pages.push(c);c=summaryHead(true);c+=t(35,786,9,"Stueckliste",true);col=0;y=770;}
-    }
-    let line=result.mode==="project"
-      ? `P${p.pos} ${p.q}x ${p.material} ${p.dimension} | ${lengthFmt(p.len)} cm${p.name?" "+p.name:""}`
-      : `P${p.pos} ${p.q}x ${lengthFmt(p.len)} cm${p.name?" "+p.name:""}`;
-    if(line.length>55)line=line.slice(0,52)+"...";
-    c+=t(colX[col],y,7,line);y-=rowStep;
+  startPage("main");
+  let posIndex=0;
+  while(posIndex<result.pos.length){
+    const left=result.pos.length-posIndex,rowsNeeded=Math.ceil(left/2);
+    // Wenn die komplette Restliste passt und noch ca. 120 pt fuer Zuschnittbalken bleiben, direkt weiterfliessen.
+    const rowsWithDetail=Math.max(0,Math.floor((y-(bottom+120))/rowStep));
+    if(rowsWithDetail>0 && rowsNeeded<=rowsWithDetail){renderListChunk(result.pos.slice(posIndex));posIndex=result.pos.length;break;}
+    const rowsFull=Math.max(1,Math.floor((y-bottom-10)/rowStep)),take=Math.min(left,rowsFull*2);
+    renderListChunk(result.pos.slice(posIndex,posIndex+take));posIndex+=take;
+    if(posIndex<result.pos.length)startPage("detail");
   }
-  pages.push(c);
-
-  // Detailseiten: Gruppen laufen platzsparend hintereinander; kein Seitenwechsel pro Materialgruppe.
-  let p="",py=0,pageNo=0;
-  const newDetailPage=()=>{
-    if(p)pages.push(p);
-    pageNo++;
-    p="0 G 0 g 0.5 w\n";
-    p+=t(35,814,9.5,result.mode==="project"?(result.projectName?`Projekt ${result.projectName} - Zuschnittdetails`:`Projekt-Zuschnittdetails`):"Laengen-Zuschnittdetails",true);
-    p+=t(485,814,6.3,`Seite ${pageNo}`);
-    p+="0.86 G 0.35 w\n"+ln(35,804,560,804)+"0 G\n";
-    py=790;
-  };
-  newDetailPage();
+  if(!result.pos.length){page+=t(35,y,8.8,"Stueckliste: keine Positionen",true);y-=18;}
 
   const groupHeader=(group,continued=false)=>{
     const sum=summarizeBars(group.material,group.bars,group.restLimit??restLimit);
-    p+=t(35,py,9,`${group.material} ${group.dimension} cm${continued?" - Fortsetzung":""}`,true);py-=11;
+    page+=t(35,y,8.7,`${group.material} ${group.dimension} cm${continued?" - Fortsetzung":""}`,true);y-=10.5;
     let meta=`Rohlaengen ${group.raws.map(lengthFmt).join("/")} cm | Teile ${group.items.length} | Rohstuecke ${group.bars.length} | Kundenrest ${lengthFmt(sum.customerRest)} | Lagerrest ${lengthFmt(sum.warehouseRest)} cm`;
     if(meta.length>120)meta=meta.slice(0,117)+"...";
-    p+=t(35,py,6.2,meta);py-=10;
+    page+=t(35,y,6.1,meta);y-=9;
   };
 
   result.groups.forEach((group,gidx)=>{
     const patterns=groupLengthBars(group.bars,group.material,group.restLimit??restLimit);
-    if(py<90)newDetailPage();
-    if(gidx>0){p+="0.90 G 0.3 w\n"+ln(35,py+5,560,py+5)+"0 G\n";py-=3;}
+    if(y-bottom<60)startPage("detail");
+    if(gidx>0){page+="0.90 G 0.3 w\n"+ln(35,y+4,560,y+4)+"0 G\n";y-=3;}
     groupHeader(group,false);
-
     patterns.forEach((pat,idx)=>{
       const bar=pat.bar,raw=bar.raw,rest=Math.max(0,Math.round((raw-bar.used)*10)/10),cls=classifyLengthRest(group.material,raw,rest,group.restLimit??restLimit);
       const seq=bar.pieces.map(x=>`${lengthFmt(x.len)}${x.name?" "+x.name:""}`).join(" + ");
       const seqText=`${seq}${rest?` | ${cls.label} ${lengthFmt(rest)} cm`:" | kein Rest"}`;
-      const needed=seqText.length>112?38:31;
-      if(py<needed+38){newDetailPage();groupHeader(group,true);}
-
-      const label=pat.count>1?`${pat.count}x identisch`:`Rohstueck ${idx+1}`;
-      p+=t(35,py,7.1,label,true);
-      p+=t(330,py,5.9,`Rohlaenge ${lengthFmt(raw)} cm | ${cls.label}${rest?` ${lengthFmt(rest)} cm`:""}`);py-=9;
-
-      const bx=35,bw=525,bh=10,by=py-1;
-      p+="1 g\n"+rc(bx,by,bw,bh,true)+"0 g\n"+rc(bx,by,bw,bh,false);
-      let off=0;
-      bar.pieces.forEach(piece=>{
-        const x=bx+bw*(off/raw),w=Math.max(.55,bw*(piece.len/raw));
-        p+=rc(x,by,w,bh,false);
-        if(w>21)p+=t(x+2,by+2.7,4.8,`${lengthFmt(piece.len)}`,true);
-        off+=piece.len+LENGTH_KERF_CM;
-      });
-      const restW=bw*(rest/raw);
-      if(restW>0){const rx=bx+bw*((raw-rest)/raw);p+="0.93 g\n"+rc(rx,by,restW,bh,true)+"0 g\n"+rc(rx,by,restW,bh,false);}
-      py-=10;
-
       const seqLines=pdfAscii(`Schnittfolge: ${seqText}`).match(/.{1,112}/g)||[];
-      seqLines.slice(0,2).forEach(line=>{p+=t(39,py,5.2,line);py-=7;});
-      py-=4;
+      const needed=28+Math.min(2,seqLines.length)*7;
+      if(y-bottom<needed+8){startPage("detail");groupHeader(group,true);}
+      const label=pat.count>1?`${pat.count}x identisch`:`Rohstueck ${idx+1}`;
+      page+=t(35,y,7,label,true)+t(330,y,5.8,`Rohlaenge ${lengthFmt(raw)} cm | ${cls.label}${rest?` ${lengthFmt(rest)} cm`:""}`);y-=9;
+      const bx=35,bw=525,bh=10,by=y-1;
+      page+="1 g\n"+rc(bx,by,bw,bh,true)+"0 g\n"+rc(bx,by,bw,bh,false);
+      let off=0;
+      bar.pieces.forEach(piece=>{const x=bx+bw*(off/raw),w=Math.max(.55,bw*(piece.len/raw));page+=rc(x,by,w,bh,false);if(w>21)page+=t(x+2,by+2.7,4.8,`${lengthFmt(piece.len)}`,true);off+=piece.len+LENGTH_KERF_CM;});
+      const restW=bw*(rest/raw);if(restW>0){const rx=bx+bw*((raw-rest)/raw);page+="0.93 g\n"+rc(rx,by,restW,bh,true)+"0 g\n"+rc(rx,by,restW,bh,false);}y-=10;
+      seqLines.slice(0,2).forEach(line=>{page+=t(39,y,5.15,line);y-=7;});y-=3;
     });
-    py-=3;
+    y-=2;
   });
-  if(p)pages.push(p);
+  pushPage();
   return buildSimplePdfBase64(pages);
 }
 
@@ -4403,7 +4473,7 @@ $("lengthMaterialSelect").addEventListener("change",()=>rebuildLengthDimensions(
 $("lengthAddPart").addEventListener("click",()=>addLengthPartRow("",1,"",true));$("lengthExample").addEventListener("click",loadLengthExample);$("lengthClear").addEventListener("click",clearLengthParts);$("lengthCalculate").addEventListener("click",calculateLengths);
 $("projectAddPart").addEventListener("click",()=>addProjectPartRow("KVH","","",1,"",true));$("projectExample").addEventListener("click",loadProjectExample);$("projectClear").addEventListener("click",clearProjectParts);$("projectCalculate").addEventListener("click",calculateProject);
 $("projectSave").addEventListener("click",saveNamedProject);$("projectSavedToggle").addEventListener("click",toggleSavedProjects);$("projectNew").addEventListener("click",newNamedProject);$("projectLoad").addEventListener("click",loadNamedProject);$("projectRename").addEventListener("click",renameNamedProject);$("projectDelete").addEventListener("click",deleteNamedProject);$("projectName").addEventListener("input",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});$("projectRestLimit").addEventListener("input",()=>{if(Number($("projectRestLimit").value)<0)$("projectRestLimit").value=0;saveLengthDraft();$("lengthResultArea").classList.add("hidden");currentLengthResult=null;if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});
-$("lengthDownloadCsv").addEventListener("click",downloadLengthCsv);$("lengthPrint").addEventListener("click",createLengthPdf);
+$("lengthDownloadCsv").addEventListener("click",createLengthPieceListPdf);$("lengthPrint").addEventListener("click",createLengthPdf);
 rebuildLengthDimensions();if(!restoreLengthDraft()){addLengthPartRow();addProjectPartRow();setLengthMode("single",false);updateLengthPreview();renderSavedProjects();}
 try{setPlannerMode(localStorage.getItem("lowis-active-planner")||"plate");}catch(_){setPlannerMode("plate");}
 
@@ -4413,7 +4483,7 @@ $("lengthRequestForm").addEventListener("submit",sendLengthRequest);
 
 $("modalClose").addEventListener("click",closeModal);
 $("modalPrint").addEventListener("click",createCurrentPdf);
-$("modalCsv").addEventListener("click",()=>window.activePlannerMode==="length"?downloadLengthCsv():downloadCsv());
+$("modalCsv").addEventListener("click",createCurrentPieceListPdf);
 $("modalBackdrop").addEventListener("click",ev=>{if(ev.target===$("modalBackdrop")) closeModal();});
 
 initGroups();
