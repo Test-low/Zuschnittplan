@@ -926,7 +926,7 @@ html[data-theme="dark"] .planner-tab.active{background:var(--lowis);color:#12200
 #lengthCalculate{width:min(320px,100%);margin-left:auto}
 html[data-theme="dark"] #lengthSingleParts{border-top-color:#303a33}
 
-/* V52: Einzelmaterial kompakter, ohne die breite Projekt-Optik zu verlieren. */
+/* V53: Einzelmaterial kompakter, ohne die breite Projekt-Optik zu verlieren. */
 #lengthSingleConfig .length-single-material-grid{gap:8px 14px}
 #lengthSingleConfig .length-single-catalog-grid{gap:8px 14px}
 #lengthSingleConfig .step-main>h3{margin-bottom:8px}
@@ -1118,6 +1118,22 @@ html[data-theme="dark"] .special-measure-box{background:#171d19;border-color:#30
 .local-project-manager label{margin-top:0}
 .local-project-main{display:grid;grid-template-columns:minmax(220px,1fr) auto auto auto;gap:8px;align-items:end}
 .portable-plan-row{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:8px;align-items:end;margin-bottom:12px}.portable-plan-note{font-size:11px;color:#657067;margin-top:6px;line-height:1.35}html[data-theme="dark"] .portable-plan-note{color:#aab5ac}@media(max-width:700px){.portable-plan-row{grid-template-columns:1fr}}
+.pdf-drop-overlay{
+  position:fixed;inset:0;z-index:1000;display:none;place-items:center;
+  background:rgba(19,44,27,.56);backdrop-filter:blur(2px);pointer-events:none;
+}
+.pdf-drop-overlay.active{display:grid}
+.pdf-drop-card{
+  width:min(560px,calc(100vw - 32px));padding:30px 26px;border-radius:20px;
+  background:#fff;border:3px dashed var(--lowis);box-shadow:0 24px 80px rgba(0,0,0,.25);
+  text-align:center;color:#203024;
+}
+.pdf-drop-icon{font-size:42px;line-height:1;margin-bottom:10px}
+.pdf-drop-card strong{display:block;font-size:22px;margin-bottom:6px}
+.pdf-drop-card span{display:block;font-size:12px;color:#647067;line-height:1.5}
+html[data-theme="dark"] .pdf-drop-card{background:#171d19;color:#edf4ef;border-color:var(--lowis)}
+html[data-theme="dark"] .pdf-drop-card span{color:#aeb9b1}
+
 .local-project-name input{width:100%;min-height:40px}
 .project-rule-setting{display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:12px;align-items:end;margin:10px 0 14px;padding:11px 12px;border:1px solid #dfe6e0;background:#fff;border-radius:12px}
 .project-rule-setting label{display:block;margin:0 0 5px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
@@ -1395,7 +1411,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
               <button class="btn btn-outline" id="plateLoadPdf" type="button">PDF-Plan laden</button>
             </div>
             <input id="platePdfInput" type="file" accept="application/pdf,.pdf" class="hidden">
-            <div class="portable-plan-note">Neue PDFs aus diesem Planer enthalten die Bearbeitungsdaten. Dadurch kann derselbe Plan später wieder aus der PDF geladen und geändert werden.</div>
+            <div class="portable-plan-note">Bearbeitbare LOWIS-PDF hierher ziehen oder über „PDF-Plan laden“ auswählen. Der Plan kann danach weiterbearbeitet werden.</div>
 
             <label>Materialgruppe</label>
             <select id="groupSelect"></select>
@@ -1568,7 +1584,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
               <button class="btn btn-outline" id="lengthLoadPdf" type="button">PDF-Plan laden</button>
             </div>
             <input id="lengthPdfInput" type="file" accept="application/pdf,.pdf" class="hidden">
-            <div class="portable-plan-note">Ein PDF-Plan kann später von einem anderen PC wieder geladen und weiterbearbeitet werden.</div>
+            <div class="portable-plan-note">Bearbeitbare LOWIS-PDF hierher ziehen oder über „PDF-Plan laden“ auswählen. Drag & Drop erkennt Platten- und Längenzuschnitt automatisch.</div>
           </div>
         </div>
 
@@ -4648,6 +4664,64 @@ async function importPortablePdf(file,targetKind){
   catch(err){if(targetKind==="plate")setNotice("error",escapeHtmlText(err.message));else setLengthNotice("error",escapeHtmlText(err.message));}
 }
 
+async function importPortablePdfAuto(file){
+  if(!file)return;
+  const isPdf=file.type==="application/pdf" || String(file.name||"").toLowerCase().endsWith(".pdf");
+  if(!isPdf){
+    const msg="Bitte eine PDF-Datei ablegen.";
+    if(window.activePlannerMode==="length")setLengthNotice("error",msg);else setNotice("error",msg);
+    return;
+  }
+  try{
+    const payload=await readPortablePayloadFromPdf(file);
+    if(payload.kind==="plate")applyPlatePortablePayload(payload);
+    else if(payload.kind==="length")applyLengthPortablePayload(payload);
+    else throw new Error("Der PDF-Plantyp konnte nicht erkannt werden.");
+  }catch(err){
+    const msg=escapeHtmlText(err?.message||"PDF-Plan konnte nicht geladen werden.");
+    if(window.activePlannerMode==="length")setLengthNotice("error",msg);else setNotice("error",msg);
+  }
+}
+
+let pdfDragDepth=0;
+function hasDraggedFiles(ev){
+  return Array.from(ev.dataTransfer?.types||[]).includes("Files");
+}
+function showPdfDropOverlay(){
+  const overlay=$("pdfDropOverlay");
+  if(overlay){overlay.classList.add("active");overlay.setAttribute("aria-hidden","false");}
+}
+function hidePdfDropOverlay(){
+  const overlay=$("pdfDropOverlay");
+  if(overlay){overlay.classList.remove("active");overlay.setAttribute("aria-hidden","true");}
+}
+document.addEventListener("dragenter",ev=>{
+  if(!hasDraggedFiles(ev))return;
+  ev.preventDefault();pdfDragDepth++;showPdfDropOverlay();
+});
+document.addEventListener("dragover",ev=>{
+  if(!hasDraggedFiles(ev))return;
+  ev.preventDefault();if(ev.dataTransfer)ev.dataTransfer.dropEffect="copy";showPdfDropOverlay();
+});
+document.addEventListener("dragleave",ev=>{
+  if(!hasDraggedFiles(ev))return;
+  pdfDragDepth=Math.max(0,pdfDragDepth-1);if(pdfDragDepth===0)hidePdfDropOverlay();
+});
+document.addEventListener("drop",async ev=>{
+  if(!hasDraggedFiles(ev))return;
+  ev.preventDefault();pdfDragDepth=0;hidePdfDropOverlay();
+  const files=Array.from(ev.dataTransfer?.files||[]);
+  const pdf=files.find(f=>f.type==="application/pdf" || String(f.name||"").toLowerCase().endsWith(".pdf"));
+  if(!pdf){
+    const msg="Bitte eine PDF-Datei ablegen.";
+    if(window.activePlannerMode==="length")setLengthNotice("error",msg);else setNotice("error",msg);
+    return;
+  }
+  await importPortablePdfAuto(pdf);
+});
+document.addEventListener("dragend",()=>{pdfDragDepth=0;hidePdfDropOverlay();});
+window.addEventListener("blur",()=>{pdfDragDepth=0;hidePdfDropOverlay();});
+
 function buildSimplePdfBase64(pages,portablePayload=null){
   const objects=[null];
   const add=o=>{objects.push(o);return objects.length-1;};
@@ -5084,5 +5158,14 @@ updatePlateOptimizationHelp();
 if(!restoreDraft()) addPartRow();
 showRuntimeGuidance();
 </script>
+
+<div id="pdfDropOverlay" class="pdf-drop-overlay" aria-hidden="true">
+  <div class="pdf-drop-card">
+    <div class="pdf-drop-icon">⇩</div>
+    <strong>PDF-Plan hier ablegen</strong>
+    <span>Bearbeitbare LOWIS-PDF loslassen. Platten- oder Längenzuschnitt wird automatisch erkannt.</span>
+  </div>
+</div>
+
 </body>
 </html>

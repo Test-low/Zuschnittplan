@@ -1,6 +1,6 @@
-LOWIS Zuschnittplaner V52
+LOWIS Zuschnittplaner V53
 
-V52: Einzelmaterial im Längenzuschnitt etwas kompakter dargestellt: geringere Abstände, kompaktere Rohlängen-Auswahl, Materialvorschau und Restgrenze nebeneinander auf breiten Bildschirmen sowie flachere Fertiglängen-Tabelle. Projektmodus und Berechnungslogik bleiben unverändert.
+V53: Einzelmaterial im Längenzuschnitt etwas kompakter dargestellt: geringere Abstände, kompaktere Rohlängen-Auswahl, Materialvorschau und Restgrenze nebeneinander auf breiten Bildschirmen sowie flachere Fertiglängen-Tabelle. Projektmodus und Berechnungslogik bleiben unverändert.
 V51: Drei auswählbare Optimierungsarten im Plattenzuschnitt: Materialoptimal, Schnell sägen und Serienfreundlich. Alle Modi minimieren zuerst zwingend die Anzahl ganzer Platten. Materialoptimal bevorzugt danach große zusammenhängende Restflächen, Schnell sägen möglichst wenige Streifen und Sägeeinstellungen, Serienfreundlich möglichst viele identische Plattenzuschnitte. Furnierrichtung bleibt in allen Modi zwingend und die gewählte Optimierung wird im Browser-Entwurf sowie in bearbeitbaren PDF-Plänen gespeichert.
 
 LOWIS Zuschnittplaner V49
