@@ -1217,6 +1217,42 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
   .summary-table th,.summary-table td{padding:.8mm 1mm!important}
 }
 
+
+/* V35: Druckausgabe ist immer hell – unabhängig vom Webseiten-Darkmode. */
+@media print{
+  html,html[data-theme="dark"],body,html[data-theme="dark"] body{
+    background:#fff!important;
+    color:#000!important;
+    color-scheme:light!important;
+  }
+  html[data-theme="dark"] .panel,
+  html[data-theme="dark"] .results,
+  html[data-theme="dark"] .sheet,
+  html[data-theme="dark"] .stat,
+  html[data-theme="dark"] .toolbar,
+  html[data-theme="dark"] .length-bar-card,
+  html[data-theme="dark"] .length-group,
+  html[data-theme="dark"] .summary-table-wrap,
+  html[data-theme="dark"] .subsection{
+    background:#fff!important;
+    color:#000!important;
+    border-color:#b8b8b8!important;
+    box-shadow:none!important;
+  }
+  html[data-theme="dark"] .results *,
+  html[data-theme="dark"] .sheet *,
+  html[data-theme="dark"] .length-bar-card *,
+  html[data-theme="dark"] .summary-table *{
+    color:#000!important;
+  }
+  html[data-theme="dark"] .length-track,
+  html[data-theme="dark"] .length-piece{
+    background:#fff!important;
+    color:#000!important;
+    border-color:#555!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1363,7 +1399,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
             </div>
             <div class="button-row" style="margin:0">
               <button class="btn btn-soft" id="downloadCsv" type="button">Stückliste CSV</button>
-              <button class="btn btn-dark" id="printPlan" type="button">Drucken / PDF</button>
+              <button class="btn btn-dark" id="printPlan" type="button">PDF erstellen</button>
             </div>
           </div>
 
@@ -1555,7 +1591,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
             </div>
             <div class="button-row" style="margin:0">
               <button class="btn btn-soft" id="lengthDownloadCsv" type="button">Stückliste CSV</button>
-              <button class="btn btn-dark" id="lengthPrint" type="button">Drucken / PDF</button>
+              <button class="btn btn-dark" id="lengthPrint" type="button">PDF erstellen</button>
             </div>
           </div>
           <div id="lengthBars"></div>
@@ -1618,7 +1654,7 @@ html[data-theme="dark"] .length-sale-rule,html[data-theme="dark"] .length-global
       <p id="modalText"></p>
       <div class="button-row">
         <button class="btn btn-soft" id="modalCsv" type="button">Stückliste laden</button>
-        <button class="btn btn-dark" id="modalPrint" type="button">Schnittplan / PDF</button>
+        <button class="btn btn-dark" id="modalPrint" type="button">PDF erstellen</button>
         <button class="btn btn-primary" id="modalClose" type="button">Schließen</button>
       </div>
     </div>
@@ -3456,7 +3492,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 }
 
 $("calculate").addEventListener("click",calculate);
-$("printPlan").addEventListener("click",()=>window.print());
+$("printPlan").addEventListener("click",createPlatePdf);
 $("downloadCsv").addEventListener("click",downloadCsv);
 
 
@@ -3468,6 +3504,8 @@ function pdfAscii(s){
 function pdfEsc(s){return pdfAscii(s).replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)");}
 
 function makePlanPdfBase64(result, customer){
+  customer=Object.assign({name:"",company:"",email:"",phone:"",remarks:""},customer||{});
+  const hasCustomer=Boolean(customer.name||customer.company||customer.email||customer.phone||customer.remarks);
   const pages=[];
   const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
   const tv=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf 0 1 -1 0 ${x} ${y} Tm (${pdfEsc(str)}) Tj ET\n`;
@@ -3479,11 +3517,17 @@ function makePlanPdfBase64(result, customer){
   c+=t(45,779,10,`${result.m.group} ${result.m.thickness} mm - ${result.m.edge}`);
   c+=t(45,763,10,`Rohplatte: ${result.m.width} x ${result.m.height} mm | Saegefuge: 3 mm | Drehen: automatisch aktiv`);
   c+=t(45,741,11,`Plattenbedarf: ${result.sheets.length}`,true);
-  c+=t(45,717,11,"Kunde",true);
-  c+=t(45,701,9,`${customer.name}${customer.company ? " | "+customer.company : ""}`);
-  c+=t(45,686,9,`${customer.email}${customer.phone ? " | "+customer.phone : ""}`);
-  c+=t(45,661,11,"Stueckliste",true);
-  let y=643;
+  let y;
+  if(hasCustomer){
+    c+=t(45,717,11,"Kunde",true);
+    c+=t(45,701,9,`${customer.name}${customer.company ? " | "+customer.company : ""}`);
+    c+=t(45,686,9,`${customer.email}${customer.phone ? " | "+customer.phone : ""}`);
+    c+=t(45,661,11,"Stueckliste",true);
+    y=643;
+  }else{
+    c+=t(45,712,11,"Stueckliste",true);
+    y=694;
+  }
   result.pos.forEach(p=>{ c+=t(55,y,9,`Pos. ${p.pos}: ${p.q} x ${p.w} x ${p.h} mm${p.name ? " - "+p.name : ""}`); y-=15; });
   if(customer.remarks){
     y-=8;c+=t(45,y,10,"Bemerkung:",true);y-=15;
@@ -3589,6 +3633,54 @@ function makePlanPdfBase64(result, customer){
   pdf+=`trailer\n<< /Size ${objects.length} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF`;
 
   return btoa(unescape(encodeURIComponent(pdf)));
+}
+
+function safePdfFilePart(value){
+  return String(value||"")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9_-]+/g,"-")
+    .replace(/^-+|-+$/g,"")
+    .slice(0,60);
+}
+
+function pdfTimestamp(){
+  const d=new Date(),pad=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+}
+
+function openPdfBase64(base64,filename){
+  const binary=atob(base64);
+  const bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  const blob=new Blob([bytes],{type:"application/pdf"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.target="_blank";
+  a.rel="noopener";
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+
+function createPlatePdf(){
+  if(!currentResult){setNotice("error","Bitte zuerst einen Plattenzuschnitt berechnen.");return;}
+  const filename=`Lowis-Plattenzuschnitt-${pdfTimestamp()}.pdf`;
+  openPdfBase64(makePlanPdfBase64(currentResult,null),filename);
+}
+
+function createLengthPdf(){
+  if(!currentLengthResult){setLengthNotice("error","Bitte zuerst einen Längenzuschnitt berechnen.");return;}
+  const project=currentLengthResult.mode==="project"?safePdfFilePart(currentLengthResult.projectName):"";
+  const filename=`Lowis-Laengenzuschnitt${project?"-"+project:""}-${pdfTimestamp()}.pdf`;
+  openPdfBase64(makeLengthPlanPdfBase64(currentLengthResult,null),filename);
+}
+
+function createCurrentPdf(){
+  if(window.activePlannerMode==="length")createLengthPdf();
+  else createPlatePdf();
 }
 
 function utf8Base64(str){
@@ -3725,7 +3817,7 @@ function sendRequest(ev){
 
 
 /* =========================================================
-   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V34
+   GEMEINSAME OBERFLÄCHE / LÄNGENZUSCHNITT – V35
    ========================================================= */
 window.activePlannerMode="plate";
 let activeLengthMode="single";
@@ -4029,6 +4121,8 @@ function buildSimplePdfBase64(pages){
 }
 
 function makeLengthPlanPdfBase64(result,customer){
+  customer=Object.assign({name:"",company:"",email:"",phone:"",remarks:""},customer||{});
+  const hasCustomer=Boolean(customer.name||customer.company||customer.email||customer.phone||customer.remarks);
   const pages=[];
   const t=(x,y,size,str,bold=false)=>`BT /F${bold?2:1} ${size} Tf ${x} ${y} Td (${pdfEsc(str)}) Tj ET\n`;
   const ln=(x1,y1,x2,y2)=>`${x1} ${y1} m ${x2} ${y2} l S\n`;
@@ -4044,9 +4138,11 @@ function makeLengthPlanPdfBase64(result,customer){
   c+=t(45,result.mode==="project"&&result.projectName?758:778,9,`Saegefuge: 0,5 cm / 5 mm | Rohstuecke: ${totalBars} | Fertigteile: ${result.items.length}`);
   c+=t(45,result.mode==="project"&&result.projectName?742:762,9,`Kundenrest: ${lengthFmt(totalCustomer)} cm | Lagerrest: ${lengthFmt(totalWarehouse)} cm | Restgrenze: ${lengthFmt(restLimit)} cm`);
   let y=result.mode==="project"&&result.projectName?712:730;
-  c+=t(45,y,11,"Kunde",true);y-=16;
-  c+=t(55,y,9,`${customer.name}${customer.company?" | "+customer.company:""}`);y-=14;
-  c+=t(55,y,9,`${customer.email}${customer.phone?" | "+customer.phone:""}`);y-=24;
+  if(hasCustomer){
+    c+=t(45,y,11,"Kunde",true);y-=16;
+    c+=t(55,y,9,`${customer.name}${customer.company?" | "+customer.company:""}`);y-=14;
+    c+=t(55,y,9,`${customer.email}${customer.phone?" | "+customer.phone:""}`);y-=24;
+  }
   c+=t(45,y,11,"Stueckliste",true);y-=16;
   for(const p of result.pos){
     const line=result.mode==="project"
@@ -4287,7 +4383,7 @@ $("lengthMaterialSelect").addEventListener("change",()=>rebuildLengthDimensions(
 $("lengthAddPart").addEventListener("click",()=>addLengthPartRow("",1,"",true));$("lengthExample").addEventListener("click",loadLengthExample);$("lengthClear").addEventListener("click",clearLengthParts);$("lengthCalculate").addEventListener("click",calculateLengths);
 $("projectAddPart").addEventListener("click",()=>addProjectPartRow("KVH","","",1,"",true));$("projectExample").addEventListener("click",loadProjectExample);$("projectClear").addEventListener("click",clearProjectParts);$("projectCalculate").addEventListener("click",calculateProject);
 $("projectSave").addEventListener("click",saveNamedProject);$("projectSavedToggle").addEventListener("click",toggleSavedProjects);$("projectNew").addEventListener("click",newNamedProject);$("projectLoad").addEventListener("click",loadNamedProject);$("projectRename").addEventListener("click",renameNamedProject);$("projectDelete").addEventListener("click",deleteNamedProject);$("projectName").addEventListener("input",()=>{saveLengthDraft();if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});$("projectRestLimit").addEventListener("input",()=>{if(Number($("projectRestLimit").value)<0)$("projectRestLimit").value=0;saveLengthDraft();$("lengthResultArea").classList.add("hidden");currentLengthResult=null;if(currentProjectId)setProjectStorageStatus("Änderungen am geöffneten Projekt noch nicht gespeichert.");});
-$("lengthDownloadCsv").addEventListener("click",downloadLengthCsv);$("lengthPrint").addEventListener("click",()=>window.print());
+$("lengthDownloadCsv").addEventListener("click",downloadLengthCsv);$("lengthPrint").addEventListener("click",createLengthPdf);
 rebuildLengthDimensions();if(!restoreLengthDraft()){addLengthPartRow();addProjectPartRow();setLengthMode("single",false);updateLengthPreview();renderSavedProjects();}
 try{setPlannerMode(localStorage.getItem("lowis-active-planner")||"plate");}catch(_){setPlannerMode("plate");}
 
@@ -4296,7 +4392,7 @@ $("requestForm").addEventListener("submit",sendRequest);
 $("lengthRequestForm").addEventListener("submit",sendLengthRequest);
 
 $("modalClose").addEventListener("click",closeModal);
-$("modalPrint").addEventListener("click",()=>window.print());
+$("modalPrint").addEventListener("click",createCurrentPdf);
 $("modalCsv").addEventListener("click",()=>window.activePlannerMode==="length"?downloadLengthCsv():downloadCsv());
 $("modalBackdrop").addEventListener("click",ev=>{if(ev.target===$("modalBackdrop")) closeModal();});
 

@@ -16,3 +16,9 @@ Neu in V34:
 - Die Grenze wird pro lokal gespeichertem Projekt mitgespeichert und beim Laden wiederhergestellt.
 - Die Projektgrenze gilt für KVH 1302 cm und BSH 1202 cm; andere Rohlängen bleiben Komplettverkauf.
 - Die gewählte Grenze wird in Ergebnis, CSV, PDF und E-Mail-Anfrage übernommen.
+
+V35:
+- Drucken/PDF bei Platten- und Längenzuschnitt erzeugt jetzt direkt eine PDF-Datei statt window.print().
+- Verhindert dadurch die Safari/iPhone-Meldung zum blockierten automatischen Drucken.
+- PDF-Ausgabe ist immer hell und druckfreundlich, unabhängig vom Darkmode der Webseite.
+- Browser-Druckregeln zusätzlich für helle Ausgabe abgesichert.
