@@ -2125,6 +2125,188 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   }
 }
 
+
+
+/* =========================================================
+   V65 – SMARTPHONE POSITIONEN: 70/30 STATT SCHMALER FELDER
+   Längenzuschnitt: Fertiglänge 70 % | Stück 30 %.
+   Projektmodus: Material / Dimension / Rohlänge vollbreit,
+   darunter Fertiglänge 70 % | Stück 30 %.
+   ========================================================= */
+@media(max-width:760px){
+  /* Die V64-Flexdarstellung wird bewusst wieder als 2-Spalten-Grid aufgebaut. */
+  .length-parts-table.v59-parts-table tr,
+  .project-parts-table.v59-parts-table tr{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,7fr) minmax(96px,3fr)!important;
+    column-gap:12px!important;
+    row-gap:12px!important;
+    padding:14px!important;
+    margin:0 0 14px!important;
+    border:1px solid var(--v56-border)!important;
+    border-radius:13px!important;
+    background:var(--v56-panel2)!important;
+  }
+
+  /* Einzelmaterial */
+  .length-parts-table.v59-parts-table tr{
+    grid-template-areas:
+      "head head"
+      "len qty"
+      "name name"!important;
+  }
+  .length-parts-table.v59-parts-table tr::before{
+    grid-area:head!important;
+  }
+  .length-parts-table.v59-parts-table td:nth-child(2){grid-area:len!important}
+  .length-parts-table.v59-parts-table td:nth-child(3){grid-area:qty!important}
+  .length-parts-table.v59-parts-table td:nth-child(4){grid-area:name!important}
+  .length-parts-table.v59-parts-table td:nth-child(5){
+    position:absolute!important;
+    top:12px!important;
+    right:12px!important;
+    width:44px!important;
+    height:44px!important;
+  }
+
+  /* Projektmodus */
+  .project-parts-table.v59-parts-table tr{
+    grid-template-areas:
+      "head head"
+      "mat mat"
+      "dim dim"
+      "raw raw"
+      "len qty"
+      "name name"!important;
+  }
+  .project-parts-table.v59-parts-table tr::before{
+    grid-area:head!important;
+  }
+  .project-parts-table.v59-parts-table td:nth-child(2){grid-area:mat!important}
+  .project-parts-table.v59-parts-table td:nth-child(3){grid-area:dim!important}
+  .project-parts-table.v59-parts-table td:nth-child(4){grid-area:raw!important}
+  .project-parts-table.v59-parts-table td:nth-child(5){grid-area:len!important}
+  .project-parts-table.v59-parts-table td:nth-child(6){grid-area:qty!important}
+  .project-parts-table.v59-parts-table td:nth-child(7){grid-area:name!important}
+  .project-parts-table.v59-parts-table td:nth-child(8){
+    position:absolute!important;
+    top:12px!important;
+    right:12px!important;
+    width:44px!important;
+    height:44px!important;
+  }
+
+  .length-parts-table.v59-parts-table tr::before,
+  .project-parts-table.v59-parts-table tr::before{
+    display:flex!important;
+    align-items:center!important;
+    width:auto!important;
+    min-height:44px!important;
+    padding-right:54px!important;
+    line-height:1.2!important;
+    margin:0!important;
+  }
+
+  .length-parts-table.v59-parts-table td,
+  .project-parts-table.v59-parts-table td{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+  }
+  .length-parts-table.v59-parts-table td:nth-child(1),
+  .project-parts-table.v59-parts-table td:nth-child(1){display:none!important}
+
+  .length-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table select,
+  .project-parts-table.v59-parts-table .pdim,
+  .project-parts-table.v59-parts-table .pmat{
+    box-sizing:border-box!important;
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:52px!important;
+    min-height:52px!important;
+    padding:10px 13px!important;
+    border-radius:10px!important;
+    font-size:17px!important;
+    line-height:1.2!important;
+    font-weight:650!important;
+    color:var(--v56-text)!important;
+    opacity:1!important;
+  }
+  .length-parts-table.v59-parts-table .ll,
+  .length-parts-table.v59-parts-table .lq,
+  .project-parts-table.v59-parts-table .plen,
+  .project-parts-table.v59-parts-table .pqty{
+    font-size:19px!important;
+    font-weight:800!important;
+    text-align:left!important;
+  }
+  .length-parts-table.v59-parts-table .lq,
+  .project-parts-table.v59-parts-table .pqty{
+    padding-left:15px!important;
+  }
+
+  .project-row-dim,
+  .project-row-raws,
+  .project-row-raws .raw-choice-wrap,
+  .project-custom-dims,
+  .project-custom-field{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  .project-row-raws .raw-choice-wrap{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:7px!important;
+  }
+  .project-row-raws .raw-choice{
+    width:100%!important;
+    min-width:0!important;
+    min-height:50px!important;
+    padding:10px 13px!important;
+    font-size:16px!important;
+    text-align:left!important;
+    border-radius:10px!important;
+  }
+  .raw-choice-note{font-size:12px!important;margin-top:5px!important}
+
+  /* Gleichmäßige Labels direkt über den Feldern */
+  .length-parts-table.v59-parts-table td:nth-child(n+2):nth-child(-n+4)::before,
+  .project-parts-table.v59-parts-table td:nth-child(n+2):nth-child(-n+7)::before{
+    margin:0 0 6px!important;
+    font-size:10px!important;
+    line-height:1.1!important;
+    letter-spacing:.045em!important;
+  }
+}
+
+/* Auf sehr schmalen Geräten bleibt die 70/30-Aufteilung erhalten,
+   aber das Stückfeld bekommt garantiert genug Platz für mehrstellige Werte. */
+@media(max-width:380px){
+  .length-parts-table.v59-parts-table tr,
+  .project-parts-table.v59-parts-table tr{
+    grid-template-columns:minmax(0,1fr) 104px!important;
+    column-gap:10px!important;
+    padding:12px!important;
+  }
+  .length-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table select{
+    height:50px!important;
+    min-height:50px!important;
+    font-size:16px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2170,7 +2352,7 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   </nav>
   <div class="v56-side-foot">
     <div class="v56-side-slogan">Holz<br>optimal<br>nutzen.<span></span></div>
-    <div class="v56-version">LOWIS &nbsp; V64</div>
+    <div class="v56-version">LOWIS &nbsp; V65</div>
   </div>
 </aside>
 

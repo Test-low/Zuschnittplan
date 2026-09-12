@@ -1,9 +1,9 @@
-LOWIS Zuschnittplaner V64
+LOWIS Zuschnittplaner V65
 
 GitHub Pages:
 Alle Dateien dieses Ordners in das Root-Verzeichnis des Repositories hochladen.
 
-V64 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
+V65 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
 - Plattenzuschnitt mit echtem Material-und-Parameter-Dashboard
 - drei Optimierungs-Kacheln: Materialoptimal, Schnell sägen, Serienfreundlich
 - separate Positionskarte und kompakter Ergebnisbereich mit Platten-Tabs und Detailkarte
@@ -13,6 +13,6 @@ V64 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
 - Sidebar-Holzbild mit weichem Verlauf nach oben
 - Anfrage-Seite bereinigt und vereinheitlicht
 - Smartphone-Layout für iPhone und Android angepasst
-- bestehende V53-Funktionen, bearbeitbare PDFs und Drag & Drop bleiben erhalten
+- bestehende V65-Funktionen, bearbeitbare PDFs und Drag & Drop bleiben erhalten
 
-Cache-Version: V64
+Cache-Version: V65
