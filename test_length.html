@@ -2380,45 +2380,6 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   }
 }
 
-
-/* =========================================================
-   V67 – MOBILE LÖSCHBUTTON POSITION
-   V66 setzte die letzte Tabellenzelle versehentlich auf 100 % Breite.
-   Dadurch begann der absolut positionierte Löschbereich links und lag
-   über "Position 1". Die Löschzelle bleibt nun fest oben rechts.
-   ========================================================= */
-@media(max-width:760px){
-  .length-parts-table.v59-parts-table td:nth-child(5),
-  .project-parts-table.v59-parts-table td:nth-child(8){
-    position:absolute!important;
-    top:12px!important;
-    right:12px!important;
-    left:auto!important;
-    width:44px!important;
-    min-width:44px!important;
-    max-width:44px!important;
-    height:44px!important;
-    margin:0!important;
-    padding:0!important;
-    z-index:3!important;
-  }
-  .length-parts-table.v59-parts-table td:nth-child(5) .icon-btn,
-  .project-parts-table.v59-parts-table td:nth-child(8) .icon-btn{
-    display:grid!important;
-    place-items:center!important;
-    width:44px!important;
-    min-width:44px!important;
-    max-width:44px!important;
-    height:44px!important;
-    min-height:44px!important;
-    margin:0!important;
-  }
-  .length-parts-table.v59-parts-table tr::before,
-  .project-parts-table.v59-parts-table tr::before{
-    padding-right:58px!important;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -2464,7 +2425,7 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   </nav>
   <div class="v56-side-foot">
     <div class="v56-side-slogan">Holz<br>optimal<br>nutzen.<span></span></div>
-    <div class="v56-version">LOWIS &nbsp; V67</div>
+    <div class="v56-version">LOWIS &nbsp; V66</div>
   </div>
 </aside>
 
@@ -6431,5 +6392,5 @@ navigateV56(initialV56,false);
   </div>
 </div>
 
-</body>
+<script>window.addEventListener("load",()=>setTimeout(()=>{navigateV56("length",false);loadLengthExample();},300));</script></body>
 </html>

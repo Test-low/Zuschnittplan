@@ -1,9 +1,9 @@
-LOWIS Zuschnittplaner V66
+LOWIS Zuschnittplaner V67
 
 GitHub Pages:
 Alle Dateien dieses Ordners in das Root-Verzeichnis des Repositories hochladen.
 
-V66 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
+V67 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
 - Plattenzuschnitt mit echtem Material-und-Parameter-Dashboard
 - drei Optimierungs-Kacheln: Materialoptimal, Schnell sägen, Serienfreundlich
 - separate Positionskarte und kompakter Ergebnisbereich mit Platten-Tabs und Detailkarte
@@ -13,6 +13,6 @@ V66 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
 - Sidebar-Holzbild mit weichem Verlauf nach oben
 - Anfrage-Seite bereinigt und vereinheitlicht
 - Smartphone-Layout für iPhone und Android angepasst
-- bestehende V66-Funktionen, bearbeitbare PDFs und Drag & Drop bleiben erhalten
+- bestehende V67-Funktionen, bearbeitbare PDFs und Drag & Drop bleiben erhalten
 
-Cache-Version: V66
+Cache-Version: V67
