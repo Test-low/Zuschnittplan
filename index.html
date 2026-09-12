@@ -1748,7 +1748,7 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
 
 
 /* =========================================================
-   V63 – MOBILE EINGABEN NEU AUFGEBAUT
+   V63/V64 – MOBILE EINGABEN NEU AUFGEBAUT
    Smartphone: große, klar lesbare Eingabekarten ohne Mini-Felder.
    ========================================================= */
 @media(max-width:760px){
@@ -2006,6 +2006,125 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   }
 }
 
+
+
+/* =========================================================
+   V64 – MOBILE POSITIONEN: VOLLE FELDBREITE
+   Auf jedem Smartphone lesbare Eingaben statt Mini-Felder.
+   ========================================================= */
+@media(max-width:760px){
+  .length-parts-table.v59-parts-table tr,
+  .project-parts-table.v59-parts-table tr{
+    position:relative!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:12px!important;
+    padding:14px!important;
+    margin:0 0 14px!important;
+    border:1px solid var(--v56-border)!important;
+    border-radius:13px!important;
+    background:var(--v56-panel2)!important;
+  }
+  .length-parts-table.v59-parts-table tr::before,
+  .project-parts-table.v59-parts-table tr::before{
+    display:block!important;
+    width:100%!important;
+    padding-right:54px!important;
+    min-height:42px!important;
+    line-height:42px!important;
+    grid-area:auto!important;
+  }
+  .length-parts-table.v59-parts-table td,
+  .project-parts-table.v59-parts-table td{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    grid-area:auto!important;
+  }
+  .length-parts-table.v59-parts-table td:nth-child(1),
+  .project-parts-table.v59-parts-table td:nth-child(1){display:none!important}
+  .length-parts-table.v59-parts-table td:nth-child(5),
+  .project-parts-table.v59-parts-table td:nth-child(8){
+    position:absolute!important;
+    top:12px!important;
+    right:12px!important;
+    width:44px!important;
+    height:44px!important;
+  }
+  .length-parts-table.v59-parts-table td:nth-child(n+2):nth-child(-n+4)::before,
+  .project-parts-table.v59-parts-table td:nth-child(n+2):nth-child(-n+7)::before{
+    display:block!important;
+    margin:0 0 6px!important;
+    font-size:11px!important;
+    line-height:1.15!important;
+    font-weight:850!important;
+    color:var(--v56-muted)!important;
+    text-transform:uppercase!important;
+    letter-spacing:.04em!important;
+  }
+  .length-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table select,
+  .project-parts-table.v59-parts-table .pdim,
+  .project-parts-table.v59-parts-table .pmat{
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:100%!important;
+    max-width:100%!important;
+    height:54px!important;
+    min-height:54px!important;
+    padding:11px 14px!important;
+    border-radius:10px!important;
+    font-size:18px!important;
+    line-height:1.25!important;
+    font-weight:650!important;
+    color:var(--v56-text)!important;
+    opacity:1!important;
+  }
+  .length-parts-table.v59-parts-table .lq,
+  .project-parts-table.v59-parts-table .pqty{
+    font-size:20px!important;
+    font-weight:850!important;
+    text-align:left!important;
+  }
+  .length-parts-table.v59-parts-table .lname,
+  .project-parts-table.v59-parts-table .pname2{
+    font-weight:550!important;
+  }
+  .length-parts-table.v59-parts-table .icon-btn,
+  .project-parts-table.v59-parts-table .icon-btn{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+  }
+  .project-row-dim,
+  .project-row-raws,
+  .project-row-raws .raw-choice-wrap,
+  .project-custom-dims,
+  .project-custom-field{width:100%!important;min-width:0!important;max-width:none!important}
+  .project-custom-dims{grid-template-columns:1fr!important}
+  .project-row-raws .raw-choice-wrap{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
+  .project-row-raws .raw-choice{width:100%!important;min-height:50px!important;font-size:16px!important}
+  .raw-choice-note{font-size:12px!important;margin-top:5px!important}
+}
+@media(max-width:380px){
+  .length-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table select,
+  .project-parts-table.v59-parts-table .pdim,
+  .project-parts-table.v59-parts-table .pmat{
+    font-size:17px!important;
+    height:52px!important;
+    min-height:52px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2051,7 +2170,7 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   </nav>
   <div class="v56-side-foot">
     <div class="v56-side-slogan">Holz<br>optimal<br>nutzen.<span></span></div>
-    <div class="v56-version">LOWIS &nbsp; V63</div>
+    <div class="v56-version">LOWIS &nbsp; V64</div>
   </div>
 </aside>
 
@@ -2206,7 +2325,7 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
 
           <div class="v59-veneer-block">
             <div class="v59-section-label">Furnierrichtung <span class="v59-info-dot" title="Die Furnierrichtung der Fertigteile wird je Position festgelegt.">i</span></div>
-            <select id="v60RawVeneerDisplay" class="v60-reference-select" disabled aria-label="Furnierrichtung der Rohplatte"><option>Längs</option></select>
+            <select id="v60RawVeneerDisplay" class="v60-reference-select" aria-label="Furnierrichtung der Rohplatte"><option value="long">Längs</option><option value="cross">Quer</option></select>
           </div>
         </div>
       </div>
@@ -3114,9 +3233,23 @@ function syncV60PlateFormatControls(){
   widSel.innerHTML=widthVals.map(x=>`<option value="${x.width}" data-format="${x.v}">${lengthFmt(x.width/10)}</option>`).join("");
   const chosen=widthVals.find(x=>x.v===fmtSel.value)||widthVals[0];
   if(chosen)widSel.value=String(chosen.width);
-  const m=currentMaterial();
+  updateV64RawVeneerOptions();
+}
+function plateRawVeneerDirection(){
+  return $("v60RawVeneerDisplay")?.value==="cross" ? "cross" : "long";
+}
+function updateV64RawVeneerOptions(){
   const raw=$("v60RawVeneerDisplay");
-  if(raw&&m&&!m.isSpecial)raw.innerHTML=`<option>Längs (${lengthFmt(m.width/10)} cm)</option>`;
+  if(!raw)return;
+  const previous=plateRawVeneerDirection();
+  const m=currentMaterial();
+  if(!m)return;
+  const longMm=m.isSpecial ? Number(m.heightCm||0)*10 : Number(m.width||0);
+  const crossMm=m.isSpecial ? Number(m.widthCm||0)*10 : Number(m.height||0);
+  const longText=longMm>0?`Längs (${lengthFmt(longMm/10)} cm)`:"Längs";
+  const crossText=crossMm>0?`Quer (${lengthFmt(crossMm/10)} cm)`:"Quer";
+  raw.innerHTML=`<option value="long">${longText}</option><option value="cross">${crossText}</option>`;
+  raw.value=previous;
 }
 function applyV60PlateFormat(){
   const lenSel=$("v60PlateLengthSelect"),widSel=$("v60PlateWidthSelect"),fmtSel=$("formatSelect");
@@ -3144,6 +3277,7 @@ function currentMaterial(){
 
 function updateMaterialPreview(){
   const m=currentMaterial();
+  setTimeout(updateV64RawVeneerOptions,0);
   if(m.isSpecial){
     $("materialPreview").innerHTML=`<div class="tag">Sondermaß</div><strong>${escapeHtmlText(m.specialName||"Sondermaß")}</strong><small>Länge ${lengthFmt(m.heightCm||0)} cm · Breite ${lengthFmt(m.widthCm||0)} cm · Stärke ${String(m.thickness||0).replace(".",",")} mm</small>`;
     return;
@@ -3362,10 +3496,17 @@ function rotationAllowed(){
 
 function validate(pos,m){
   if(!pos.length) return "Bitte mindestens eine vollständige Zuschnittposition eingeben.";
+  const rawVeneer=plateRawVeneerDirection();
   for(const p of pos){
     const veneer=p.veneer||"any";
-    const directAllowed=veneer!=="cross";
-    const rotatedAllowed=veneer!=="long";
+    let directAllowed=true,rotatedAllowed=true;
+    if(veneer==="long"){
+      directAllowed=rawVeneer==="long";
+      rotatedAllowed=rawVeneer==="cross";
+    }else if(veneer==="cross"){
+      directAllowed=rawVeneer==="cross";
+      rotatedAllowed=rawVeneer==="long";
+    }
     const direct=directAllowed && p.w<=m.width && p.h<=m.height;
     const rotated=rotatedAllowed && p.h<=m.width && p.w<=m.height;
     if(!direct && !rotated){
@@ -3384,8 +3525,9 @@ function validate(pos,m){
 */
 function orientations(item){
   const veneer=item.veneer||"any";
-  if(veneer==="long") return [{w:item.w,h:item.h,rotated:false}];
-  if(veneer==="cross") return [{w:item.h,h:item.w,rotated:true}];
+  const rawVeneer=plateRawVeneerDirection();
+  if(veneer==="long") return rawVeneer==="long" ? [{w:item.w,h:item.h,rotated:false}] : [{w:item.h,h:item.w,rotated:true}];
+  if(veneer==="cross") return rawVeneer==="long" ? [{w:item.h,h:item.w,rotated:true}] : [{w:item.w,h:item.h,rotated:false}];
   const out=[{w:item.w,h:item.h,rotated:false}];
   if(rotationAllowed() && item.w!==item.h) out.push({w:item.h,h:item.w,rotated:true});
   return out;
@@ -4184,7 +4326,7 @@ function calculate(){
   const usedArea=items.reduce((a,p)=>a+p.w*p.h,0);
   const totalArea=sheets.length*m.width*m.height;
   const use=100*usedArea/totalArea;
-  currentResult={m,pos,items,sheets,use,optimizationMode};
+  currentResult={m,pos,items,sheets,use,optimizationMode,rawVeneer:plateRawVeneerDirection()};
   render(currentResult);
   setNotice("success",`Berechnung abgeschlossen: <strong>${sheets.length} Platte${sheets.length===1?"":"n"}</strong> erforderlich. Optimierung: <strong>${plateOptimizationLabel(optimizationMode)}</strong>. Furnierrichtung: <strong>wird je Position berücksichtigt</strong>.`);$("notice").classList.add("hidden");
 }
@@ -4253,6 +4395,7 @@ function draftData(){
   return {
     planName:$("platePlanName")?.value||"",
     optimizationMode:plateOptimizationMode(),
+    rawVeneer:plateRawVeneerDirection(),
     group:$("groupSelect").value,
     edge:$("edgeSelect").value,
     format:$("formatSelect").value,
@@ -4280,6 +4423,7 @@ function restoreDraft(){
   if(!d || !Array.isArray(d.parts)) return false;
   if($("platePlanName"))$("platePlanName").value=d.planName||"";
   if($("plateOptimizationMode"))$("plateOptimizationMode").value=PLATE_OPTIMIZATION_MODES[d.optimizationMode]?d.optimizationMode:"material";
+  if($("v60RawVeneerDisplay"))$("v60RawVeneerDisplay").value=d.rawVeneer==="cross"?"cross":"long";
   updatePlateOptimizationHelp();
   if(d.specialPlate){
     if($("plateSpecialName"))$("plateSpecialName").value=d.specialPlate.name||"";
@@ -4333,6 +4477,7 @@ $("thicknessSelect").addEventListener("change",()=>{updateMaterialPreview();sync
 ["plateSpecialName","plateSpecialHeight","plateSpecialWidth","plateSpecialThickness"].forEach(id=>$(id)?.addEventListener("input",()=>{updateMaterialPreview();saveDraft();}));
 $("platePlanName")?.addEventListener("input",saveDraft);
 $("plateOptimizationMode")?.addEventListener("change",()=>{updatePlateOptimizationHelp();saveDraft();currentResult=null;$("resultArea").classList.add("hidden");setNotice("","Optimierungsart geändert. Bitte den Schnittplan neu berechnen.");});
+$("v60RawVeneerDisplay")?.addEventListener("change",()=>{saveDraft();currentResult=null;$("resultArea").classList.add("hidden");setNotice("","Furnierrichtung der Rohplatte geändert. Bitte den Schnittplan neu berechnen.");});
 
 $("addPart").addEventListener("click",()=>{addPartRow("","",1,"",true);setTimeout(saveDraft,0);});
 $("loadExample").addEventListener("click",()=>{loadExample();setTimeout(saveDraft,0);});
