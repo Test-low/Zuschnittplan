@@ -1617,6 +1617,133 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   .v59-position-body{padding:8px!important}.v60-card-head{padding-left:10px!important;padding-right:10px!important}.v60-head-tools{gap:4px}.v60-head-tools .btn{min-height:28px!important;font-size:9px!important}.v60-plate-plan-layout{display:block!important}.v60-plate-details{margin-top:8px}.v59-summary-section{overflow-x:auto}.summary-table{min-width:520px}
 }
 
+
+
+/* =========================================================
+   V62 – UNIVERSAL SMARTPHONE RESPONSIVE
+   Viewport-basiert statt gerätespezifisch (320–760 px + Landscape).
+   ========================================================= */
+@media (max-width:760px){
+  :root{--v56-topbar-h:64px;--v56-sidebar-w:0px}
+  html,body{width:100%;max-width:100%;overflow-x:hidden!important}
+  body{padding-bottom:calc(66px + env(safe-area-inset-bottom))}
+  button,input,select,textarea{max-width:100%}
+
+  /* Kopfzeile: immer vollständig im Sichtfenster */
+  .v56-topbar{height:var(--v56-topbar-h)!important;min-height:var(--v56-topbar-h)!important}
+  .v56-topbar-inner{
+    width:100%!important;max-width:100%!important;height:100%!important;
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;gap:8px!important;padding:0 10px!important;
+  }
+  .v56-brand{min-width:0!important;max-width:100%!important;overflow:hidden!important;gap:9px!important}
+  .v56-wordmark{flex:0 0 auto!important;font-size:clamp(21px,6.9vw,27px)!important;letter-spacing:-1.2px!important}
+  .v56-wordmark:after{height:3px!important;margin-top:4px!important}
+  .v56-brand-separator{height:24px!important;flex:0 0 1px!important}
+  .v56-appname{min-width:0!important;max-width:32vw!important;font-size:clamp(13px,4vw,17px)!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .v56-top-actions{min-width:0!important;flex:0 0 auto!important;gap:5px!important}
+  .v56-theme-switch{flex:0 0 auto!important;padding:2px!important;gap:1px!important;border-radius:18px!important}
+  .v56-theme-icon{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;padding:5px!important;border-radius:15px!important}
+  .v56-theme-icon svg{width:17px!important;height:17px!important}
+  .v56-help-btn{width:32px!important;height:32px!important;min-width:32px!important;flex:0 0 32px!important;font-size:17px!important;border-width:1.5px!important}
+
+  /* Untere Navigation: fünf gleich breite, immer sichtbare Ziele */
+  .v56-sidebar{
+    top:auto!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;
+    height:calc(64px + env(safe-area-inset-bottom))!important;
+    padding-bottom:env(safe-area-inset-bottom)!important;overflow:hidden!important;
+  }
+  .v56-side-nav{height:64px!important;width:100%!important;padding:5px 3px!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important}
+  .v56-nav-item{width:100%!important;min-width:0!important;max-width:100%!important;min-height:54px!important;padding:4px 1px!important;gap:3px!important;overflow:hidden!important}
+  .v56-icon{width:21px!important;height:21px!important;min-width:21px!important;max-width:21px!important;flex-basis:21px!important}
+  .v56-nav-item span{width:100%!important;min-width:0!important;display:block!important;font-size:clamp(7px,2.1vw,9px)!important;line-height:1.05!important;white-space:normal!important;overflow:hidden!important;text-overflow:clip!important;text-align:center!important;overflow-wrap:anywhere!important}
+
+  /* Seitenbreite nie größer als der Viewport */
+  .v56-page,.hero,.app,.shell,.v59-shell,.panel,.v56-card,.v56-home-card,.v56-home-drop,.v56-info-card{max-width:100%!important;min-width:0!important}
+  .v56-page{padding-left:10px!important;padding-right:10px!important;padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
+  .app{padding-left:10px!important;padding-right:10px!important;padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
+
+  /* Startseite */
+  .v56-page-head h1{font-size:clamp(25px,8vw,31px)!important}
+  .v56-page-head p{font-size:clamp(15px,4.7vw,18px)!important}
+  .v56-home-cards{grid-template-columns:1fr!important}
+  .v56-card-photo{height:clamp(125px,42vw,170px)!important}
+  .v56-card-body{gap:12px!important}
+  .v56-card-body .v56-feature-icon{width:38px!important;height:38px!important;flex-basis:38px!important}
+  .v56-card-body h2{font-size:20px!important}
+  .v56-card-body p{font-size:13px!important}
+  .v56-home-drop{padding:18px 12px!important}
+  .v56-home-drop>svg{width:42px!important;height:42px!important}
+  .v56-home-drop h2{font-size:20px!important}
+  .v56-home-drop p{font-size:13px!important}
+  .v56-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  .v56-info-card{padding:11px!important;gap:9px!important;min-height:82px!important}
+  .v56-info-card .v56-feature-icon{width:28px!important;height:28px!important;flex-basis:28px!important}
+  .v56-info-card strong{font-size:16px!important}.v56-info-card span{font-size:9.5px!important;line-height:1.25!important}
+
+  /* Arbeitsseiten: keine horizontalen Pflicht-Scroller */
+  .v59-opt-cards{grid-template-columns:1fr!important;overflow:visible!important;gap:7px!important}
+  .v59-opt-card{width:100%!important;min-width:0!important;min-height:64px!important}
+  .v59-opt-card svg{width:23px!important;height:23px!important;flex-basis:23px!important}
+  .v59-opt-card strong{font-size:12px!important}.v59-opt-card small{font-size:9px!important}
+  .parts-scroll{overflow:visible!important;max-width:100%!important}
+  .parts-table,.length-parts-table,.project-parts-table,.v59-parts-table{min-width:0!important;max-width:100%!important;width:100%!important}
+  .v59-position-body,.v59-length-panel-body,.v59-parameter-grid{max-width:100%!important;overflow:hidden!important}
+  .v60-length-summary-line{max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .v60-sheet-tabs{max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .v59-calc-btn,.v56-primary,.v56-primary-wide,.v56-pdf-hero-btn{max-width:100%!important}
+  .v59-project-top-grid{grid-template-columns:1fr!important}
+  .v59-project-pdf-drop{grid-template-columns:42px minmax(0,1fr)!important}
+  .v59-project-pdf-drop .v56-primary{grid-column:1/-1!important;width:100%!important}
+  .v56-request-grid{grid-template-columns:1fr!important}.v56-request-types{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
+@media (max-width:520px){
+  /* Auf normalen Smartphones bekommt die Funktion Vorrang vor dem App-Namen. */
+  .v56-brand-separator,.v56-appname{display:none!important}
+  .v56-topbar-inner{padding:0 9px!important}
+  .v56-wordmark{font-size:clamp(21px,7.5vw,25px)!important}
+  .v56-top-actions{gap:4px!important}
+  .v56-theme-icon{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;padding:4px!important}
+  .v56-help-btn{width:30px!important;height:30px!important;min-width:30px!important;flex-basis:30px!important;font-size:16px!important}
+  .v56-info-card{min-height:76px!important}
+}
+
+@media (max-width:390px){
+  /* Kleine Android-Geräte / ältere iPhones */
+  :root{--v56-topbar-h:60px}
+  .v56-topbar-inner{padding:0 7px!important;gap:5px!important}
+  .v56-wordmark{font-size:21px!important}
+  .v56-theme-switch{padding:1px!important}
+  .v56-theme-icon{width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important}
+  .v56-help-btn{width:28px!important;height:28px!important;min-width:28px!important;flex-basis:28px!important}
+  .v56-nav-item span{font-size:0!important}
+  .v56-nav-item span::after{content:attr(data-short);font-size:7.5px!important;line-height:1!important}
+  .v56-icon{width:20px!important;height:20px!important;min-width:20px!important;flex-basis:20px!important}
+  .v56-info-grid{grid-template-columns:1fr!important}
+  .v56-info-card{min-height:66px!important}
+  .v56-info-card .v56-feature-icon{width:26px!important;height:26px!important;flex-basis:26px!important}
+  .v56-request-types{grid-template-columns:1fr!important}
+}
+
+@media (max-width:340px){
+  /* Extrem schmale Geräte: alle Funktionen bleiben erreichbar. */
+  .v56-wordmark{font-size:19px!important}
+  .v56-theme-icon{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important}
+  .v56-help-btn{width:26px!important;height:26px!important;min-width:26px!important;flex-basis:26px!important;font-size:14px!important}
+  .v56-side-nav{padding-left:1px!important;padding-right:1px!important;gap:0!important}
+  .v56-nav-item span::after{font-size:7px!important}
+}
+
+@media (max-height:500px) and (orientation:landscape){
+  /* Landscape auf Smartphones */
+  :root{--v56-topbar-h:54px}
+  .v56-topbar-inner{padding:0 10px!important}.v56-wordmark{font-size:20px!important}.v56-brand-separator,.v56-appname{display:none!important}
+  .v56-theme-icon{width:26px!important;height:26px!important;min-height:26px!important}.v56-help-btn{width:28px!important;height:28px!important;min-width:28px!important}
+  .v56-sidebar{height:54px!important;padding-bottom:0!important}.v56-side-nav{height:54px!important;padding:3px 4px!important}.v56-nav-item{min-height:48px!important}.v56-icon{width:19px!important;height:19px!important;flex-basis:19px!important}.v56-nav-item span{font-size:7px!important}
+  body{padding-bottom:54px!important}.v56-page,.app{padding-bottom:64px!important}
+}
+
 </style>
 </head>
 <body>
@@ -1645,24 +1772,24 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
 <aside class="v56-sidebar" aria-label="Navigation">
   <nav class="v56-side-nav">
     <button class="v56-nav-item active" type="button" data-v56-page="home">
-      <svg class="v56-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.2 12 4l9 7.2"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/></svg><span>Startseite</span>
+      <svg class="v56-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.2 12 4l9 7.2"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/></svg><span data-short="Start">Startseite</span>
     </button>
     <button class="v56-nav-item" type="button" data-v56-page="plate">
-      <svg class="v56-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 8 8-4 8 4-8 4-8-4Z"/><path d="m4 12 8 4 8-4"/><path d="m4 16 8 4 8-4"/></svg><span>Plattenzuschnitt</span>
+      <svg class="v56-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 8 8-4 8 4-8 4-8-4Z"/><path d="m4 12 8 4 8-4"/><path d="m4 16 8 4 8-4"/></svg><span data-short="Platten">Plattenzuschnitt</span>
     </button>
     <button class="v56-nav-item" type="button" data-v56-page="length">
-      <svg class="v56-icon v56-ruler-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.5 15.5 11-11 4 4-11 11-4-4Z"/><path d="m10 10 2 2M12.5 7.5l2 2M7.5 12.5l2 2"/></svg><span>Längenzuschnitt</span>
+      <svg class="v56-icon v56-ruler-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4.5 15.5 11-11 4 4-11 11-4-4Z"/><path d="m10 10 2 2M12.5 7.5l2 2M7.5 12.5l2 2"/></svg><span data-short="Länge">Längenzuschnitt</span>
     </button>
     <button class="v56-nav-item" type="button" data-v56-page="project">
-      <svg class="v56-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5h7l2 2h9v9.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7.5Z"/><path d="M3 7.5V6a1 1 0 0 1 1-1h5l2 2"/></svg><span>Projektmodus</span>
+      <svg class="v56-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5h7l2 2h9v9.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7.5Z"/><path d="M3 7.5V6a1 1 0 0 1 1-1h5l2 2"/></svg><span data-short="Projekt">Projektmodus</span>
     </button>
     <button class="v56-nav-item" type="button" data-v56-page="request">
-      <svg class="v56-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m4 7 8 6 8-6"/></svg><span>Anfrage</span>
+      <svg class="v56-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m4 7 8 6 8-6"/></svg><span data-short="Anfrage">Anfrage</span>
     </button>
   </nav>
   <div class="v56-side-foot">
     <div class="v56-side-slogan">Holz<br>optimal<br>nutzen.<span></span></div>
-    <div class="v56-version">LOWIS &nbsp; V60</div>
+    <div class="v56-version">LOWIS &nbsp; V62</div>
   </div>
 </aside>
 

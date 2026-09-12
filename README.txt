@@ -1,9 +1,9 @@
-LOWIS Zuschnittplaner V60
+LOWIS Zuschnittplaner V62
 
 GitHub Pages:
 Alle Dateien dieses Ordners in das Root-Verzeichnis des Repositories hochladen.
 
-V60 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
+V62 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
 - Plattenzuschnitt mit echtem Material-und-Parameter-Dashboard
 - drei Optimierungs-Kacheln: Materialoptimal, Schnell sägen, Serienfreundlich
 - separate Positionskarte und kompakter Ergebnisbereich mit Platten-Tabs und Detailkarte
@@ -15,4 +15,4 @@ V60 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
 - Smartphone-Layout für iPhone und Android angepasst
 - bestehende V53-Funktionen, bearbeitbare PDFs und Drag & Drop bleiben erhalten
 
-Cache-Version: V60
+Cache-Version: V62
