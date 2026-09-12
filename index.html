@@ -2307,6 +2307,79 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   }
 }
 
+
+
+/* =========================================================
+   V66 – MOBILE POSITIONEN: SPEZIFITÄTS-FIX
+   Die alten Desktop-nth-child-Breiten hatten auf iOS/Safari
+   höhere CSS-Spezifität und hielten die Tabellenzellen schmal.
+   Hier werden die Breiten pro Zelle explizit überschrieben.
+   ========================================================= */
+@media(max-width:760px){
+  /* Längenzuschnitt: 70/30, Bezeichnung volle Breite */
+  .length-parts-table.v59-parts-table td:nth-child(2),
+  .length-parts-table.v59-parts-table td:nth-child(3),
+  .length-parts-table.v59-parts-table td:nth-child(4),
+  .length-parts-table.v59-parts-table td:nth-child(5){
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  .length-parts-table.v59-parts-table td:nth-child(2),
+  .length-parts-table.v59-parts-table td:nth-child(3){
+    align-self:stretch!important;
+  }
+  .length-parts-table.v59-parts-table td:nth-child(2) input,
+  .length-parts-table.v59-parts-table td:nth-child(3) input,
+  .length-parts-table.v59-parts-table td:nth-child(4) input{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+
+  /* Projektmodus: erste drei Eingaben volle Breite; danach 70/30 */
+  .project-parts-table.v59-parts-table td:nth-child(2),
+  .project-parts-table.v59-parts-table td:nth-child(3),
+  .project-parts-table.v59-parts-table td:nth-child(4),
+  .project-parts-table.v59-parts-table td:nth-child(5),
+  .project-parts-table.v59-parts-table td:nth-child(6),
+  .project-parts-table.v59-parts-table td:nth-child(7),
+  .project-parts-table.v59-parts-table td:nth-child(8){
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  .project-parts-table.v59-parts-table td:nth-child(2) select,
+  .project-parts-table.v59-parts-table td:nth-child(3) select,
+  .project-parts-table.v59-parts-table td:nth-child(4) select,
+  .project-parts-table.v59-parts-table td:nth-child(5) input,
+  .project-parts-table.v59-parts-table td:nth-child(6) input,
+  .project-parts-table.v59-parts-table td:nth-child(7) input{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  .project-parts-table.v59-parts-table .project-row-dim,
+  .project-parts-table.v59-parts-table .project-row-raws,
+  .project-parts-table.v59-parts-table .project-row-raws > *,
+  .project-parts-table.v59-parts-table .project-row-dim > *{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+
+  /* mobile Karten nutzen wirklich die komplette Innenbreite */
+  .length-parts-table.v59-parts-table,
+  .project-parts-table.v59-parts-table,
+  .length-parts-table.v59-parts-table tbody,
+  .project-parts-table.v59-parts-table tbody,
+  .length-parts-table.v59-parts-table tr,
+  .project-parts-table.v59-parts-table tr{
+    width:100%!important;
+    max-width:100%!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2352,7 +2425,7 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   </nav>
   <div class="v56-side-foot">
     <div class="v56-side-slogan">Holz<br>optimal<br>nutzen.<span></span></div>
-    <div class="v56-version">LOWIS &nbsp; V65</div>
+    <div class="v56-version">LOWIS &nbsp; V66</div>
   </div>
 </aside>
 
