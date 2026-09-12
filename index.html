@@ -1516,6 +1516,8 @@ select:focus,input:focus,textarea:focus{border-color:var(--v56-green)!important;
 }
 @media(max-width:430px){.v56-appname{display:none}.v56-brand-separator{display:none}.v56-info-grid{grid-template-columns:1fr}.v56-card-photo{height:125px}.v56-feature-icon{width:43px;height:43px;flex-basis:43px}.v56-work-title h1{font-size:22px!important}.stats{grid-template-columns:1fr 1fr!important}.stat .num{font-size:21px!important}.v56-request-types{grid-template-columns:1fr 1fr}}
 
+
+
 @media print{.v56-sidebar,.v56-topbar,.v56-page,.v56-pdf-hero-btn,.v56-work-tagline{display:none!important}.hero,.app{margin-left:0!important}}
 
 /* =========================================================
@@ -1620,7 +1622,7 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
 
 
 /* =========================================================
-   V62 – UNIVERSAL SMARTPHONE RESPONSIVE
+   V62/V63 – UNIVERSAL SMARTPHONE RESPONSIVE BASIS
    Viewport-basiert statt gerätespezifisch (320–760 px + Landscape).
    ========================================================= */
 @media (max-width:760px){
@@ -1744,6 +1746,266 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   body{padding-bottom:54px!important}.v56-page,.app{padding-bottom:64px!important}
 }
 
+
+/* =========================================================
+   V63 – MOBILE EINGABEN NEU AUFGEBAUT
+   Smartphone: große, klar lesbare Eingabekarten ohne Mini-Felder.
+   ========================================================= */
+@media(max-width:760px){
+  /* Allgemeine Eingaben */
+  .v59-length-panel-body,
+  .v60-project-data-card,
+  .v60-project-positions-card{
+    padding:12px!important;
+  }
+  .v60-length-planname,
+  .v60-length-parameter-grid,
+  .v60-project-data-grid{
+    gap:12px!important;
+  }
+  .v60-field>label,
+  .v60-project-data-card label{
+    margin:0 0 6px!important;
+    font-size:11px!important;
+    line-height:1.2!important;
+  }
+  .v60-length-planname input,
+  .v60-length-parameter-grid input,
+  .v60-length-parameter-grid select,
+  .v60-project-data-card input,
+  .v60-project-data-card select{
+    width:100%!important;
+    min-width:0!important;
+    min-height:46px!important;
+    font-size:16px!important;
+    padding:10px 12px!important;
+    border-radius:10px!important;
+  }
+  .project-rule-input{
+    width:100%!important;
+    max-width:none!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 46px!important;
+    gap:0!important;
+  }
+  .project-rule-input input{
+    width:100%!important;
+    min-width:0!important;
+    border-radius:10px 0 0 10px!important;
+  }
+  .project-rule-input>span{
+    min-width:46px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border:1px solid var(--v56-border)!important;
+    border-left:0!important;
+    border-radius:0 10px 10px 0!important;
+    background:var(--v56-input)!important;
+    color:var(--v56-muted)!important;
+    font-weight:800!important;
+  }
+
+  /* Einzelmaterial: Positionen als saubere Karten */
+  .length-parts-table.v59-parts-table tbody{
+    counter-reset:v59row!important;
+  }
+  .length-parts-table.v59-parts-table tr{
+    counter-increment:v59row!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(105px,.48fr) 42px!important;
+    grid-template-areas:
+      "head head del"
+      "len qty del"
+      "name name name"!important;
+    column-gap:10px!important;
+    row-gap:10px!important;
+    margin:0 0 12px!important;
+    padding:12px!important;
+    border:1px solid var(--v56-border)!important;
+    border-radius:12px!important;
+    background:var(--v56-panel2)!important;
+  }
+  .length-parts-table.v59-parts-table tr::before{
+    content:"Position " counter(v59row)!important;
+    grid-area:head!important;
+    display:block!important;
+    font-size:11px!important;
+    line-height:1!important;
+    font-weight:850!important;
+    color:var(--v56-muted)!important;
+    text-transform:uppercase!important;
+    letter-spacing:.04em!important;
+    align-self:center!important;
+  }
+  .length-parts-table.v59-parts-table td{
+    display:block!important;
+    width:auto!important;
+    min-width:0!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+  }
+  .length-parts-table.v59-parts-table td:nth-child(1){display:none!important}
+  .length-parts-table.v59-parts-table td:nth-child(2){grid-area:len!important}
+  .length-parts-table.v59-parts-table td:nth-child(3){grid-area:qty!important}
+  .length-parts-table.v59-parts-table td:nth-child(4){grid-area:name!important}
+  .length-parts-table.v59-parts-table td:nth-child(5){grid-area:del!important;align-self:start!important;justify-self:end!important}
+  .length-parts-table.v59-parts-table td:nth-child(2)::before{content:"Fertiglänge (cm)"!important}
+  .length-parts-table.v59-parts-table td:nth-child(3)::before{content:"Stück"!important}
+  .length-parts-table.v59-parts-table td:nth-child(4)::before{content:"Bezeichnung"!important}
+  .length-parts-table.v59-parts-table td:nth-child(n+2):nth-child(-n+4)::before{
+    display:block!important;
+    margin:0 0 5px!important;
+    font-size:10px!important;
+    line-height:1.05!important;
+    font-weight:850!important;
+    color:var(--v56-muted)!important;
+    text-transform:uppercase!important;
+    letter-spacing:.035em!important;
+  }
+  .length-parts-table.v59-parts-table input{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    min-height:46px!important;
+    padding:10px 12px!important;
+    border-radius:10px!important;
+    font-size:16px!important;
+  }
+  .length-parts-table.v59-parts-table .icon-btn{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    min-height:42px!important;
+    border-radius:10px!important;
+    font-size:20px!important;
+  }
+
+  /* Projektmodus: jedes Feld bekommt echte nutzbare Breite */
+  .project-parts-table.v59-parts-table tbody{
+    counter-reset:v59row!important;
+  }
+  .project-parts-table.v59-parts-table tr{
+    counter-increment:v59row!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(96px,.42fr) 42px!important;
+    grid-template-areas:
+      "head head del"
+      "mat mat mat"
+      "dim dim dim"
+      "raw raw raw"
+      "len qty qty"
+      "name name name"!important;
+    column-gap:10px!important;
+    row-gap:10px!important;
+    margin:0 0 12px!important;
+    padding:12px!important;
+    border:1px solid var(--v56-border)!important;
+    border-radius:12px!important;
+    background:var(--v56-panel2)!important;
+  }
+  .project-parts-table.v59-parts-table tr::before{
+    content:"Position " counter(v59row)!important;
+    grid-area:head!important;
+    display:block!important;
+    font-size:11px!important;
+    line-height:1!important;
+    font-weight:850!important;
+    color:var(--v56-muted)!important;
+    text-transform:uppercase!important;
+    letter-spacing:.04em!important;
+    align-self:center!important;
+  }
+  .project-parts-table.v59-parts-table td{
+    display:block!important;
+    width:auto!important;
+    min-width:0!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+  }
+  .project-parts-table.v59-parts-table td:nth-child(1){display:none!important}
+  .project-parts-table.v59-parts-table td:nth-child(2){grid-area:mat!important}
+  .project-parts-table.v59-parts-table td:nth-child(3){grid-area:dim!important}
+  .project-parts-table.v59-parts-table td:nth-child(4){grid-area:raw!important}
+  .project-parts-table.v59-parts-table td:nth-child(5){grid-area:len!important}
+  .project-parts-table.v59-parts-table td:nth-child(6){grid-area:qty!important}
+  .project-parts-table.v59-parts-table td:nth-child(7){grid-area:name!important}
+  .project-parts-table.v59-parts-table td:nth-child(8){grid-area:del!important;align-self:start!important;justify-self:end!important}
+  .project-parts-table.v59-parts-table td:nth-child(2)::before{content:"Material"!important}
+  .project-parts-table.v59-parts-table td:nth-child(3)::before{content:"Dimension"!important}
+  .project-parts-table.v59-parts-table td:nth-child(4)::before{content:"Rohlänge"!important}
+  .project-parts-table.v59-parts-table td:nth-child(5)::before{content:"Fertiglänge (cm)"!important}
+  .project-parts-table.v59-parts-table td:nth-child(6)::before{content:"Stück"!important}
+  .project-parts-table.v59-parts-table td:nth-child(7)::before{content:"Bezeichnung"!important}
+  .project-parts-table.v59-parts-table td:nth-child(n+2):nth-child(-n+7)::before{
+    display:block!important;
+    margin:0 0 5px!important;
+    font-size:10px!important;
+    line-height:1.05!important;
+    font-weight:850!important;
+    color:var(--v56-muted)!important;
+    text-transform:uppercase!important;
+    letter-spacing:.035em!important;
+  }
+  .project-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table select{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    min-height:46px!important;
+    padding:10px 12px!important;
+    border-radius:10px!important;
+    font-size:16px!important;
+  }
+  .project-parts-table.v59-parts-table .icon-btn{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    min-height:42px!important;
+    border-radius:10px!important;
+    font-size:20px!important;
+  }
+  .project-row-raws,
+  .project-row-dim{min-width:0!important;width:100%!important}
+  .project-row-raws .raw-choice-wrap{display:flex!important;width:100%!important;gap:6px!important;flex-wrap:wrap!important}
+  .project-row-raws .raw-choice{
+    min-height:44px!important;
+    padding:9px 12px!important;
+    font-size:14px!important;
+    border-radius:9px!important;
+  }
+  .project-row-raws .raw-choice:only-child{width:100%!important}
+  .project-custom-dims{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  /* Aktionen klar getrennt */
+  .v59-position-actions{gap:10px!important;margin-top:12px!important}
+  .v59-left-actions{display:block!important;width:100%!important;margin:0!important}
+  .v59-left-actions .btn,
+  .v59-calc-btn{width:100%!important;min-width:0!important;min-height:48px!important;font-size:14px!important}
+}
+
+@media(max-width:380px){
+  .length-parts-table.v59-parts-table tr{
+    grid-template-columns:minmax(0,1fr) 90px 40px!important;
+  }
+  .project-parts-table.v59-parts-table tr{
+    grid-template-columns:minmax(0,1fr) 88px 40px!important;
+  }
+  .length-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table input,
+  .project-parts-table.v59-parts-table select{
+    font-size:15px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1789,7 +2051,7 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
   </nav>
   <div class="v56-side-foot">
     <div class="v56-side-slogan">Holz<br>optimal<br>nutzen.<span></span></div>
-    <div class="v56-version">LOWIS &nbsp; V62</div>
+    <div class="v56-version">LOWIS &nbsp; V63</div>
   </div>
 </aside>
 
@@ -2027,8 +2289,6 @@ body[data-v56-page="project"] .v59-length-result-toolbar h3{display:none!importa
               <div id="lengthCatalogFields" class="v60-field"><label>Dimension</label><select id="lengthDimensionSelect"></select></div>
               <div class="v60-field"><label>Rohlängen in cm</label><div id="lengthRawChoices" class="raw-choice-wrap v60-raw-choices"></div><div class="raw-choice-note v60-hidden-helper" id="lengthRawChoiceNote"></div></div>
               <div class="v60-field project-rule-setting" id="singleRestLimitSetting"><label for="singleRestLimit">Grenze Kundenrest / Lagerrest</label><div class="project-rule-input"><input id="singleRestLimit" type="number" min="0" step="1" inputmode="decimal" value="200"><span>cm</span></div><div class="project-rule-note v60-hidden-helper">Für KVH 1302 cm und BSH 1202 cm: Rest &lt; Grenze = Kundenrest, Rest ≥ Grenze = Lagerrest.</div></div>
-              <div class="v60-field"><label>Optimierung</label><select id="v60LengthOptimization" disabled><option>Wenig Verschnitt (Standard)</option></select></div>
-              <div class="v60-field v60-empty-field" aria-hidden="true"></div>
               <div id="lengthSpecialFields" class="special-measure-box hidden v59-special-box v60-length-special">
                 <div class="special-title">Sondermaß</div>
                 <div class="special-measure-grid three"><div><label for="lengthSpecialHeight">Höhe (cm)</label><input id="lengthSpecialHeight" type="number" min="0.1" step="0.1" inputmode="decimal"></div><div><label for="lengthSpecialWidth">Breite (cm)</label><input id="lengthSpecialWidth" type="number" min="0.1" step="0.1" inputmode="decimal"></div><div><label for="lengthSpecialLength">Länge (cm)</label><input id="lengthSpecialLength" type="number" min="0.1" step="0.1" inputmode="decimal"></div></div>
