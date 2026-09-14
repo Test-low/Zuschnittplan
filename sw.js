@@ -1,57 +1,31 @@
-const CACHE="lowis-zuschnittplaner-v67";
-const STATIC_ASSETS=["./manifest.webmanifest","./icon.svg"];
+const CACHE_NAME = "lowis-zuschnittplaner-v73";
+const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
-self.addEventListener("install",event=>{
-  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(STATIC_ASSETS)));
+self.addEventListener("install", event => {
   self.skipWaiting();
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE)).catch(() => {}));
 });
 
-self.addEventListener("activate",event=>{
-  event.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
-  );
-  self.clients.claim();
+self.addEventListener("activate", event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(k => k.startsWith("lowis-zuschnittplaner-") && k !== CACHE_NAME).map(k => caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
-self.addEventListener("fetch",event=>{
-  if(event.request.method!=="GET") return;
-
-  const request=event.request;
-  const url=new URL(request.url);
-  const isPage=request.mode==="navigate" ||
-    request.destination==="document" ||
-    url.pathname.endsWith("/") ||
-    url.pathname.endsWith("/index.html");
-
-  if(isPage){
-    // HTML immer zuerst online holen. Nur offline auf die zuletzt geladene Seite zurückfallen.
-    event.respondWith(
-      fetch(request,{cache:"no-store"}).then(response=>{
-        if(response && response.ok){
-          const copy=response.clone();
-          caches.open(CACHE).then(cache=>cache.put("./index.html",copy));
-        }
-        return response;
-      }).catch(async()=>{
-        return (await caches.match("./index.html")) ||
-               (await caches.match(request)) ||
-               Response.error();
-      })
-    );
-    return;
-  }
-
-  // Statische Dateien: Cache nutzen, aber im Hintergrund aktualisieren.
-  event.respondWith(
-    caches.match(request).then(cached=>{
-      const network=fetch(request).then(response=>{
-        if(response && response.ok){
-          const copy=response.clone();
-          caches.open(CACHE).then(cache=>cache.put(request,copy));
-        }
-        return response;
-      }).catch(()=>cached);
-      return cached || network;
-    })
-  );
+self.addEventListener("fetch", event => {
+  if(event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if(url.origin !== self.location.origin) return;
+  event.respondWith((async () => {
+    try {
+      const fresh = await fetch(event.request, {cache:"no-store"});
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(event.request, fresh.clone()).catch(() => {});
+      return fresh;
+    } catch (_) {
+      return (await caches.match(event.request)) || (await caches.match("./index.html"));
+    }
+  })());
 });

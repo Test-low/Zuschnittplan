@@ -1,18 +1,12 @@
 {
-  "name": "Lowis Zuschnittplaner",
-  "short_name": "Zuschnittplaner",
+  "name": "LOWIS Zuschnittplaner",
+  "short_name": "LOWIS",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#2b3137",
-  "theme_color": "#12e77a",
-  "description": "Platten- und Längen-Zuschnittplaner für Lowis Holzhandlung",
+  "background_color": "#31383f",
+  "theme_color": "#2f6f3e",
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
   ]
 }
