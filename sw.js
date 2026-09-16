@@ -1,4 +1,4 @@
-const CACHE_NAME = "lowis-zuschnittplaner-v82";
+const CACHE_NAME = "lowis-zuschnittplaner-v84";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 self.addEventListener("install", event => {
   self.skipWaiting();
