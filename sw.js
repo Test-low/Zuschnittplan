@@ -1,11 +1,9 @@
-const CACHE_NAME = "lowis-zuschnittplaner-v80";
+const CACHE_NAME = "lowis-zuschnittplaner-v81";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
-
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE)).catch(() => {}));
 });
-
 self.addEventListener("activate", event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
@@ -13,7 +11,6 @@ self.addEventListener("activate", event => {
     await self.clients.claim();
   })());
 });
-
 self.addEventListener("fetch", event => {
   if(event.request.method !== "GET") return;
   const url = new URL(event.request.url);
