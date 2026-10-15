@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#31383f"/>
-  <path d="M96 354V142h54v164h184v48H96Z" fill="#12e77a"/>
-  <path d="M96 390h320" stroke="#12e77a" stroke-width="18" stroke-linecap="round"/>
-  <text x="256" y="255" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="92" font-weight="800" fill="#fff">LOWIS</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#2563eb"/><path d="M18 18h6v28h-6zm11 0h6v12h-6zm11 0h6v28h-6zM29 36h6v10h-6z" fill="white"/></svg>

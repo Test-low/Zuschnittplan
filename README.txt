@@ -1,18 +1,6 @@
-LOWIS Zuschnittplaner V67
+Ernährungstracker Simple
 
-GitHub Pages:
-Alle Dateien dieses Ordners in das Root-Verzeichnis des Repositories hochladen.
+Nur vier Bereiche: Heute, Tagebuch, Rezepte, Profil.
+Beim ersten Start werden aus dem alten meinTrackerV1 nur gegessene Tagebucheinträge, Gewicht, Profil und Ziele übernommen. Die alte Datenbank bleibt unverändert.
 
-V67 – Layout-Feinschliff nach den freigegebenen Referenzbildern:
-- Plattenzuschnitt mit echtem Material-und-Parameter-Dashboard
-- drei Optimierungs-Kacheln: Materialoptimal, Schnell sägen, Serienfreundlich
-- separate Positionskarte und kompakter Ergebnisbereich mit Platten-Tabs und Detailkarte
-- Längenzuschnitt kompakter wie im Referenzdesign, inklusive Holz-Balkendarstellung
-- Projektmodus mit PDF-Dropzone, Tipp, Projektdaten und materialweise gruppierten Ergebnissen
-- Startseite mit drei eingebetteten Holzmotiven
-- Sidebar-Holzbild mit weichem Verlauf nach oben
-- Anfrage-Seite bereinigt und vereinheitlicht
-- Smartphone-Layout für iPhone und Android angepasst
-- bestehende V67-Funktionen, bearbeitbare PDFs und Drag & Drop bleiben erhalten
-
-Cache-Version: V67
+Rezepte: 1000 insgesamt.
